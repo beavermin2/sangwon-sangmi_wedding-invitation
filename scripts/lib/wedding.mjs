@@ -39,6 +39,25 @@ let deceased = FLOWER_MARK;
 export function useWedding(w) {
   const opt = (w.options && w.options.deceasedMark) || 'flower';
   deceased = opt === 'flower' ? FLOWER_MARK : opt;
+  if (w.venue) w.venue.transport = mergeTransport(w.venue.transport);
+}
+
+// 교통편: 종류와 제목이 같은 항목은 처음 나온 자리에 하나로 합치고 안내는 줄바꿈으로 잇는다.
+export function mergeTransport(list) {
+  const out = [];
+  const byKey = new Map();
+  for (const t of list || []) {
+    const key = `${t.type}\u0000${String(t.label || '').trim()}`;
+    const seen = byKey.get(key);
+    if (!seen) {
+      const item = { ...t };
+      byKey.set(key, item);
+      out.push(item);
+    } else if (t.detail) {
+      seen.detail = seen.detail ? `${seen.detail}\n${t.detail}` : t.detail;
+    }
+  }
+  return out;
 }
 export const deceasedMark = () => deceased;
 export const usesFlowerImage = () => deceased === FLOWER_MARK;

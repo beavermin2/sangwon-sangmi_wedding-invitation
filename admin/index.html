@@ -286,7 +286,7 @@
           { path: 'venue.lng', label: '경도', type: 'number', inputmode: 'decimal', hint: '예: 127.0450' },
           { path: 'venue.naverPlaceId', label: '네이버 지도 장소 번호', hint: '선택. 장소 URL 의 숫자' },
           { path: 'venue.kakaoPlaceId', label: '카카오맵 장소 번호', hint: '선택. 장소 URL 의 숫자' },
-        ])]), card('교통편', '지하철·버스·자가용 안내. 순서대로 표시됩니다.', [list('venue.transport', [
+        ])]), card('교통편', '지하철·버스·자가용 안내. 순서대로 표시되고, 종류와 제목이 같은 항목은 청첩장에서 한 칸으로 합쳐 줄마다 보여 줍니다.', [list('venue.transport', [
           { key: 'type', label: '종류', type: 'select', width: '110px', options: [['subway', '지하철'], ['bus', '버스'], ['car', '자가용'], ['etc', '기타']] },
           { key: 'label', label: '제목', width: '120px' },
           { key: 'detail', label: '안내', width: '2fr' },

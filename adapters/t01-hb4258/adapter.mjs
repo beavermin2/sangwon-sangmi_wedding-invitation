@@ -129,6 +129,31 @@ export async function apply({ wedding: w, out, images }) {
         <FlowerScatter width={375} height={100} variant={THEME.flowerVariant} density={THEME.flowerDensity * 0.6} />
       </div>
 `, ''],
+  ]);
+  // 교통편: 합쳐진 안내(줄바꿈)를 줄마다 보여 준다
+  await patch(join(out, 'components', 'sections-b.jsx'), [
+    ["fontSize: 12, color: THEME.textSoft, lineHeight: 1.6, fontWeight: 300 }}>{item.detail}</div>",
+     "fontSize: 12, color: THEME.textSoft, lineHeight: 1.6, fontWeight: 300, whiteSpace: 'pre-line' }}>{item.detail}</div>"],
+  ]);
+  // 초대글 아래 혼주 두 줄: 줄마다 가운데 정렬하면 '아들'/'딸' 길이와 국화 유무로 어긋나므로
+  // 부모 이름 · '의 아들/딸' · 신랑신부 이름을 같은 칸에 맞춘다(국화는 칸 왼쪽 바깥에 걸린다).
+  const parentLine = (gp, gm, who) => [
+    `          <div>
+            {${gp}} <span style={{ color: THEME.textMuted, fontSize: 11 }}>· </span>{${gm}}
+            <span style={{ color: THEME.textMuted, fontSize: 11, marginLeft: 8 }}>의 {d.${who}.roleKo}</span>
+            <span style={{ color: THEME.accent, fontWeight: 500, marginLeft: 4 }}>{d.${who}.name}</span>
+          </div>`,
+    `          <div style={{ display: 'contents' }}>
+            <span>{${gp}} <span style={{ color: THEME.textMuted, fontSize: 11 }}>· </span>{${gm}}</span>
+            <span style={{ color: THEME.textMuted, fontSize: 11, marginLeft: 8 }}>의 {d.${who}.roleKo}</span>
+            <span style={{ color: THEME.accent, fontWeight: 500, marginLeft: 4 }}>{d.${who}.name}</span>
+          </div>`,
+  ];
+  await patch(join(out, 'components', 'sections-a.jsx'), [
+    ['fontSize: 13, lineHeight: 2, color: THEME.text, letterSpacing: 1,',
+     "fontSize: 13, lineHeight: 2, color: THEME.text, letterSpacing: 1,\n          display: 'grid', gridTemplateColumns: 'auto auto auto', alignItems: 'baseline', textAlign: 'left',"],
+    parentLine('gf', 'gm', 'groom'),
+    parentLine('bf', 'bm', 'bride'),
     // 인용구 출처 앞의 줄표(—) 없이 출처만
     ['}}>— {quote.author}</div>', '}}>{quote.author}</div>'],
     ['    </section>\n  );\n}\n\n// 02. Invitation', '      <FallingDoodles />\n    </section>\n  );\n}\n\n// 02. Invitation'],

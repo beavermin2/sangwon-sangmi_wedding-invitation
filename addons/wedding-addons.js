@@ -34,13 +34,15 @@
       var i;
       while ((i = node.data.indexOf(mark)) >= 0) {
         var at = i === 0 ? node : node.splitText(i);
-        at.data = at.data.slice(mark.length);
+        // 표식 뒤 띄어쓰기도 지우고, 그림은 이름 왼쪽 바깥에 걸쳐 그려 폭을 차지하지 않게 한다.
+        // 그래서 국화가 있는 줄과 없는 줄의 글자 위치가 같다.
+        at.data = at.data.slice(mark.length).replace(/^ /, '');
         var img = document.createElement('img');
         img.src = BASE + 'mourn-flower.svg';
         img.alt = '국화';
         img.className = 'wedding-mourn';
-        img.setAttribute('style', 'display:inline-block!important;height:1.35em!important;width:auto!important;max-width:none!important;' +
-          'margin:0 .08em 0 0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;vertical-align:-.32em!important');
+        img.setAttribute('style', 'display:inline-block!important;height:1.35em!important;width:1.35em!important;max-width:none!important;' +
+          'margin:0 .12em 0 -1.47em!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;vertical-align:-.32em!important');
         at.parentNode.insertBefore(img, at);
         node = at;
       }
