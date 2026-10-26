@@ -2,7 +2,7 @@
 import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { kstParts, venueLine } from './wedding.mjs';
+import { FLOWER_MARK, kstParts, usesFlowerImage, venueLine } from './wedding.mjs';
 
 const SRC = fileURLToPath(new URL('../../addons/', import.meta.url));
 const MARK = '<!-- wedding-addons -->';
@@ -17,7 +17,7 @@ export async function injectAddons({ wedding: w, id, out, images, options = {} }
   const f = w.features || {};
   const dir = join(out, 'addons');
   await mkdir(dir, { recursive: true });
-  for (const name of ['wedding-addons.js', 'wedding-addons.css']) await copyFile(join(SRC, name), join(dir, name));
+  for (const name of ['wedding-addons.js', 'wedding-addons.css', 'mourn-flower.svg']) await copyFile(join(SRC, name), join(dir, name));
 
   // 카카오 공유 카드 사진: site.ogImage → gallery.cover 순
   let image = '';
@@ -33,6 +33,8 @@ export async function injectAddons({ wedding: w, id, out, images, options = {} }
     id: `${w.groom.name}-${w.bride.name}-${when.dateIso}`,
     accent: options.accent || '',
     mount: options.mount || null,
+    // 고인 표시를 흰 국화 그림으로 바꿀 텍스트 표식
+    mournMark: usesFlowerImage() ? FLOWER_MARK : '',
     rsvp: f.rsvp && f.rsvp.enabled ? {
       enabled: true,
       endpoint: f.rsvp.endpoint || '',

@@ -16,6 +16,47 @@
   var KAKAO_SRI = 'sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka';
   var PAGE = 5;
 
+  /* ── 고인 표시: 텍스트 표식(U+2063 + 🌼)을 흰 국화 그림으로 ───────────────
+     템플릿마다 이름을 그리는 방식(HTML·React·Vue)이 달라, 화면에 나온 글자를 찾아 바꾼다.
+     원래 글자 노드는 지우지 않고 내용만 줄이고 그 앞에 그림을 넣어 React/Vue 가 쥔 노드를 깨지 않는다. */
+  function swapMourn(root) {
+    var mark = C.mournMark;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        if (n.data.indexOf(mark) < 0) return NodeFilter.FILTER_REJECT;
+        var p = n.parentNode && n.parentNode.nodeName;
+        return /^(SCRIPT|STYLE|TEXTAREA|TITLE|OPTION)$/.test(p) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      },
+    });
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function (node) {
+      var i;
+      while ((i = node.data.indexOf(mark)) >= 0) {
+        var at = i === 0 ? node : node.splitText(i);
+        at.data = at.data.slice(mark.length);
+        var img = document.createElement('img');
+        img.src = BASE + 'mourn-flower.svg';
+        img.alt = '국화';
+        img.className = 'wedding-mourn';
+        img.setAttribute('style', 'display:inline-block!important;height:1.35em!important;width:auto!important;max-width:none!important;' +
+          'margin:0 .08em 0 0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;vertical-align:-.32em!important');
+        at.parentNode.insertBefore(img, at);
+        node = at;
+      }
+    });
+  }
+  if (C.mournMark) {
+    var pending = false;
+    var run = function () { pending = false; swapMourn(document.body); };
+    run();
+    // React/Vue 템플릿은 나중에 그리거나 다시 그리므로 바뀔 때마다 다시 확인.
+    // requestAnimationFrame 은 화면에 안 보이는 탭에서 멈추므로 짧은 타이머로 모아서 처리한다.
+    new MutationObserver(function () {
+      if (!pending) { pending = true; setTimeout(run, 30); }
+    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+
   // 저장소 주소가 없으면 배포된 청첩장에서는 숨기고, 내 PC 미리보기에서만 '저장 안 됨'으로 보여 준다.
   var rsvpOn = C.rsvp && C.rsvp.enabled && (C.rsvp.endpoint || LOCAL);
   var guestbookOn = C.guestbook && C.guestbook.enabled && (C.guestbook.endpoint || LOCAL);

@@ -28,13 +28,20 @@ export function kstParts(iso) {
   };
 }
 
-// 고인이신 부모님 이름 앞에 붙이는 표시. 기본은 국화(🌼), wedding.json 의 options.deceasedMark 로 바꾼다(✿, 故 등).
+// 고인이신 부모님 이름 앞에 붙이는 표시. wedding.json 의 options.deceasedMark 로 고른다.
+//   'flower'(기본): 흰 국화 그림. 텍스트에는 표식(보이지 않는 U+2063 + 🌼)을 넣고,
+//                   공통 모듈(addons/wedding-addons.js)이 화면에서 addons/mourn-flower.svg 그림으로 바꾼다.
+//                   스크립트가 돌지 않으면 🌼 로 보인다.
+//   그 밖의 값('🌼', '✿', '故' 등): 그 글자를 그대로 쓴다.
 // build.mjs 가 어댑터를 돌리기 전에 useWedding() 으로 한 번 설정한다.
-let deceased = '🌼';
+export const FLOWER_MARK = '⁣🌼';
+let deceased = FLOWER_MARK;
 export function useWedding(w) {
-  deceased = (w.options && w.options.deceasedMark) || '🌼';
+  const opt = (w.options && w.options.deceasedMark) || 'flower';
+  deceased = opt === 'flower' ? FLOWER_MARK : opt;
 }
 export const deceasedMark = () => deceased;
+export const usesFlowerImage = () => deceased === FLOWER_MARK;
 export const parentName = (p) => (p && p.name ? (p.deceased ? `${deceased} ${p.name}` : p.name) : '');
 // 표시를 뗀 이름(계좌 예금주와 맞춰 볼 때)
 export const bareName = (name) => String(name || '').replace(new RegExp(`^${deceased.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`), '');

@@ -268,8 +268,10 @@
     var TABS = [
       { id: 'people', title: '신랑·신부', render: function () {
         return [el('div', { class: 'two' }, [personCard('groom', '신랑'), personCard('bride', '신부')]),
-          card('고인 표시', '고인으로 체크한 부모님 성함 앞에 붙는 표시입니다.', [grid([
-            { path: 'options.deceasedMark', label: '표시 모양', type: 'select', options: [['🌼', '🌼 국화 (컬러)'], ['✿', '✿ 꽃 (글자색)'], ['故', '故 (한자)']] },
+          card('고인 표시', '고인으로 체크한 부모님 성함 앞에 붙는 표시입니다.', [
+            el('img', { src: '/addons/mourn-flower.svg', alt: '흰 국화', style: 'height:56px;float:right' }),
+            grid([
+            { path: 'options.deceasedMark', label: '표시 모양', type: 'select', options: [['flower', '흰 국화 그림'], ['🌼', '🌼 꽃 이모지'], ['✿', '✿ 꽃 (글자색)'], ['故', '故 (한자)']] },
           ])])];
       } },
       { id: 'venue', title: '예식·장소', render: function (re) {
