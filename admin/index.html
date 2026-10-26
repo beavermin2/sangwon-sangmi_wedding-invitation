@@ -190,6 +190,7 @@
         var val = input.value;
         if (f.type === 'number' || f.type === 'range') val = val === '' ? '' : Number(val);
         set(f.path, val);
+        if (f.onChange) f.onChange(val);
       });
       return el('label', { class: 'f' + (f.wide ? ' wide' : '') }, [f.label, input, f.hint ? el('small', { text: f.hint }) : null]);
     }
@@ -302,11 +303,20 @@
 
     var TABS = [
       { id: 'people', title: '신랑·신부', render: function () {
+        // 그림 표시를 고르면 오른쪽에 그 그림을 미리 보여 준다.
+        var MARK_IMG = { flower: '/addons/mourn-flower.svg', chrysanthemum: '/addons/mourn-chrysanthemum.png' };
+        var preview = el('img', { alt: '국화', style: 'height:56px;float:right' });
+        function showMark(v) {
+          var src = MARK_IMG[v || 'flower'];
+          preview.style.display = src ? '' : 'none';
+          if (src) preview.src = src;
+        }
+        showMark(get('options.deceasedMark'));
         return [el('div', { class: 'two' }, [personCard('groom', '신랑'), personCard('bride', '신부')]),
           card('고인 표시', '고인으로 체크한 부모님 성함 앞에 붙는 표시입니다.', [
-            el('img', { src: '/addons/mourn-flower.svg', alt: '흰 국화', style: 'height:56px;float:right' }),
+            preview,
             grid([
-            { path: 'options.deceasedMark', label: '표시 모양', type: 'select', options: [['flower', '흰 국화 그림'], ['🌼', '🌼 꽃 이모지'], ['✿', '✿ 꽃 (글자색)'], ['故', '故 (한자)']] },
+            { path: 'options.deceasedMark', label: '표시 모양', type: 'select', onChange: showMark, options: [['flower', '흰 국화 그림'], ['chrysanthemum', '국화 선 그림'], ['🌼', '🌼 꽃 이모지'], ['✿', '✿ 꽃 (글자색)'], ['故', '故 (한자)']] },
           ])])];
       } },
       { id: 'venue', title: '예식·장소', render: function (re) {

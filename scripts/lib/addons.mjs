@@ -2,7 +2,7 @@
 import { copyFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { FLOWER_MARK, kstParts, usesFlowerImage, venueLine, youtubeId } from './wedding.mjs';
+import { FLOWER_MARK, flowerImage, kstParts, usesFlowerImage, venueLine, youtubeId } from './wedding.mjs';
 
 const SRC = fileURLToPath(new URL('../../addons/', import.meta.url));
 const MARK = '<!-- wedding-addons -->';
@@ -17,7 +17,7 @@ export async function injectAddons({ wedding: w, id, out, images, options = {} }
   const f = w.features || {};
   const dir = join(out, 'addons');
   await mkdir(dir, { recursive: true });
-  for (const name of ['wedding-addons.js', 'wedding-addons.css', 'mourn-flower.svg']) await copyFile(join(SRC, name), join(dir, name));
+  for (const name of ['wedding-addons.js', 'wedding-addons.css', 'mourn-flower.svg', 'mourn-chrysanthemum.png']) await copyFile(join(SRC, name), join(dir, name));
   // 이전 빌드에서 남은 음악·영상 파일 정리
   for (const name of await readdir(dir)) if (/^(bgm|video|video-poster)\./.test(name)) await rm(join(dir, name));
 
@@ -51,8 +51,9 @@ export async function injectAddons({ wedding: w, id, out, images, options = {} }
     id: `${w.groom.name}-${w.bride.name}-${when.dateIso}`,
     accent: options.accent || '',
     mount: options.mount || null,
-    // 고인 표시를 흰 국화 그림으로 바꿀 텍스트 표식
+    // 고인 표시를 국화 그림(mournImage)으로 바꿀 텍스트 표식
     mournMark: usesFlowerImage() ? FLOWER_MARK : '',
+    mournImage: flowerImage(),
     music: musicSrc ? {
       src: musicSrc,
       autoplay: m.autoplay !== false,
