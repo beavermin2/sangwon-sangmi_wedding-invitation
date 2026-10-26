@@ -238,10 +238,10 @@
       grid([
         { path: p + 'parents.father.name', label: '아버지 성함' },
         { path: p + 'parents.father.phone', label: '아버지 연락처', type: 'tel' },
-        { path: p + 'parents.father.deceased', label: '고인(故 표시)', type: 'check' },
+        { path: p + 'parents.father.deceased', label: '고인', type: 'check' },
         { path: p + 'parents.mother.name', label: '어머니 성함' },
         { path: p + 'parents.mother.phone', label: '어머니 연락처', type: 'tel' },
-        { path: p + 'parents.mother.deceased', label: '고인(故 표시)', type: 'check' },
+        { path: p + 'parents.mother.deceased', label: '고인', type: 'check' },
       ])]);
     }
 
@@ -267,7 +267,10 @@
 
     var TABS = [
       { id: 'people', title: '신랑·신부', render: function () {
-        return [el('div', { class: 'two' }, [personCard('groom', '신랑'), personCard('bride', '신부')])];
+        return [el('div', { class: 'two' }, [personCard('groom', '신랑'), personCard('bride', '신부')]),
+          card('고인 표시', '고인으로 체크한 부모님 성함 앞에 붙는 표시입니다.', [grid([
+            { path: 'options.deceasedMark', label: '표시 모양', type: 'select', options: [['🌼', '🌼 국화 (컬러)'], ['✿', '✿ 꽃 (글자색)'], ['故', '故 (한자)']] },
+          ])])];
       } },
       { id: 'venue', title: '예식·장소', render: function (re) {
         return [datetimeCard(), card('예식장', null, [grid([

@@ -6,7 +6,7 @@ import { readFile, rm, cp } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { makeImages } from './lib/wedding.mjs';
+import { makeImages, useWedding } from './lib/wedding.mjs';
 import { injectAddons } from './lib/addons.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -14,6 +14,7 @@ const DATA = join(ROOT, 'data');
 const wedding = JSON.parse(await readFile(join(DATA, 'wedding.json'), 'utf8'));
 // GitHub Actions 는 Pages 주소를 SITE_URL 로 넘긴다. site.url 이 비어 있을 때만 채운다.
 if (!wedding.site.url && process.env.SITE_URL) wedding.site.url = process.env.SITE_URL.replace(/\/*$/, '/');
+useWedding(wedding);
 const catalog = JSON.parse(await readFile(join(ROOT, 'templates', 'catalog.json'), 'utf8'));
 
 // --addons-only: 템플릿은 다시 빌드하지 않고 기존 build/ 에 공통 모듈만 다시 넣는다(wedding.json 의 기능 설정만 바꿨을 때).

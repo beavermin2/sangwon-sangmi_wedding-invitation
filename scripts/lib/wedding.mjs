@@ -28,8 +28,16 @@ export function kstParts(iso) {
   };
 }
 
-// 고인이신 부모님은 이름 앞에 故 를 붙인다.
-export const parentName = (p) => (p && p.name ? (p.deceased ? `故 ${p.name}` : p.name) : '');
+// 고인이신 부모님 이름 앞에 붙이는 표시. 기본은 국화(🌼), wedding.json 의 options.deceasedMark 로 바꾼다(✿, 故 등).
+// build.mjs 가 어댑터를 돌리기 전에 useWedding() 으로 한 번 설정한다.
+let deceased = '🌼';
+export function useWedding(w) {
+  deceased = (w.options && w.options.deceasedMark) || '🌼';
+}
+export const deceasedMark = () => deceased;
+export const parentName = (p) => (p && p.name ? (p.deceased ? `${deceased} ${p.name}` : p.name) : '');
+// 표시를 뗀 이름(계좌 예금주와 맞춰 볼 때)
+export const bareName = (name) => String(name || '').replace(new RegExp(`^${deceased.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`), '');
 export const parentPhone = (p) => (p && !p.deceased ? p.phone || '' : '');
 
 export const enFull = (n) => [n.first, n.last].filter(Boolean).join(' ');

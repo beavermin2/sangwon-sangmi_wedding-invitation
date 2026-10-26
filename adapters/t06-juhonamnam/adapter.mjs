@@ -3,7 +3,7 @@
 import { readFile, writeFile, readdir, rm } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import {
-  kstParts, pad2, parentName, parentPhone, mapLinks, kakaoKey, noticeOf, escapeHtml,
+  kstParts, pad2, parentName, parentPhone, bareName, mapLinks, kakaoKey, noticeOf, escapeHtml,
 } from '../../scripts/lib/wedding.mjs';
 import { prepareWork, install, writeEnv, viteBuild, patch } from '../../scripts/lib/vite.mjs';
 
@@ -29,7 +29,7 @@ function people(p, side) {
 function infoList(w, key, side) {
   const list = people(w[key], side).map((x) => ({ ...x, account: '' }));
   for (const a of w.accounts[key]) {
-    const hit = list.find((x) => x.name.replace(/^故 /, '') === a.owner);
+    const hit = list.find((x) => bareName(x.name) === a.owner);
     const text = `${a.bank} ${a.number}`;
     if (hit && !hit.account) hit.account = text;
     else list.push({ relation: a.relation === side ? side : `${side} ${a.relation}`, name: a.owner, phone: '', account: text });
