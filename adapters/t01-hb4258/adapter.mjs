@@ -163,7 +163,6 @@ export async function apply({ wedding: w, out, images }) {
 `, ''],
     // 인용구 출처 앞의 줄표(—) 없이 출처만
     ['}}>— {quote.author}</div>', '}}>{quote.author}</div>'],
-    ['    </section>\n  );\n}\n\n// 02. Invitation', '      <FallingDoodles />\n    </section>\n  );\n}\n\n// 02. Invitation'],
     // 달력: 예식일 표시를 파란 원 대신 빨간 하트로
     [`                    <div style={{
                       position: 'absolute', inset: 3,
@@ -182,6 +181,9 @@ export async function apply({ wedding: w, out, images }) {
   const flowersTag = '<script type="text/babel" src="./components/flowers.jsx"></script>';
   if (!html.includes(flowersTag)) throw new Error('index.html 에서 flowers.jsx 스크립트를 찾지 못했습니다');
   html = html.replace(flowersTag, `${flowersTag}\n<script type="text/babel" src="./components/falling-doodles.jsx"></script>`);
+  // 손그림 꽃은 표지만이 아니라 화면 전체에 흩날리게 청첩장 맨 앞에 한 번 넣는다.
+  if (!/<div className="app-shell">\r?\n/.test(html)) throw new Error('index.html 에서 app-shell 을 찾지 못했습니다');
+  html = html.replace(/<div className="app-shell">(\r?\n)/, '<div className="app-shell">$1      <FallingDoodles />$1');
   // 카카오톡 공유 아래의 꽃 장식·THANK YOU 꼬리말은 넣지 않는다.
   if (!/\s*<FooterSection \/>/.test(html)) throw new Error('index.html 에서 <FooterSection /> 을 찾지 못했습니다');
   html = html.replace(/\r?\n\s*<FooterSection \/>/, '');

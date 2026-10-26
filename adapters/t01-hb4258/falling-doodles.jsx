@@ -1,5 +1,5 @@
-// 표지 위로 흩날리는 손그림 꽃 — 대표 사진의 낙서 꽃(분홍·노랑·흰 꽃, 하트, 반짝이)과 같은 모양.
-// adapter.mjs 가 components/ 로 복사하고 CoverSection 맨 위 층에 넣는다.
+// 화면 전체에 흩날리는 손그림 꽃 — 대표 사진의 낙서 꽃(분홍·노랑·흰 꽃, 하트, 반짝이)과 같은 모양.
+// adapter.mjs 가 components/ 로 복사하고 청첩장 맨 위 층에 넣는다. 스크롤해도 화면에 고정된 채 떨어진다.
 
 const DOODLE_STYLE = `
 @keyframes dd-fall {
@@ -96,7 +96,7 @@ function FallingDoodles({ count = 18 }) {
   }, [count]);
 
   return (
-    <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 2 }}>
+    <div aria-hidden="true" style={{ position: 'fixed', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 20 }}>
       <style>{DOODLE_STYLE}</style>
       {items.map((it, i) => (
         <div key={i} className="dd-lane" style={{
