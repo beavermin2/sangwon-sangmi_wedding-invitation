@@ -203,5 +203,8 @@
         "rankExpr": ""
       }
     }
+  },
+  "options": {
+    "deceasedMark": "chrysanthemum"
   }
 }
