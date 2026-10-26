@@ -119,6 +119,16 @@ export async function apply({ wedding: w, out, images }) {
     ['width="100%" height="100%" alt="" eager={true} />', 'width="100%" height="auto" alt="" eager={true} />'],
     ['rgba(251,246,238,0) 55%', 'rgba(251,246,238,0) 82%'],
     ['    </section>\n  );\n}\n\n// 02. Invitation', '      <FallingDoodles />\n    </section>\n  );\n}\n\n// 02. Invitation'],
+    // 달력: 예식일 표시를 파란 원 대신 빨간 하트로
+    [`                    <div style={{
+                      position: 'absolute', inset: 3,
+                      background: THEME.accent, borderRadius: '50%',
+                    }} />`,
+    `                    <svg viewBox="0 0 24 24" aria-hidden="true" style={{ position: 'absolute', inset: 1, width: 'calc(100% - 2px)', height: 'calc(100% - 2px)' }}>
+                      <path d="M12 21.2C5.6 16.4 2 12.9 2 8.7 2 5.6 4.4 3.2 7.4 3.2c1.9 0 3.6 1 4.6 2.6 1-1.6 2.7-2.6 4.6-2.6 3 0 5.4 2.4 5.4 5.5 0 4.2-3.6 7.7-10 12.5z" fill="#E0414F" />
+                    </svg>`],
+    ["<span style={{ position: 'relative', zIndex: 1, fontWeight: isTarget ? 500 : 300 }}>",
+     "<span style={{ position: 'relative', zIndex: 1, fontWeight: isTarget ? 500 : 300, top: isTarget ? -2 : 0 }}>"],
   ]);
 
   // 카카오톡·문자 미리보기는 JS를 실행하지 않으므로 og 태그를 HTML에 직접 박는다.
