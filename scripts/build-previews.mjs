@@ -6,12 +6,19 @@ import { injectAddons } from './lib/addons.mjs';
 import { escapeHtml as h, kstParts, mapLinks, makeImages, useWedding, parentName, MONTH_EN } from './lib/wedding.mjs';
 
 export async function buildPreviews({ root, dist, wedding: w }) {
+  await buildPaperRose({ root, dist, wedding: w });
+  console.log('✓ test1.html — paper & rose design preview (original invitation preserved)');
+}
+
+// 같은 원본을 시안(test1.html)과 정식 템플릿(index.html)으로 빌드한다.
+export async function buildPaperRose({ root, dist, wedding: w, template = false }) {
   const id = 'test1';
-  const entry = join(dist, `${id}.html`);
-  const assetDir = join(dist, 'preview-assets', id);
+  const entry = join(dist, template ? 'index.html' : `${id}.html`);
+  const assetPath = template ? 'assets/paper-rose' : `preview-assets/${id}`;
+  const assetDir = join(dist, assetPath);
   if (existsSync(entry) || existsSync(assetDir)) throw new Error('Preview output would overwrite existing invitation files');
   await mkdir(assetDir, { recursive: true });
-  const base = `./preview-assets/${id}/`;
+  const base = `./${assetPath}/`;
   const source = join(root, 'previews', id);
   const dataRoot = resolve(root, 'data');
   let imageIndex = 0;
@@ -54,7 +61,7 @@ export async function buildPreviews({ root, dist, wedding: w }) {
   const venue = [w.venue.name, w.venue.floor, w.venue.hall].filter(Boolean).join(' ');
   const siteRoot = w.site.url || process.env.SITE_URL || '';
   const siteBase = siteRoot ? new URL(siteRoot.endsWith('/') ? siteRoot : siteRoot + '/') : null;
-  const publicUrl = siteBase ? new URL(`${id}.html`, siteBase).href : '';
+  const publicUrl = siteBase ? new URL(template ? './' : `${id}.html`, siteBase).href : '';
   const ogImage = siteBase && shareImage ? new URL(shareImage, siteBase).href : shareImage;
   const links = mapLinks(w.venue);
   const phone = value => String(value || '').replace(/[^+\d]/g, '');
@@ -153,5 +160,4 @@ export async function buildPreviews({ root, dist, wedding: w }) {
   html=(await readFile(join(assetDir,'index.html'),'utf8')).replaceAll('src="./addons/',`src="${base}addons/`);
   await writeFile(entry,html);
   await unlink(join(assetDir,'index.html'));
-  console.log('✓ test1.html — paper & rose design preview (original invitation preserved)');
 }

@@ -147,5 +147,19 @@
       "demo": "https://chungrimi.com"
     },
     "note": "Vue, 핑크 꽃잎 효과(Blooming Plus 디자인)"
+  },
+  {
+    "id": "t08-paper-rose",
+    "title": "페이퍼 & 로즈 (test1)",
+    "repo": "beavermin2/sangwon-sangmi_wedding-invitation",
+    "license": "자체 디자인",
+    "stack": "static",
+    "build": true,
+    "features": ["kakaoShare", "guestbook", "rsvp", "kakaoMap", "account"],
+    "preview": {
+      "local": "build/t08-paper-rose/index.html",
+      "demo": ""
+    },
+    "note": "작업하던 test1 시안: 종이색 배경, 로즈색 제목, 오프닝 애니메이션과 사진 방명록"
   }
 ]

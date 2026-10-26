@@ -31,10 +31,13 @@ if (!targets.length) {
 let failed = 0;
 for (const t of targets) {
   const adapter = await import(pathToFileURL(join(ROOT, 'adapters', t.id, 'adapter.mjs')).href);
-  const src = join(ROOT, 'templates', 'sources', t.id, adapter.srcDir || '');
+  const src = adapter.sourcePath
+    ? join(ROOT, adapter.sourcePath)
+    : join(ROOT, 'templates', 'sources', t.id, adapter.srcDir || '');
   const out = join(ROOT, 'build', t.id);
   try {
-    if (addonsOnly) {
+    // 자체 공통 모듈 경로를 사용하는 템플릿은 전체를 재생성해 경로와 설정을 함께 갱신한다.
+    if (addonsOnly && !adapter.managesAddons) {
       if (!existsSync(join(out, 'index.html'))) throw new Error('build/ 결과가 없습니다. 먼저 npm run build 를 실행하세요');
       const warnings = await injectAddons({ wedding, id: t.id, out, images: makeImages(DATA), options: adapter.addons });
       console.log(`✓ ${t.id} (공통 모듈만)`);
@@ -50,11 +53,14 @@ for (const t of targets) {
       log: (m) => console.log(`  … ${t.id}: ${m}`),
     })) || [];
     // 참석 여부·방명록·공유 공통 모듈 (WEDDING_SKIP_VITE 로 빌드를 건너뛰어 HTML 이 없으면 생략)
-    if (existsSync(join(out, 'index.html'))) {
+    if (!adapter.managesAddons && existsSync(join(out, 'index.html'))) {
       warnings.push(...await injectAddons({ wedding, id: t.id, out, images, options: adapter.addons }));
     }
-    // MIT 고지는 결과물에도 남긴다.
-    await cp(join(ROOT, 'templates', 'sources', t.id, 'LICENSE'), join(out, 'LICENSE'));
+    // 원작 라이선스를 보존한다. 자체 템플릿은 어댑터가 포함 라이브러리 고지를 복사한다.
+    if (adapter.license !== false) {
+      const licenseSource = adapter.sourcePath ? src : join(ROOT, 'templates', 'sources', t.id);
+      await cp(join(licenseSource, 'LICENSE'), join(out, 'LICENSE'));
+    }
     console.log(`✓ ${t.id}`);
     warnings.forEach((m) => console.log(`    - ${m}`));
   } catch (e) {
