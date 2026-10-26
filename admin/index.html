@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>청첩장 관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #faf7f4; --surface: #ffffff; --ink: #2b2522; --muted: #8a7f78; --line: #ebe4de;
+      --accent: #b5776b; --accent-ink: #ffffff; --ok: #3f8f6b; --warn: #b8702a; --err: #c0453a; --chip: #f3ede8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1c1917; --surface: #262220; --ink: #f2ece7; --muted: #a8a09a; --line: #3a3431;
+        --accent: #d49688; --accent-ink: #1c1917; --ok: #6cc59b; --warn: #e3a35a; --err: #ef7d72; --chip: #322c29;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 'Noto Sans KR', system-ui, sans-serif; }
+    header { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
+    .top { max-width: 960px; margin: 0 auto; padding: 12px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    h1 { font: 700 20px 'Gowun Batang', serif; margin: 0; flex: 1; min-width: 140px; }
+    .state { font-size: 13px; color: var(--muted); }
+    .state.dirty { color: var(--warn); font-weight: 500; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    nav.tabs { max-width: 960px; margin: 0 auto; padding: 0 16px; display: flex; gap: 4px; overflow-x: auto; }
+    nav.tabs button { border: 0; background: none; padding: 10px 12px; font: inherit; font-size: 14px; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+    nav.tabs button[aria-selected="true"] { color: var(--ink); border-color: var(--accent); font-weight: 600; }
+    main { max-width: 960px; margin: 0 auto; padding: 20px 16px 120px; }
+    section.panel { display: none; }
+    section.panel.on { display: block; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
+    .card h2 { font-size: 16px; margin: 0 0 4px; }
+    .card > p.desc { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px 14px; }
+    .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+    label.f { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500; }
+    label.f.wide { grid-column: 1 / -1; }
+    label.f small { font-weight: 400; color: var(--muted); }
+    label.check { flex-direction: row; align-items: center; gap: 8px; font-weight: 500; }
+    input, textarea, select { font: inherit; font-size: 14px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
+    input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+    textarea { resize: vertical; min-height: 90px; }
+    input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    button.btn { font: inherit; font-size: 14px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+    button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+    button.btn:disabled { opacity: .55; cursor: default; }
+    button.icon { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 14px; flex: none; }
+    .rows { display: flex; flex-direction: column; gap: 10px; }
+    .row { display: grid; gap: 8px; align-items: end; padding: 10px; border: 1px dashed var(--line); border-radius: 10px; }
+    .row .tools { display: flex; gap: 4px; }
+    .add { margin-top: 10px; }
+    .photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    .slot { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+    .slot .thumb { aspect-ratio: 4 / 5; border-radius: 10px; border: 1px solid var(--line); background: var(--chip) center / cover no-repeat; display: grid; place-items: center; color: var(--muted); font-size: 12px; text-align: center; padding: 8px; }
+    .slot .thumb.wide { aspect-ratio: 1200 / 630; }
+    .slot .btns { display: flex; gap: 6px; }
+    .slot .btns button { flex: 1; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+    .gallery .item { position: relative; aspect-ratio: 3 / 4; border-radius: 10px; background: var(--chip) center / cover no-repeat; border: 1px solid var(--line); }
+    .gallery .item .n { position: absolute; left: 6px; top: 6px; background: rgba(0,0,0,.6); color: #fff; font-size: 11px; border-radius: 6px; padding: 1px 6px; }
+    .gallery .item .tools { position: absolute; left: 4px; right: 4px; bottom: 4px; display: flex; gap: 4px; justify-content: center; }
+    .gallery .item .tools button { width: 28px; height: 28px; border-radius: 7px; border: 0; background: rgba(255,255,255,.92); color: #2b2522; cursor: pointer; }
+    .drop { border: 2px dashed var(--line); border-radius: 12px; padding: 18px; text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 14px; cursor: pointer; }
+    .drop.over { border-color: var(--accent); color: var(--ink); }
+    .templates { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+    .tpl { display: flex; gap: 10px; align-items: flex-start; padding: 14px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+    .tpl:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+    .tpl input { width: 18px; margin-top: 3px; accent-color: var(--accent); }
+    .tpl b { display: block; }
+    .tpl small { color: var(--muted); display: block; margin-top: 2px; }
+    .tpl a { font-size: 12px; color: var(--accent); }
+    .msg { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 20; white-space: pre-line; }
+    .msg.show { opacity: 1; }
+    .msg.err { background: var(--err); color: #fff; }
+    details.log { margin-top: 10px; }
+    details.log pre { max-height: 260px; overflow: auto; background: var(--chip); padding: 10px; border-radius: 8px; font-size: 12px; white-space: pre-wrap; }
+    .note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+    .note.warn { color: var(--warn); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top">
+      <h1>청첩장 관리자</h1>
+      <span class="state" id="state">불러오는 중…</span>
+      <div class="actions">
+        <button class="btn primary" id="saveBtn" type="button">저장</button>
+        <button class="btn" id="buildBtn" type="button">미리보기</button>
+        <button class="btn" id="deployBtn" type="button">배포</button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+  </header>
+  <main id="main"></main>
+  <div class="msg" id="msg" role="status"></div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var W = null, CATALOG = [], IMAGES = [], BRANCH = '', dirty = false;
+
+    /* ── 경로 도구 ─────────────────────────────────────────── */
+    function get(path) {
+      return path.split('.').reduce(function (o, k) { return o == null ? undefined : o[k]; }, W);
+    }
+    function set(path, value) {
+      var keys = path.split('.'), o = W;
+      for (var i = 0; i < keys.length - 1; i++) {
+        if (o[keys[i]] == null) o[keys[i]] = /^\d+$/.test(keys[i + 1]) ? [] : {};
+        o = o[keys[i]];
+      }
+      o[keys[keys.length - 1]] = value;
+      markDirty();
+    }
+    function markDirty() {
+      dirty = true;
+      var s = document.getElementById('state');
+      s.textContent = '저장 안 된 변경 있음';
+      s.className = 'state dirty';
+    }
+    function markClean(text) {
+      dirty = false;
+      var s = document.getElementById('state');
+      s.textContent = text || '저장됨';
+      s.className = 'state';
+    }
+
+    function el(tag, attrs, children) {
+      var n = document.createElement(tag);
+      Object.keys(attrs || {}).forEach(function (k) {
+        var v = attrs[k];
+        if (k === 'text') n.textContent = v;
+        else if (k === 'class') n.className = v;
+        else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v);
+        else if (v === true) n.setAttribute(k, '');
+        else if (v !== false && v != null) n.setAttribute(k, v);
+      });
+      (children || []).forEach(function (c) { if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+      return n;
+    }
+
+    var msgTimer;
+    function toast(text, isErr) {
+      var m = document.getElementById('msg');
+      m.textContent = text;
+      m.className = 'msg show' + (isErr ? ' err' : '');
+      clearTimeout(msgTimer);
+      msgTimer = setTimeout(function () { m.className = 'msg'; }, isErr ? 6000 : 3000);
+    }
+
+    function api(method, url, body, type) {
+      var opts = { method: method, headers: {} };
+      if (body !== undefined) {
+        opts.body = type ? body : JSON.stringify(body);
+        opts.headers['Content-Type'] = type || 'application/json';
+      }
+      return fetch(url, opts).then(function (r) {
+        return r.json().then(function (j) { if (!r.ok) throw Object.assign(new Error(j.error || (j.errors || []).join('\n') || r.status), { data: j }); return j; });
+      });
+    }
+
+    /* ── 입력 필드 ─────────────────────────────────────────── */
+    // f: { path, label, type, hint, wide, options, placeholder }
+    function field(f) {
+      var v = get(f.path), input;
+      if (f.type === 'textarea') {
+        input = el('textarea', { rows: f.rows || 4, placeholder: f.placeholder });
+        input.value = v || '';
+      } else if (f.type === 'check') {
+        input = el('input', { type: 'checkbox' });
+        input.checked = !!v;
+        input.addEventListener('change', function () { set(f.path, input.checked); });
+        return el('label', { class: 'f check' + (f.wide ? ' wide' : '') }, [input, f.label, f.hint ? el('small', { text: ' ' + f.hint }) : null]);
+      } else if (f.type === 'select') {
+        input = el('select', {}, f.options.map(function (o) { return el('option', { value: o[0], text: o[1] }); }));
+        input.value = v || f.options[0][0];
+      } else {
+        input = el('input', { type: f.type || 'text', placeholder: f.placeholder, inputmode: f.inputmode, autocomplete: 'off', list: f.list });
+        input.value = v == null ? '' : v;
+      }
+      input.addEventListener(f.type === 'select' ? 'change' : 'input', function () {
+        var val = input.value;
+        if (f.type === 'number') val = val === '' ? '' : Number(val);
+        set(f.path, val);
+      });
+      return el('label', { class: 'f' + (f.wide ? ' wide' : '') }, [f.label, input, f.hint ? el('small', { text: f.hint }) : null]);
+    }
+
+    function card(title, desc, children) {
+      return el('div', { class: 'card' }, [el('h2', { text: title }), desc ? el('p', { class: 'desc', text: desc }) : null].concat(children));
+    }
+    function grid(fields) { return el('div', { class: 'grid' }, fields.map(field)); }
+
+    // 목록 편집: 항목마다 같은 필드 묶음 + 위/아래/삭제
+    function list(path, itemFields, blank, addLabel, rerender) {
+      var arr = get(path) || [];
+      var rows = el('div', { class: 'rows' });
+      arr.forEach(function (_, i) {
+        var cols = itemFields.map(function (f) { return f.width || '1fr'; }).join(' ') + ' auto';
+        var row = el('div', { class: 'row', style: 'grid-template-columns:' + cols });
+        itemFields.forEach(function (f) { row.appendChild(field(Object.assign({}, f, { path: path + '.' + i + '.' + f.key }))); });
+        row.appendChild(el('div', { class: 'tools' }, [
+          el('button', { class: 'icon', type: 'button', title: '위로', text: '↑', disabled: i === 0, onclick: function () { move(arr, i, -1); rerender(); } }),
+          el('button', { class: 'icon', type: 'button', title: '아래로', text: '↓', disabled: i === arr.length - 1, onclick: function () { move(arr, i, 1); rerender(); } }),
+          el('button', { class: 'icon', type: 'button', title: '삭제', text: '✕', onclick: function () { arr.splice(i, 1); markDirty(); rerender(); } }),
+        ]));
+        rows.appendChild(row);
+      });
+      return el('div', {}, [rows, el('button', { class: 'btn add', type: 'button', text: '+ ' + addLabel, onclick: function () {
+        if (!get(path)) set(path, []);
+        get(path).push(JSON.parse(JSON.stringify(blank)));
+        markDirty();
+        rerender();
+      } })]);
+    }
+    function move(arr, i, d) {
+      var t = arr[i]; arr[i] = arr[i + d]; arr[i + d] = t; markDirty();
+    }
+
+    /* ── 탭 구성 ───────────────────────────────────────────── */
+    var RELATIONS = ['장남', '차남', '삼남', '막내', '아들', '장녀', '차녀', '삼녀', '막내딸', '딸'];
+
+    function personCard(side, title) {
+      var p = side + '.';
+      return card(title, null, [grid([
+        { path: p + 'name', label: '이름', placeholder: '홍길동' },
+        { path: p + 'relation', label: '관계', list: 'relations', hint: '예: 장남, 차녀' },
+        { path: p + 'nameEn.last', label: '영문 성', placeholder: 'Hong' },
+        { path: p + 'nameEn.first', label: '영문 이름', placeholder: 'Gildong' },
+        { path: p + 'phone', label: '연락처', type: 'tel', placeholder: '010-0000-0000' },
+      ]),
+      el('p', { class: 'note', text: '부모님' }),
+      grid([
+        { path: p + 'parents.father.name', label: '아버지 성함' },
+        { path: p + 'parents.father.phone', label: '아버지 연락처', type: 'tel' },
+        { path: p + 'parents.father.deceased', label: '고인(故 표시)', type: 'check' },
+        { path: p + 'parents.mother.name', label: '어머니 성함' },
+        { path: p + 'parents.mother.phone', label: '어머니 연락처', type: 'tel' },
+        { path: p + 'parents.mother.deceased', label: '고인(故 표시)', type: 'check' },
+      ])]);
+    }
+
+    // 예식 일시: date + time 두 칸을 ISO(+09:00) 하나로
+    function datetimeCard() {
+      var iso = String(get('ceremony.datetime') || '');
+      var m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/.exec(iso) || [];
+      var d = el('input', { type: 'date', value: m[1] || '' });
+      var t = el('input', { type: 'time', value: m[2] || '', step: '600' });
+      function sync() { if (d.value && t.value) set('ceremony.datetime', d.value + 'T' + t.value + ':00+09:00'); }
+      d.addEventListener('input', sync);
+      t.addEventListener('input', sync);
+      var holidays = el('input', { type: 'text', placeholder: '예: 5, 15', value: (get('ceremony.holidays') || []).join(', ') });
+      holidays.addEventListener('input', function () {
+        set('ceremony.holidays', holidays.value.split(/[,\s]+/).filter(Boolean).map(Number).filter(function (n) { return n >= 1 && n <= 31; }));
+      });
+      return card('예식 일시', '한국 시간 기준입니다. 달력과 D-Day 는 이 값으로 계산됩니다.', [el('div', { class: 'grid' }, [
+        el('label', { class: 'f' }, ['날짜', d]),
+        el('label', { class: 'f' }, ['시간', t]),
+        el('label', { class: 'f' }, ['예식 달의 공휴일', holidays, el('small', { text: '일부 템플릿 달력에 빨간 날로 표시' })]),
+      ])]);
+    }
+
+    var TABS = [
+      { id: 'people', title: '신랑·신부', render: function () {
+        return [el('div', { class: 'two' }, [personCard('groom', '신랑'), personCard('bride', '신부')])];
+      } },
+      { id: 'venue', title: '예식·장소', render: function (re) {
+        return [datetimeCard(), card('예식장', null, [grid([
+          { path: 'venue.name', label: '예식장 이름' },
+          { path: 'venue.hall', label: '홀' },
+          { path: 'venue.floor', label: '층' },
+          { path: 'venue.phone', label: '예식장 전화', type: 'tel' },
+          { path: 'venue.address', label: '주소', wide: true },
+          { path: 'venue.addressDetail', label: '찾아오는 길 한 줄 요약', wide: true, placeholder: '예: 7호선 청담역 13번 출구 도보 10분' },
+          { path: 'venue.lat', label: '위도', type: 'number', inputmode: 'decimal', hint: '지도 표시용 (예: 37.5236)' },
+          { path: 'venue.lng', label: '경도', type: 'number', inputmode: 'decimal', hint: '예: 127.0450' },
+          { path: 'venue.naverPlaceId', label: '네이버 지도 장소 번호', hint: '선택. 장소 URL 의 숫자' },
+          { path: 'venue.kakaoPlaceId', label: '카카오맵 장소 번호', hint: '선택. 장소 URL 의 숫자' },
+        ])]), card('교통편', '지하철·버스·자가용 안내. 순서대로 표시됩니다.', [list('venue.transport', [
+          { key: 'type', label: '종류', type: 'select', width: '110px', options: [['subway', '지하철'], ['bus', '버스'], ['car', '자가용'], ['etc', '기타']] },
+          { key: 'label', label: '제목', width: '120px' },
+          { key: 'detail', label: '안내', width: '2fr' },
+        ], { type: 'subway', label: '지하철', detail: '' }, '교통편 추가', re)])];
+      } },
+      { id: 'greeting', title: '인사말·안내', render: function (re) {
+        return [card('공유 미리보기', '카카오톡·문자로 보낼 때 보이는 제목과 설명입니다.', [grid([
+          { path: 'site.title', label: '제목', wide: true },
+          { path: 'site.description', label: '설명', wide: true },
+        ])]), card('인사말', null, [grid([
+          { path: 'greeting.title', label: '인사말 제목' },
+          { path: 'greeting.message', label: '본문', type: 'textarea', wide: true, rows: 6, hint: '빈 줄로 문단을 나눕니다' },
+          { path: 'greeting.quote.text', label: '인용구 (선택)', type: 'textarea', wide: true, rows: 2 },
+          { path: 'greeting.quote.author', label: '인용구 출처' },
+        ])]), card('하객 안내', '식사·주차 등. 제목에 "식사"·"주차"가 들어가면 템플릿의 해당 칸에도 쓰입니다.', [list('notices', [
+          { key: 'icon', label: '아이콘', width: '70px' },
+          { key: 'title', label: '제목', width: '140px' },
+          { key: 'detail', label: '내용', width: '2fr' },
+        ], { icon: '📌', title: '', detail: '' }, '안내 추가', re)])];
+      } },
+      { id: 'photos', title: '사진', render: photosTab },
+      { id: 'accounts', title: '계좌', render: function (re) {
+        var fields = [
+          { key: 'owner', label: '예금주', width: '1fr' },
+          { key: 'relation', label: '관계', width: '90px', list: 'acc-relations' },
+          { key: 'bank', label: '은행', width: '1fr' },
+          { key: 'number', label: '계좌번호', width: '1.4fr', inputmode: 'numeric' },
+          { key: 'kakaopay', label: '카카오페이 송금 링크 (선택)', width: '1.4fr', type: 'url' },
+        ];
+        return [card('안내 문구', null, [grid([{ path: 'accounts.note', label: '계좌 안내 문구', type: 'textarea', wide: true, rows: 2 }])]),
+          card('신랑측', null, [list('accounts.groom', fields, { owner: '', relation: '아버지', bank: '', number: '', kakaopay: '' }, '계좌 추가', re)]),
+          card('신부측', null, [list('accounts.bride', fields, { owner: '', relation: '어머니', bank: '', number: '', kakaopay: '' }, '계좌 추가', re)])];
+      } },
+      { id: 'features', title: '기능·키', render: function (re) {
+        var sameBtn = el('button', { class: 'btn', type: 'button', text: '참석 여부 주소와 같게', onclick: function () {
+          set('features.guestbook.endpoint', get('features.rsvp.endpoint') || ''); re();
+        } });
+        return [card('참석 여부 (RSVP)', '구글 시트 주소가 없으면 배포된 청첩장에서는 숨겨집니다. 만드는 법: backend/README.md', [grid([
+          { path: 'features.rsvp.enabled', label: '참석 여부 받기', type: 'check' },
+          { path: 'features.rsvp.askCompanions', label: '동행 인원 묻기', type: 'check' },
+          { path: 'features.rsvp.askMeal', label: '식사 여부 묻기', type: 'check' },
+          { path: 'features.rsvp.deadline', label: '마감일', type: 'date' },
+          { path: 'features.rsvp.endpoint', label: '저장소 주소 (구글 Apps Script 웹 앱)', type: 'url', wide: true, placeholder: 'https://script.google.com/macros/s/…/exec' },
+        ])]), card('방명록', null, [grid([
+          { path: 'features.guestbook.enabled', label: '방명록 사용', type: 'check' },
+          { path: 'features.guestbook.endpoint', label: '저장소 주소', type: 'url', wide: true, placeholder: 'https://script.google.com/macros/s/…/exec' },
+        ]), sameBtn]), card('카카오톡 공유·지도', 'Kakao Developers 에서 JavaScript 키를 발급하고 배포 도메인을 등록하세요.', [grid([
+          { path: 'features.kakaoShare.enabled', label: '카카오톡 공유 사용', type: 'check' },
+          { path: 'features.kakaoShare.jsKey', label: '카카오 JavaScript 키', wide: true },
+          { path: 'features.kakaoShare.buttonText', label: '공유 카드 버튼 문구', placeholder: '모바일 청첩장 보기' },
+          { path: 'features.map.kakaoJsKey', label: '카카오맵 키 (비우면 공유 키 사용)' },
+          { path: 'features.map.naverClientId', label: '네이버 지도 Client ID' },
+        ])]), card('배포 주소', '비워 두면 GitHub Actions 가 Pages 주소를 자동으로 넣습니다.', [grid([
+          { path: 'site.url', label: '청첩장 주소', type: 'url', wide: true, placeholder: 'https://아이디.github.io/저장소/' },
+        ])])];
+      } },
+      { id: 'template', title: '템플릿', render: function () {
+        return [card('대표 템플릿', '배포되는 청첩장 디자인입니다. 미리보기는 갤러리에서 볼 수 있습니다.', [
+          el('div', { class: 'templates' }, CATALOG.map(function (t) {
+            var r = el('input', { type: 'radio', name: 'tpl', value: t.id });
+            r.checked = W.template === t.id;
+            r.addEventListener('change', function () { set('template', t.id); });
+            return el('label', { class: 'tpl' }, [r, el('div', {}, [
+              el('b', { text: t.title }), el('small', { text: t.note }),
+              el('a', { href: '/build/' + t.id + '/index.html', target: '_blank', rel: 'noopener', text: '미리보기 ↗' }),
+            ])]);
+          })),
+          el('p', { class: 'note', text: '원작 커플의 실제 사진이 데모로 들어 있는 템플릿(심플 일러스트·벚꽃 엔딩·블루밍 플라워)은 갤러리 사진을 올려야 배포됩니다.' }),
+          el('p', {}, [el('a', { href: '/gallery/', target: '_blank', rel: 'noopener', text: '템플릿 갤러리 열기 ↗' })]),
+        ])];
+      } },
+    ];
+
+    /* ── 사진 ──────────────────────────────────────────────── */
+    // 큰 사진은 브라우저에서 줄여서 올린다(긴 변 1600px, JPEG 85%).
+    function resize(file, maxSide, crop) {
+      return createImageBitmap(file).then(function (img) {
+        var sw = img.width, sh = img.height, sx = 0, sy = 0;
+        if (crop) {
+          var ratio = crop[0] / crop[1];
+          if (sw / sh > ratio) { sx = (sw - sh * ratio) / 2; sw = sh * ratio; } else { sy = (sh - sw / ratio) / 2; sh = sw / ratio; }
+        }
+        var scale = Math.min(1, maxSide / Math.max(sw, sh));
+        var c = document.createElement('canvas');
+        c.width = Math.round(sw * scale);
+        c.height = Math.round(sh * scale);
+        c.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
+        return new Promise(function (r) { c.toBlob(r, 'image/jpeg', 0.85); });
+      });
+    }
+    function uploadFile(file, prefix, opts) {
+      opts = opts || {};
+      var name = prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6) + '.jpg';
+      return resize(file, opts.max || 1600, opts.crop).then(function (blob) {
+        return api('POST', '/api/admin/upload?name=' + encodeURIComponent(name), blob, 'image/jpeg');
+      }).then(function (res) {
+        IMAGES.push({ name: name, path: res.path, size: res.size });
+        return res.path;
+      });
+    }
+    function pickFiles(multiple, cb) {
+      var i = el('input', { type: 'file', accept: 'image/*', multiple: multiple });
+      i.addEventListener('change', function () { if (i.files.length) cb([].slice.call(i.files)); });
+      i.click();
+    }
+    function imgUrl(path) { return '/data/' + path; }
+
+    function photosTab(re) {
+      var slots = [
+        { path: 'gallery.cover', label: '대표 사진', prefix: 'cover', hint: '첫 화면 사진' },
+        { path: 'groom.photo', label: '신랑 사진', prefix: 'groom' },
+        { path: 'bride.photo', label: '신부 사진', prefix: 'bride' },
+        { path: 'site.ogImage', label: '공유 썸네일', prefix: 'og', wide: true, crop: [1200, 630], max: 1200, hint: '카카오톡 공유 카드 (1200×630 으로 잘림)' },
+      ];
+      var slotEls = slots.map(function (s) {
+        var v = get(s.path);
+        var has = v && IMAGES.some(function (x) { return x.path === v; });
+        var thumb = el('div', { class: 'thumb' + (s.wide ? ' wide' : ''), text: has ? '' : (v ? '파일 없음' : '사진 없음') });
+        if (has) thumb.style.backgroundImage = 'url("' + imgUrl(v) + '")';
+        return el('div', { class: 'slot' }, [
+          el('b', { text: s.label }), thumb, s.hint ? el('small', { class: 'note', text: s.hint }) : null,
+          el('div', { class: 'btns' }, [
+            el('button', { class: 'btn', type: 'button', text: has ? '바꾸기' : '올리기', onclick: function () {
+              pickFiles(false, function (files) {
+                toast('올리는 중…');
+                uploadFile(files[0], s.prefix, s).then(function (p) { set(s.path, p); re(); toast('올렸습니다. 저장을 눌러 반영하세요'); })
+                  .catch(function (e) { toast(e.message, true); });
+              });
+            } }),
+            has ? el('button', { class: 'btn', type: 'button', text: '빼기', onclick: function () { set(s.path, ''); re(); } }) : null,
+          ]),
+        ]);
+      });
+
+      var photos = get('gallery.photos') || [];
+      var drop = el('div', { class: 'drop', text: '여기에 사진을 끌어다 놓거나 눌러서 여러 장을 한 번에 올리세요' });
+      function addMany(files) {
+        files = files.filter(function (f) { return /^image\//.test(f.type); });
+        if (!files.length) return;
+        var done = 0;
+        toast('올리는 중… 0/' + files.length);
+        files.reduce(function (p, f) {
+          return p.then(function () {
+            return uploadFile(f, 'gallery').then(function (path) {
+              if (!get('gallery.photos')) set('gallery.photos', []);
+              get('gallery.photos').push(path);
+              markDirty();
+              toast('올리는 중… ' + (++done) + '/' + files.length);
+            });
+          });
+        }, Promise.resolve()).then(function () { re(); toast(files.length + '장을 올렸습니다. 저장을 눌러 반영하세요'); })
+          .catch(function (e) { re(); toast(e.message, true); });
+      }
+      drop.addEventListener('click', function () { pickFiles(true, addMany); });
+      drop.addEventListener('dragover', function (e) { e.preventDefault(); drop.classList.add('over'); });
+      drop.addEventListener('dragleave', function () { drop.classList.remove('over'); });
+      drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('over'); addMany([].slice.call(e.dataTransfer.files)); });
+
+      var gallery = el('div', { class: 'gallery' }, photos.map(function (p, i) {
+        var it = el('div', { class: 'item' }, [el('span', { class: 'n', text: String(i + 1) }), el('div', { class: 'tools' }, [
+          el('button', { type: 'button', title: '앞으로', text: '←', disabled: i === 0, onclick: function () { move(photos, i, -1); re(); } }),
+          el('button', { type: 'button', title: '뒤로', text: '→', disabled: i === photos.length - 1, onclick: function () { move(photos, i, 1); re(); } }),
+          el('button', { type: 'button', title: '갤러리에서 빼기', text: '✕', onclick: function () { photos.splice(i, 1); markDirty(); re(); } }),
+        ])]);
+        it.style.backgroundImage = 'url("' + imgUrl(p) + '")';
+        return it;
+      }));
+
+      // 어디에도 쓰이지 않는 사진 파일 정리
+      var used = slots.map(function (s) { return get(s.path); }).concat(photos, get('site.favicon'));
+      var unused = IMAGES.filter(function (x) { return used.indexOf(x.path) < 0; });
+      var cleanup = unused.length ? el('button', { class: 'btn', type: 'button', text: '안 쓰는 사진 ' + unused.length + '장 지우기', onclick: function () {
+        if (dirty) { toast('먼저 저장한 뒤 정리하세요', true); return; }
+        if (!confirm('어디에도 쓰이지 않는 사진 ' + unused.length + '장을 data/images 에서 지웁니다.')) return;
+        Promise.all(unused.map(function (x) { return api('DELETE', '/api/admin/image?name=' + encodeURIComponent(x.name)); }))
+          .then(function () { IMAGES = IMAGES.filter(function (x) { return unused.indexOf(x) < 0; }); re(); toast('정리했습니다'); })
+          .catch(function (e) { toast(e.message, true); });
+      } }) : null;
+
+      return [card('주요 사진', '사진은 긴 변 1600px 로 줄여서 data/images 에 저장됩니다.', [el('div', { class: 'photos' }, slotEls)]),
+        card('갤러리', '순서대로 표시됩니다. 화살표로 순서를 바꿀 수 있습니다.', [drop, gallery,
+          photos.length ? null : el('p', { class: 'note warn', text: '갤러리 사진이 없으면 템플릿의 데모 사진이 나옵니다.' }), cleanup])];
+    }
+
+    /* ── 화면 그리기 ───────────────────────────────────────── */
+    var current = 'people';
+    function renderTabs() {
+      var nav = document.getElementById('tabs');
+      nav.innerHTML = '';
+      TABS.forEach(function (t) {
+        nav.appendChild(el('button', { type: 'button', role: 'tab', 'aria-selected': String(t.id === current), text: t.title, onclick: function () {
+          current = t.id; try { localStorage.setItem('admin-tab', current); } catch (e) {} renderTabs(); render();
+        } }));
+      });
+    }
+    function render() {
+      var main = document.getElementById('main');
+      var y = window.scrollY;
+      main.innerHTML = '';
+      var tab = TABS.filter(function (t) { return t.id === current; })[0];
+      var panel = el('section', { class: 'panel on', role: 'tabpanel' }, tab.render(render));
+      main.appendChild(panel);
+      main.appendChild(el('datalist', { id: 'relations' }, RELATIONS.map(function (r) { return el('option', { value: r }); })));
+      main.appendChild(el('datalist', { id: 'acc-relations' }, ['신랑', '신부', '아버지', '어머니'].map(function (r) { return el('option', { value: r }); })));
+      window.scrollTo(0, y);
+    }
+
+    function load() {
+      return api('GET', '/api/admin/state').then(function (s) {
+        W = s.wedding; CATALOG = s.catalog; IMAGES = s.images; BRANCH = s.branch;
+        try { current = localStorage.getItem('admin-tab') || current; } catch (e) {}
+        if (!TABS.some(function (t) { return t.id === current; })) current = 'people';
+        renderTabs(); render();
+        markClean('브랜치: ' + BRANCH);
+      });
+    }
+
+    function save() {
+      return api('PUT', '/api/admin/wedding', W).then(function () { markClean('저장됨 · 브랜치: ' + BRANCH); toast('저장했습니다'); });
+    }
+
+    function busyButtons(on) {
+      ['saveBtn', 'buildBtn', 'deployBtn'].forEach(function (id) { document.getElementById(id).disabled = on; });
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', function () {
+      busyButtons(true);
+      save().catch(function (e) { toast(e.message, true); }).then(function () { busyButtons(false); });
+    });
+
+    document.getElementById('buildBtn').addEventListener('click', function () {
+      var win = window.open('about:blank', '_blank');
+      busyButtons(true);
+      toast('저장하고 대표 템플릿을 빌드하는 중… (React/Vue 템플릿은 수십 초)');
+      (dirty ? save() : Promise.resolve())
+        .then(function () { return api('POST', '/api/admin/build'); })
+        .then(function () { toast('미리보기를 열었습니다'); if (win) win.location = '/dist/?t=' + Date.now(); })
+        .catch(function (e) { if (win) win.close(); toast('빌드 실패: ' + e.message + (e.data && e.data.log ? '\n' + e.data.log.slice(-400) : ''), true); })
+        .then(function () { busyButtons(false); });
+    });
+
+    document.getElementById('deployBtn').addEventListener('click', function () {
+      var text = BRANCH === 'main'
+        ? '저장한 내용(data/)을 커밋하고 GitHub 에 올립니다.\n공개 저장소라 누구나 볼 수 있고, 2~3분 뒤 청첩장이 바뀝니다.'
+        : '현재 브랜치가 ' + BRANCH + ' 입니다. 커밋만 하고 GitHub 에는 올리지 않습니다(배포는 main 에서만).';
+      if (!confirm(text)) return;
+      busyButtons(true);
+      toast('배포 전 점검과 커밋을 진행하는 중…');
+      (dirty ? save() : Promise.resolve())
+        .then(function () { return api('POST', '/api/admin/deploy'); })
+        .then(function (r) { toast(r.message); })
+        .catch(function (e) { toast((e.message || '배포 실패') + (e.data && e.data.log ? '\n' + e.data.log.slice(-500) : ''), true); })
+        .then(function () { busyButtons(false); });
+    });
+
+    window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+    load().catch(function (e) {
+      document.getElementById('main').textContent = '불러오지 못했습니다: ' + e.message + ' — npm run dev 로 서버를 켜고 http://localhost:4000/admin/ 으로 접속하세요.';
+    });
+  })();
+  </script>
+</body>
+</html>

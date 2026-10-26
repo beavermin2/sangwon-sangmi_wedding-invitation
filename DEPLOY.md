@@ -31,8 +31,18 @@ npm run dist
 4. **Actions** 탭에서 `Deploy wedding invitation` 이 초록색이 되면 배포 완료입니다(처음엔 2~4분).
    실패했다면 Settings → Pages 설정 후 **Actions → 실패한 실행 → Re-run all jobs** 를 누릅니다.
 
-## 그다음부터: 고치고 올리기
-`data/wedding.json` 이나 `data/images/` 를 고친 뒤 commit·push 만 하면 자동으로 다시 배포됩니다.
+## 그다음부터: 관리자 페이지에서 고치고 올리기
+```
+npm run admin
+```
+`http://localhost:4000/admin/` 에서 청첩장 정보·사진·기능·대표 템플릿을 바꿀 수 있습니다(이 PC 에서만 열림).
+
+- **저장**: `data/wedding.json` 과 `data/images/` 에 저장합니다. 사진은 긴 변 1600px 로 줄여서 저장됩니다.
+- **미리보기**: 대표 템플릿을 빌드해 배포될 화면을 새 탭으로 엽니다.
+- **배포**: 배포 전 점검을 통과하면 `data/` 변경을 커밋하고 GitHub 에 push 합니다. 2~3분 뒤 청첩장이 바뀝니다.
+  `main` 브랜치에서만 push 하고, 다른 브랜치에서는 커밋만 합니다. push 로그인이 풀렸다면 터미널에서 `git push` 를 한 번 실행해 다시 로그인하세요.
+
+직접 고칠 때는 `data/wedding.json` 이나 `data/images/` 를 고친 뒤 commit·push 만 하면 자동으로 다시 배포됩니다.
 GitHub Actions 가 대표 템플릿만 새로 빌드하므로 `build/`·`dist/` 는 올리지 않습니다(.gitignore).
 
 ## 배포 주소 연결

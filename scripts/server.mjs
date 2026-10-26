@@ -1,13 +1,16 @@
 // 로컬 미리보기 서버 (의존성 없음)
-//   node scripts/server.mjs  →  http://localhost:4000/gallery/
-// 정적 파일을 서빙하고, 갤러리의 "대표로 선택" 버튼이 호출하는 POST /api/select 를 처리한다.
+//   node scripts/server.mjs  →  http://localhost:4000/admin/ (관리자), /gallery/ (템플릿 갤러리)
+// 정적 파일을 서빙하고, 갤러리의 "대표로 선택"(POST /api/select)과 관리자 API(/api/admin/*)를 처리한다.
+// 파일을 고치는 API 가 있으므로 이 PC(127.0.0.1)에서만 접속을 받는다.
 import { createServer } from 'node:http';
 import { readFile, writeFile, stat } from 'node:fs/promises';
 import { join, normalize, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createAdmin } from './admin-api.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const PORT = Number(process.env.PORT) || 4000;
+const HOST = '127.0.0.1';
 const WEDDING = join(ROOT, 'data', 'wedding.json');
 const CATALOG = join(ROOT, 'templates', 'catalog.json');
 
@@ -28,6 +31,11 @@ function send(res, code, body, type = 'application/json; charset=utf-8') {
 }
 
 async function handleSelect(req, res) {
+  // 관리자 API 와 같은 기준: 이 PC 의 같은 출처에서 온 요청만
+  const local = [`localhost:${PORT}`, `127.0.0.1:${PORT}`];
+  if (!local.includes(req.headers.host) || !local.map((h) => `http://${h}`).includes(req.headers.origin)) {
+    return send(res, 403, { error: 'forbidden' });
+  }
   let raw = '';
   for await (const chunk of req) raw += chunk;
   let id;
@@ -69,6 +77,7 @@ async function serveStatic(req, res) {
   const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   let file = normalize(join(ROOT, path));
   if (!file.startsWith(ROOT.endsWith(sep) ? ROOT : ROOT + sep)) return send(res, 403, 'forbidden', 'text/plain');
+  if (/^\/\.(git|work)(\/|$)/.test(path)) return send(res, 403, 'forbidden', 'text/plain');
   try {
     if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
     send(res, 200, await readFile(file), MIME[extname(file).toLowerCase()] || 'application/octet-stream');
@@ -77,9 +86,12 @@ async function serveStatic(req, res) {
   }
 }
 
+const admin = createAdmin({ root: ROOT, port: PORT, send });
+
 createServer(async (req, res) => {
   try {
-    if (req.url === '/') { res.writeHead(302, { Location: '/gallery/' }); return res.end(); }
+    if (req.url === '/') { res.writeHead(302, { Location: '/admin/' }); return res.end(); }
+    if (await admin(req, res)) return;
     if (req.method === 'POST' && req.url === '/api/select') return await handleSelect(req, res);
     if (req.url.startsWith('/__mock/apps-script')) return await handleMock(req, res);
     if (req.method === 'GET') return await serveStatic(req, res);
@@ -87,4 +99,7 @@ createServer(async (req, res) => {
   } catch (e) {
     send(res, 500, { error: String(e) });
   }
-}).listen(PORT, () => console.log(`gallery: http://localhost:${PORT}/gallery/`));
+}).listen(PORT, HOST, () => {
+  console.log(`관리자: http://localhost:${PORT}/admin/`);
+  console.log(`갤러리: http://localhost:${PORT}/gallery/`);
+});

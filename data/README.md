@@ -1,6 +1,7 @@
 # data/wedding.json
 
 청첩장의 모든 정보를 담는 파일입니다. 어떤 템플릿을 고르든 이 파일 하나만 수정하면 됩니다.
+직접 고치기보다 관리자 페이지(`npm run admin` → `http://localhost:4000/admin/`)를 쓰는 것이 편합니다.
 사진은 `data/images/` 에 넣고, 경로는 `data/` 기준 상대 경로(`images/cover.jpg`)로 적습니다.
 
 > 주의: GitHub Pages로 배포하면 이 파일은 누구나 볼 수 있습니다. 전화번호·계좌번호는 청첩장에 노출하려는 것만 적으세요.
