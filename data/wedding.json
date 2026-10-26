@@ -150,11 +150,11 @@
   },
   "features": {
     "rsvp": {
-      "enabled": false,
-      "deadline": "2027-05-01",
-      "askCompanions": false,
-      "askMeal": false,
-      "endpoint": ""
+      "enabled": true,
+      "deadline": "2027-01-30",
+      "askCompanions": true,
+      "askMeal": true,
+      "endpoint": "https://script.google.com/macros/s/AKfycbyHz-fCYZ90UVwrkgHrB_6IdrI5TtBf1gP6g6bfzpWZmpczyKBbv6j6LZX6PrcWlxj0/exec"
     },
     "guestbook": {
       "enabled": true,

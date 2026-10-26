@@ -11,6 +11,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
 import { youtubeId } from './lib/wedding.mjs';
+import { photoShareAdmin } from './lib/photo-share-admin.mjs';
 
 const MB = 1024 * 1024;
 // 파일 종류별 저장 폴더·크기 제한·내용 확인(확장자만 믿지 않고 파일 앞부분으로 판별)
@@ -213,6 +214,11 @@ export function createAdmin({ root, port, send }) {
     try {
       const route = `${req.method} ${url.pathname}`;
       if (route === 'GET /api/admin/state') await state(res);
+      else if (route === 'GET /api/admin/photo-share') send(res,200,await photoShareAdmin(root));
+      else if (route === 'PUT /api/admin/photo-share') {
+        const settings=JSON.parse((await body(req,4096)).toString('utf8'));
+        send(res,200,await photoShareAdmin(root,settings.mode,settings.storageMode));
+      }
       else if (route === 'PUT /api/admin/wedding') await saveWedding(req, res);
       else if (route === 'POST /api/admin/upload') await upload(req, res, url);
       else if (route === 'DELETE /api/admin/image') await removeFile(res, url);

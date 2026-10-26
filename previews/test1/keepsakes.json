@@ -1,0 +1,23 @@
+[
+  {
+    "image": "images/gallery-1792995549207-9jgr.jpg",
+    "alt": "잔디 위에서 서로를 바라보는 두 사람",
+    "caption": "You, me &\nall our tomorrows.",
+    "shape": "landscape",
+    "focusY": 35
+  },
+  {
+    "image": "images/cover-1793016055598-n56r.jpg",
+    "alt": "색색의 리본 아래에서 함께 인사하는 두 사람",
+    "caption": "Little joys,\nbig love.",
+    "shape": "landscape",
+    "focusY": 90
+  },
+  {
+    "image": "images/gallery-1792995549207-9jgr.jpg",
+    "alt": "나란히 앉아 함께하는 두 사람의 모습",
+    "caption": "Always,\nby your side.",
+    "shape": "square",
+    "focusY": 48
+  }
+]

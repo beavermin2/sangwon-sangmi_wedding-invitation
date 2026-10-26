@@ -5,6 +5,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import vm from 'node:vm';
+import { escapeHtml } from './lib/wedding.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const id = 't08-paper-rose';
@@ -48,12 +49,32 @@ test('페이퍼 & 로즈: 선택된 템플릿 빌드, 기능 갱신, 배포와 �
     await writeFile(dataPath, JSON.stringify(wedding));
     run('build.mjs', '--addons-only', id);
     const html = await readFile(join(built, 'index.html'), 'utf8');
+    // 대표 청첩장의 공통 문구와 계좌를 사용하고, 시안 예시 값으로 돌아가지 않아야 한다.
+    assert.ok(html.includes('오전 11시 20분'));
+    assert.ok(!html.includes('낮 11시 20분'));
+    assert.ok(html.includes(escapeHtml(wedding.greeting.quote.text)));
+    assert.ok(html.includes(escapeHtml(wedding.greeting.quote.author)));
+    for (const account of [...wedding.accounts.groom, ...wedding.accounts.bride]) {
+      assert.ok(html.includes(`${escapeHtml(account.bank)} ${escapeHtml(account.number)}`));
+    }
+    assert.ok(!html.includes('000-000-000000'));
+    const transportText=html.match(/<div class="transport">([\s\S]*?)<\/div>/)[1].replace(/<[^>]*>/g,'');
+    for (const transport of wedding.venue.transport) {
+      const parts=['subway','bus'].includes(transport.type)?transport.detail.split(',').map(part=>part.trim()):[transport.detail];
+      for(const part of parts)assert.ok(transportText.includes(escapeHtml(part)));
+    }
+    assert.equal((html.match(/<h3>주차안내<\/h3>/g) || []).length, 1);
+    for (const notice of wedding.notices) assert.ok(html.includes(escapeHtml(notice.detail)));
     assert.equal((html.match(/<!-- wedding-addons -->/g) || []).length, 1);
     assert.ok(html.includes('./assets/paper-rose/addons/config.js'));
     const addonContext = { window: {} };
     vm.runInNewContext(await readFile(join(built, 'assets/paper-rose/addons/config.js'), 'utf8'), addonContext);
     assert.equal(addonContext.window.__WEDDING_ADDONS__.video.title, '검증 영상');
     assert.equal(addonContext.window.__WEDDING_ADDONS__.guestbook, null);
+    assert.equal(addonContext.window.__WEDDING_ADDONS__.rsvp, null);
+    assert.equal((html.match(/id="rsvp-form"/g)||[]).length,1);
+    assert.ok(html.includes('href="#rsvp"'));
+    assert.equal((await readConfig(built)).rsvp.endpoint,wedding.features.rsvp.endpoint);
 
     run('dist.mjs', '--build');
     const dist = join(fixture, 'dist');
@@ -70,7 +91,7 @@ test('페이퍼 & 로즈: 선택된 템플릿 빌드, 기능 갱신, 배포와 �
     const previewContext = { window: {} };
     vm.runInNewContext(await readFile(join(dist, 'preview-assets/test1/data.js'), 'utf8'), previewContext);
     assert.equal(previewContext.window.PREVIEW_DATA.publicUrl, 'https://example.com/wedding/test1.html');
-    for (const file of ['style.css', 'app.js', 'guestbook.js', 'lottie-LICENSE.md', 'supabase-LICENSE']) {
+    for (const file of ['style.css', 'app.js', 'guestbook.js', 'rsvp.js', 'rsvp.css', 'lottie-LICENSE.md', 'supabase-LICENSE']) {
       assert.deepEqual(await readFile(join(dist, 'assets/paper-rose', file)), await readFile(join(dist, 'preview-assets/test1', file)));
     }
   } finally {

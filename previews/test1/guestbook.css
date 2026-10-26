@@ -3,12 +3,12 @@
 .guestbook-write{background:#fff;gap:10px;margin-bottom:24px}
 .guestbook-write span{font-size:18px}
 .guestbook-status{font-size:13px;color:var(--muted);line-height:1.8;margin:10px 0}
-.guestbook-list{height:300px;text-align:left;overflow-x:auto;overflow-y:hidden;max-width:100%;overscroll-behavior-x:contain;scrollbar-width:none;scroll-snap-type:x proximity}
+.guestbook-list{height:340px;text-align:left;overflow-x:auto;overflow-y:hidden;max-width:100%;overscroll-behavior-x:contain;scrollbar-width:none;scroll-snap-type:x proximity}
 .guestbook-list::-webkit-scrollbar{display:none}
 .guestbook-list[hidden]{display:none}
 .guestbook-track{display:flex;gap:10px;width:100%;height:100%}
-.guestbook-card{flex:0 0 46%;min-width:150px;height:300px;box-sizing:border-box;background:#fff;border:1px solid #eee4e5;padding:13px;border-radius:5px;display:flex;flex-direction:column;overflow:hidden;scroll-snap-align:start}
-.guestbook-card>p{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9;-webkit-text-stroke:0;min-height:0;max-height:135px;overflow-y:auto;flex-shrink:1;margin:0 0 12px}
+.guestbook-card{flex:0 0 46%;min-width:150px;height:340px;box-sizing:border-box;background:#fff;border:1px solid #eee4e5;padding:13px;border-radius:5px;display:flex;flex-direction:column;overflow:hidden;scroll-snap-align:start}
+.guestbook-card>p{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9;-webkit-text-stroke:0;min-height:0;max-height:175px;overflow-y:auto;flex-shrink:1;margin:0 0 12px}
 .guestbook-card-footer{display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:auto;padding-top:12px;flex-shrink:0;font-size:12px;color:var(--muted)}
 .guestbook-card-footer strong{color:var(--ink);overflow-wrap:anywhere}
 .guestbook-card-footer time{font-size:11px;white-space:nowrap}
@@ -27,7 +27,7 @@
 .guestbook-form label small{font-size:11px;color:var(--muted);margin-left:5px}
 .guestbook-form input[type=text],.guestbook-form textarea{display:block;width:100%;font:16px/1.7 var(--font);color:var(--ink);background:#fcfaf8;border:1px solid var(--line);border-radius:6px;padding:10px 12px;box-sizing:border-box}
 .guestbook-form input[type=text]{margin-bottom:18px}
-.guestbook-form textarea{resize:vertical;min-height:130px;max-height:280px}
+.guestbook-form textarea{resize:vertical;min-height:100px;max-height:280px}
 .guestbook-length{display:block;text-align:right;font-size:11px;color:var(--muted);margin:4px 0 18px}
 .guestbook-form input[type=file]{font:12px/1.8 var(--font);max-width:100%;color:var(--muted)}
 .guestbook-form input[type=file]::file-selector-button{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:5px;background:#faf7f4;color:var(--ink);margin-right:7px}
@@ -46,7 +46,7 @@
 .guestbook-photo-dialog>img{max-width:100%;max-height:calc(100dvh - 110px);object-fit:contain}
 .guestbook-photo-dialog>p{font-size:13px;text-align:center;padding:24px;color:var(--muted)}
 
-.guestbook-card-text>p{margin:auto 0;max-height:215px;text-align:left;line-height:1.9}
+.guestbook-card-text>p{margin:auto 0;max-height:255px;text-align:left;line-height:1.9}
 .guestbook-card-text .guestbook-card-footer{margin-top:0}
 
 .guestbook-all-dialog{width:100%;max-width:480px;height:100dvh;max-height:100dvh;margin:auto;border:0;border-radius:0;padding:0;background:#faf7f5;overflow:hidden}

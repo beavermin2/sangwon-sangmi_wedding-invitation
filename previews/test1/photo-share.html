@@ -1,0 +1,24 @@
+    <section class="section photo-share-section" id="photo-share" aria-labelledby="photo-share-title">
+      <div class="photo-share-art" aria-hidden="true"><img src="{{PHOTO_SHARE_FIRST}}" alt="" loading="lazy"><img src="{{PHOTO_SHARE_SECOND}}" alt="" loading="lazy"><span>Your view,<br>our memories.</span></div>
+      <header class="section-heading"><p class="eyebrow">THROUGH YOUR EYES</p><h2 id="photo-share-title">당신이 담은 우리의 하루</h2></header>
+      <p class="photo-share-intro">저희가 미처 보지 못한 웃음과 순간들,<br>여러분의 시선으로 남겨 주세요.</p>
+      <button class="button photo-share-open" id="photo-share-open" type="button" data-open="photo-share-dialog" aria-haspopup="dialog">축하 사진 보내기</button>
+      <p class="photo-share-availability" id="photo-share-availability" role="status">업로드 시작 시간을 확인하고 있습니다.</p>
+      <p class="photo-share-private">보내주신 사진은 신랑·신부만 볼 수 있어요.</p>
+    </section>
+    <dialog id="photo-share-dialog" class="photo-share-dialog" aria-labelledby="photo-share-dialog-title">
+      <div class="dialog-head"><div><h2 id="photo-share-dialog-title">함께 담은 순간 보내기</h2><p>사진은 신랑·신부에게만 전달됩니다.</p></div><button type="button" class="close-button" data-close aria-label="사진 공유 닫기">×</button></div>
+      <form id="photo-share-form">
+        <fieldset id="photo-share-fields">
+          <label for="photo-share-name">보내는 분</label><input id="photo-share-name" maxlength="30" autocomplete="name" required placeholder="성함을 알려주세요">
+          <label for="photo-share-files">사진 선택</label><input id="photo-share-files" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+          <p class="photo-share-help">한 장씩 추가하거나 여러 장을 함께 선택할 수 있어요.<br>최대 5장 · 사진당 25MB 이하<br><span id="photo-share-storage-help">사진 저장 방식을 확인하고 있습니다.</span></p>
+          <ul id="photo-share-previews" class="photo-share-previews" aria-label="선택한 사진"></ul>
+          <label for="photo-share-message">사진에 담긴 이야기</label><textarea id="photo-share-message" rows="2" maxlength="300" placeholder="어떤 순간인지 짧게 남겨주셔도 좋아요"></textarea>
+          <label class="photo-share-consent"><input id="photo-share-consent" type="checkbox" required><span>이름·사진·이야기를 신랑·신부에게 전달하는 데 동의합니다.</span></label>
+          <div id="photo-share-captcha"></div>
+        </fieldset>
+        <p id="photo-share-status" role="status" aria-live="polite"></p>
+        <button class="button photo-share-submit" id="photo-share-submit" type="submit" disabled>사진 보내기</button>
+      </form>
+    </dialog>

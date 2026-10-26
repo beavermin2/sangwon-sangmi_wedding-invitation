@@ -1,0 +1,33 @@
+.photo-share-section{padding-top:64px;padding-bottom:64px}
+.photo-share-art{position:relative;width:260px;max-width:100%;height:250px;margin:0 auto 30px}
+.photo-share-art img{position:absolute;width:130px;height:158px;object-fit:cover;border:5px solid #fff;box-shadow:0 3px 12px #72555d16;top:10px;left:8px;transform:rotate(-9deg);object-position:50% 65%}
+.photo-share-art img+img{left:auto;right:8px;top:22px;transform:rotate(8deg);object-position:50% 40%}
+.photo-share-art span{position:absolute;bottom:0;left:17px;font:26px/1.1 'La Belle Aurore',cursive;color:#94717e;transform:rotate(-5deg)}
+.photo-share-section .section-heading{margin-bottom:18px}
+.photo-share-intro{font-size:14px;line-height:2;color:#817773;word-break:keep-all}
+.photo-share-open{margin-top:26px;gap:8px;padding:12px 24px;border-radius:6px;background:#fff9;color:#946476;font-size:13px}
+.photo-share-availability{margin-top:17px;font-size:12px;line-height:1.8;color:#9b7a86}
+.photo-share-private{font-size:11px;color:var(--muted);margin-top:6px}
+.photo-share-dialog{width:calc(100% - 28px);max-width:410px;max-height:calc(100dvh - 24px);border:1px solid #e7dadd;border-radius:12px;overflow:auto;overscroll-behavior:contain;background:#fffcfa}
+.photo-share-dialog .dialog-head{position:sticky;top:0;z-index:1;padding:18px 20px 14px;margin:0;background:#fffcfa;border-bottom:1px solid var(--line);align-items:flex-start}
+.photo-share-dialog .dialog-head h2{font-size:18px;line-height:1.6}
+.photo-share-dialog .dialog-head p{font-size:11px;color:var(--muted);margin-top:3px}
+#photo-share-form{padding:18px 20px 20px}
+#photo-share-fields{border:0;padding:0;margin:0;min-width:0}
+#photo-share-fields>label{display:block;font-size:12px;color:#746467;margin-bottom:5px}
+#photo-share-fields>input:not([type=checkbox]),#photo-share-fields>textarea{display:block;width:100%;font:16px/1.5 var(--font);padding:9px 10px;border:1px solid #e4d9dc;border-radius:6px;background:white;box-sizing:border-box;margin-bottom:14px}
+#photo-share-fields>input[type=file]{font-size:12px;margin-bottom:6px}
+#photo-share-fields>textarea{resize:vertical;min-height:68px;max-height:150px}
+.photo-share-help{font-size:11px;line-height:1.8;color:var(--muted);margin:4px 0 15px}
+.photo-share-previews{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.photo-share-previews:empty{display:none}
+.photo-share-previews li{position:relative;min-width:0}
+.photo-share-previews img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px}
+.photo-share-previews button{position:absolute;top:3px;right:3px;border-radius:50%;width:28px;height:28px;background:#fffE;color:#72555d;font-size:18px}
+.photo-share-previews span{display:block;font-size:10px;line-height:1.5;color:#94717e;margin-top:3px;overflow-wrap:anywhere}
+.photo-share-previews .photo-share-file-label{display:flex;align-items:center;justify-content:center;aspect-ratio:1;padding:20px 6px 6px;box-sizing:border-box;background:#f4ecee;border-radius:4px;margin:0;text-align:center}
+#photo-share-fields>.photo-share-consent{display:flex;align-items:flex-start;gap:7px;font-size:11px;line-height:1.8;margin:10px 0}
+.photo-share-consent input{flex-shrink:0;margin:4px 0 0;accent-color:#a66d80}
+#photo-share-status{font-size:12px;line-height:1.8;color:#90576b;margin:8px 0;word-break:keep-all}
+.photo-share-submit{width:100%;min-height:44px;background:#a66d80;color:#fff;border-color:#a66d80;border-radius:6px;font-size:14px}
+.button.photo-share-submit:hover{background:#90576b;color:#fff;border-color:#90576b}

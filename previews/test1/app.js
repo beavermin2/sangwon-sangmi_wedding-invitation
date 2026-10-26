@@ -3,6 +3,13 @@
   'use strict';
   const C = window.PREVIEW_DATA;
   const $ = s => document.querySelector(s);
+  // 스크롤 위치와 관계없이 재생하고, 탭이 숨겨졌을 때만 멈춘다.
+  const flowers=$('.page-doodles');
+  if(flowers){
+    const syncFlowers=()=>flowers.toggleAttribute('data-paused',document.hidden);
+    document.addEventListener('visibilitychange',syncFlowers);
+    syncFlowers();
+  }
   let toastTimer;
   function toast(text) { $('#toast').textContent=text;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2600); }
   async function copy(text,message) {
@@ -32,16 +39,15 @@
       animation.onfinish=()=>{account.open=expanded;animation=null;};
     });
   });
-  $('#link-share').addEventListener('click',()=>copy(location.href.split('#')[0],'청첩장 링크를 복사했습니다'));
+  const copyInvitationLink=()=>copy(location.href.split('#')[0],'청첩장 링크를 복사했습니다');
   const menu=$('#quick-menu'),toggle=$('#menu-toggle');
   let menuScroll=0,closingMenu=null;
-  const invitation=$('.invitation');
   function closeMenu(){
     if(closingMenu)return closingMenu;
     if(menu.hidden)return Promise.resolve();
     document.body.classList.remove('nav-expanded');
-    // Keep the fixed preview and scroll offset until the return transition finishes.
-    closingMenu=Promise.all(invitation.getAnimations().map(animation=>animation.finished.catch(()=>{}))).then(()=>{
+    // Restore the original scroll position after the contents panel fades out.
+    closingMenu=Promise.all(menu.getAnimations().map(animation=>animation.finished.catch(()=>{}))).then(()=>{
       menu.hidden=true;toggle.setAttribute('aria-expanded','false');document.body.classList.remove('nav-open');
       $('#invitation-content').style.transform='';$('#page-frame').inert=false;
       window.scrollTo({top:menuScroll,behavior:'instant'});toggle.focus({preventScroll:true});
@@ -53,22 +59,21 @@
     menuScroll=scrollY;menu.hidden=false;toggle.setAttribute('aria-expanded','true');
     $('#invitation-content').style.transform=`translateY(${-menuScroll}px)`;
     document.body.classList.add('nav-open');$('#page-frame').inert=true;
-    // Establish the full-size starting frame before sliding it into the menu.
-    invitation.getBoundingClientRect();
-    document.body.classList.add('nav-expanded');$('#menu-close').focus({preventScroll:true});
+    // Establish the panel's initial position before its entrance transition.
+    menu.getBoundingClientRect();
+    document.body.classList.add('nav-expanded');$('#menu-title').focus({preventScroll:true});
   });
   $('#menu-close').addEventListener('click',closeMenu);
   menu.querySelectorAll('a[href^="#"]').forEach(a=>{if(!document.querySelector(a.getAttribute('href'))){a.hidden=true;return;}a.addEventListener('click',async e=>{e.preventDefault();const target=document.querySelector(a.getAttribute('href'));await closeMenu();requestAnimationFrame(()=>{target.scrollIntoView({behavior:'smooth'});target.setAttribute('tabindex','-1');target.focus({preventScroll:true});});});});
   document.addEventListener('keydown',e=>{
     if(menu.hidden)return;
     if(e.key==='Escape'){e.preventDefault();closeMenu();}
-    if(e.key==='Tab'){const focusable=[...menu.querySelectorAll('button,a[href]')].filter(e=>!e.hidden);const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+    if(e.key==='Tab'){const focusable=[...menu.querySelectorAll('button,a[href]')].filter(e=>!e.hidden);const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&(document.activeElement===first||!focusable.includes(document.activeElement))){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
   });
   $('[data-drawer-contact]').addEventListener('click',async()=>{await closeMenu();openDialog($('#contacts'));});
   $('[data-drawer-top]').addEventListener('click',async()=>{await closeMenu();window.scrollTo({top:0,behavior:'smooth'});});
-  $('[data-drawer-calendar]').addEventListener('click',()=>$('#calendar-save').click());
-  $('[data-drawer-copy]').addEventListener('click',()=>$('#link-share').click());
-  $('[data-drawer-share]').addEventListener('click',()=>{if($('#kakao-share'))$('#kakao-share').click();else $('#link-share').click();});
+  $('[data-drawer-copy]').addEventListener('click',copyInvitationLink);
+  $('[data-drawer-share]').addEventListener('click',()=>{if($('#kakao-share'))$('#kakao-share').click();else copyInvitationLink();});
   function openDialog(dialog){dialog.showModal();document.body.classList.add('modal-open');}
   document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openDialog(document.getElementById(b.dataset.open))));
   document.querySelectorAll('dialog').forEach(dialog=>{
@@ -77,10 +82,84 @@
     dialog.addEventListener('click',e=>{if(e.target===dialog){const rect=dialog.getBoundingClientRect();if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom)dialog.close();}});
   });
   let photoIndex=0,photoItems=[];
-  function showPhoto(i){photoIndex=(i+photoItems.length)%photoItems.length;const item=photoItems[photoIndex];$('#lightbox-image').src=item.dataset.photo;$('#lightbox-image').alt=item.querySelector('img').alt;$('#photo-count').textContent=`${photoIndex+1} / ${photoItems.length}`;$('#photo-prev').disabled=$('#photo-next').disabled=photoItems.length<2;}
-  document.querySelectorAll('[data-photo]').forEach(b=>b.addEventListener('click',()=>{photoItems=[...b.closest('section').querySelectorAll('[data-photo]')].sort((a,b)=>Number(a.dataset.photoOrder||0)-Number(b.dataset.photoOrder||0));showPhoto(photoItems.indexOf(b));openDialog($('#lightbox'));}));
+  const photoTrack=$('#photo-track');
+  let photoAnimation=0,photoDrag=null;
+  function updatePhotoCount(){
+    $('#photo-count').textContent=`${photoIndex+1} / ${photoItems.length}`;
+    $('#photo-prev').disabled=$('#photo-next').disabled=photoItems.length<2;
+    [...photoTrack.children].forEach((slide,i)=>slide.setAttribute('aria-hidden',String(i!==photoIndex)));
+  }
+  function showPhoto(i,animate=true){
+    if(!photoItems.length)return;
+    cancelAnimationFrame(photoAnimation);
+    photoIndex=(i+photoItems.length)%photoItems.length;
+    const from=photoTrack.scrollLeft,to=photoIndex*photoTrack.clientWidth;
+    const instant=!animate||i<0||i>=photoItems.length||matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(instant){photoTrack.scrollLeft=to;}
+    else{
+      const start=performance.now();
+      const step=now=>{
+        const progress=Math.min(1,(now-start)/420);
+        // 일정한 시간 동안 감속해 착지한다. 빠르게 밀어도 여러 장을 건너뛰지 않는다.
+        photoTrack.scrollLeft=from+(to-from)*(1-Math.pow(1-progress,3));
+        if(progress<1)photoAnimation=requestAnimationFrame(step);
+      };
+      photoAnimation=requestAnimationFrame(step);
+    }
+    updatePhotoCount();
+  }
+  document.querySelectorAll('[data-photo]').forEach(b=>b.addEventListener('click',()=>{
+    photoItems=[...b.closest('section').querySelectorAll('[data-photo]')].sort((a,b)=>Number(a.dataset.photoOrder||0)-Number(b.dataset.photoOrder||0));
+    photoTrack.replaceChildren(...photoItems.map((item,i)=>{
+      const slide=document.createElement('div'),image=document.createElement('img');
+      slide.className='photo-slide';slide.setAttribute('role','group');slide.setAttribute('aria-label',`${i+1} / ${photoItems.length}`);
+      image.src=item.dataset.photo;image.alt=item.querySelector('img').alt;image.draggable=false;
+      const story=item.closest('.moment-slide');
+      if(story){
+        // 사진과 글을 같은 슬라이드 안에 넣어 드래그할 때 함께 이동한다.
+        const figure=document.createElement('figure'),caption=document.createElement('figcaption');
+        figure.className='photo-story-frame';caption.className='photo-story-caption';
+        for(const text of story.querySelectorAll('h3,p'))caption.append(text.cloneNode(true));
+        figure.append(image,caption);slide.append(figure);
+      }else slide.append(image);
+      return slide;
+    }));
+    openDialog($('#lightbox'));showPhoto(photoItems.indexOf(b),false);
+  }));
+  function finishPhotoDrag(cancelled=false){
+    if(!photoDrag)return;
+    const drag=photoDrag;photoDrag=null;photoTrack.classList.remove('is-dragging');
+    if(photoTrack.hasPointerCapture(drag.id))photoTrack.releasePointerCapture(drag.id);
+    const threshold=Math.min(90,Math.max(35,photoTrack.clientWidth*.15));
+    const direction=!cancelled&&drag.horizontal&&Math.abs(drag.dx)>=threshold?(drag.dx<0?1:-1):0;
+    showPhoto(Math.max(0,Math.min(photoItems.length-1,drag.index+direction)));
+  }
+  photoTrack.addEventListener('pointerdown',event=>{
+    if(!event.isPrimary){finishPhotoDrag(true);return;}
+    if(event.button!==0||photoItems.length<2)return;
+    cancelAnimationFrame(photoAnimation);
+    photoDrag={id:event.pointerId,x:event.clientX,y:event.clientY,left:photoTrack.scrollLeft,index:Math.round(photoTrack.scrollLeft/photoTrack.clientWidth),dx:0,horizontal:false};
+    photoTrack.setPointerCapture(event.pointerId);
+  });
+  photoTrack.addEventListener('pointermove',event=>{
+    if(!photoDrag||event.pointerId!==photoDrag.id)return;
+    const dx=event.clientX-photoDrag.x,dy=event.clientY-photoDrag.y;
+    if(!photoDrag.horizontal){
+      if(Math.max(Math.abs(dx),Math.abs(dy))<8)return;
+      if(Math.abs(dy)>Math.abs(dx)){finishPhotoDrag(true);return;}
+      photoDrag.horizontal=true;photoTrack.classList.add('is-dragging');
+    }
+    photoDrag.dx=dx;
+    const distance=Math.max(-photoTrack.clientWidth,Math.min(photoTrack.clientWidth,dx));
+    photoTrack.scrollLeft=photoDrag.left-distance;
+  });
+  photoTrack.addEventListener('pointerup',event=>{if(event.pointerId===photoDrag?.id)finishPhotoDrag();});
+  photoTrack.addEventListener('pointercancel',()=>finishPhotoDrag(true));
+  photoTrack.addEventListener('lostpointercapture',()=>finishPhotoDrag(true));
+  $('#lightbox').addEventListener('close',()=>{finishPhotoDrag(true);cancelAnimationFrame(photoAnimation);});
+  new ResizeObserver(()=>{if($('#lightbox').open){finishPhotoDrag(true);showPhoto(photoIndex,false);}}).observe(photoTrack);
   $('#photo-prev').addEventListener('click',()=>showPhoto(photoIndex-1));$('#photo-next').addEventListener('click',()=>showPhoto(photoIndex+1));
-  $('#lightbox').addEventListener('keydown',e=>{if(e.key==='ArrowLeft')showPhoto(photoIndex-1);if(e.key==='ArrowRight')showPhoto(photoIndex+1);});
+  $('#lightbox').addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();showPhoto(photoIndex-1);}if(e.key==='ArrowRight'){e.preventDefault();showPhoto(photoIndex+1);}});
   const momentsTrack=$('#moments-track'),momentSlides=[...momentsTrack.children];
   let momentIndex=0,scrollFrame=0;
   function updateMoment(){
@@ -88,7 +167,7 @@
     momentIndex=Math.max(0,Math.min(momentSlides.length-1,Math.round(momentsTrack.scrollLeft/momentsTrack.clientWidth)));
     const counter=`${String(momentIndex+1).padStart(2,'0')} / ${String(momentSlides.length).padStart(2,'0')}`;
     if($('#moments-counter').textContent!==counter)$('#moments-counter').textContent=counter;
-    $('#moments-prev').setAttribute('aria-label',momentIndex===0?'이야기 표지로 돌아가기':'이전 순간');
+    $('#moments-prev').setAttribute('aria-label',momentIndex===0?'기록 표지로 돌아가기':'이전 기록');
     $('#moments-next').disabled=momentIndex===momentSlides.length-1;
     momentSlides.forEach((slide,i)=>{slide.inert=i!==momentIndex;slide.setAttribute('aria-hidden',String(i!==momentIndex));});
   }
@@ -127,17 +206,17 @@
     const today=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
     const togetherDays=Math.max(0,Math.round((Date.parse(today)-Date.parse(C.togetherSince))/86400000)+1);
     $('#together-days').textContent=String(togetherDays);
+    const todayLabel=$('#together-today');
+    if(todayLabel.dateTime!==today){
+      todayLabel.dateTime=today;todayLabel.textContent=today.replaceAll('-','.');
+      const todayItem=$('#timeline-today'),weddingItem=$('#timeline-wedding');
+      if(today>C.dateIso){weddingItem.after(todayItem);weddingItem.querySelector('h3').textContent='부부가 된 날';}
+      else if(today===C.dateIso){weddingItem.querySelector('h3').textContent='오늘, 부부가 됩니다';}
+    }
     const dayDiff=Math.round((Date.parse(C.dateIso)-Date.parse(today))/86400000);
     $('#day-message').textContent=dayDiff>0?`${C.names}의 결혼식이 ${dayDiff}일 남았습니다.`:dayDiff===0?'오늘, 저희 결혼합니다. 함께해 주셔서 감사합니다.':'저희의 시작을 함께해 주셔서 감사합니다.';
   }
   updateTime();setInterval(updateTime,1000);
-  $('#calendar-save').addEventListener('click',()=>{
-    const esc=s=>String(s).replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
-    const stamp=date=>date.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
-    const start=new Date(C.date),end=new Date(start.getTime()+3600000);
-    const text=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Wedding invitation//KO','BEGIN:VEVENT',`UID:${C.dateIso}-${location.hostname}@wedding`,`DTSTAMP:${stamp(new Date())}`,`DTSTART:${stamp(start)}`,`DTEND:${stamp(end)}`,`SUMMARY:${esc(C.names+' 결혼식')}`,`LOCATION:${esc(C.venue+' '+C.address)}`,'END:VEVENT','END:VCALENDAR',''].join('\r\n');
-    const url=URL.createObjectURL(new Blob([text],{type:'text/calendar;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='wedding.ics';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  });
   const scripts=new Map();
   function loadScript(src){if(scripts.has(src))return scripts.get(src);const promise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=resolve;script.onerror=reject;document.head.append(script);});scripts.set(src,promise);return promise;}
   // Prepare the SDK ahead of the tap so native navigation keeps the user gesture.
@@ -178,36 +257,56 @@
   $('#kakao-share')?.addEventListener('click',async()=>{
     try{await loadScript('https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js');const K=window.Kakao;if(!K.isInitialized())K.init(C.shareKey);const url=location.href.split('#')[0];const link={mobileWebUrl:url,webUrl:url};const image=new URL(C.shareImage||location.href,location.href).href;if(C.shareImage)K.Share.sendDefault({objectType:'feed',content:{title:C.title,description:C.description,imageUrl:image,link},buttons:[{title:'청첩장 보기',link}]});else K.Share.sendDefault({objectType:'text',text:C.title,link,buttonTitle:'청첩장 보기'});}catch{await copy(location.href.split('#')[0],'카카오 공유를 사용할 수 없어 링크를 복사했습니다');}
   });
-  if('IntersectionObserver' in window&&!matchMedia('(prefers-reduced-motion: reduce)').matches){const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('revealed');observer.unobserve(e.target);}}),{threshold:.04});document.querySelectorAll('.section-heading,.greeting-copy,.together-section,.ending-copy').forEach(e=>{e.classList.add('reveal-ready');observer.observe(e);});}
+  if('IntersectionObserver' in window&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    // 제목뿐 아니라 본문·사진·버튼도 같은 흐름으로 보여 준다.
+    // 긴 목록은 항목별로 관찰하고, 자체 전환이 있는 스토리 내부와 대화상자는 제외한다.
+    const targets=[];
+    document.querySelectorAll('#invitation-content > section, #invitation-content > footer').forEach(section=>{
+      [...section.children].forEach(block=>{
+        if(block.matches('dialog,script,#moments-content'))return;
+        if(block.matches('.wedding-gallery-grid'))targets.push(...block.querySelectorAll('.wedding-gallery-photo'));
+        else if(block.matches('.profile-list,.transport,.notice-list,.account-list,.keepsake-album'))targets.push(...block.children);
+        else targets.push(block);
+      });
+    });
+    const reveal=(element,delay=0)=>{
+      element.style.setProperty('--reveal-delay',`${delay}ms`);
+      element.classList.add('revealed');observer.unobserve(element);
+    };
+    const observer=new IntersectionObserver(entries=>{
+      entries.filter(entry=>entry.isIntersecting).forEach((entry,i)=>reveal(entry.target,Math.min(i,3)*45));
+    },{threshold:.06});
+    targets.forEach(element=>{element.classList.add('reveal-ready');observer.observe(element);});
+    // 키보드로 이동한 컨트롤은 애니메이션을 기다리지 않고 바로 보여 준다.
+    document.addEventListener('focusin',event=>{
+      const target=event.target.closest('.reveal-ready:not(.revealed)');
+      if(target)reveal(target);
+    });
+  }
   // Progressive enhancement: the invitation stays usable if scripting or images fail.
   const opening=$('#opening'),openingSkip=$('#opening-skip'),frame=$('#page-frame'),floating=$('.floating-nav');
-  let openingDone=false,openingTimer,titleAnimation=null;
+  let openingDone=false,openingTimer;
+  opening.querySelectorAll('[data-opening-letters]').forEach(line=>{
+    const letters=Array.from(line.textContent);line.textContent='';
+    letters.forEach((letter,i)=>{const span=document.createElement('span');span.textContent=letter===' '?'\u00a0':letter;span.style.setProperty('--letter',i);line.append(span);});
+  });
   function finishOpening(){
     if(openingDone)return;openingDone=true;clearTimeout(openingTimer);
-    titleAnimation?.destroy();titleAnimation=null;
     if(opening.contains(document.activeElement))document.activeElement.blur();
     opening.hidden=true;opening.classList.remove('opening-playing');document.body.classList.remove('opening-active');
     frame.inert=false;floating.inert=false;
+    document.dispatchEvent(new Event('invitation:opening-finished'));
   }
   openingSkip.addEventListener('click',finishOpening);
   opening.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();finishOpening();}else if(e.key==='Tab'){e.preventDefault();openingSkip.focus();}});
   opening.addEventListener('animationend',e=>{if(e.target===opening&&e.animationName==='opening-exit')finishOpening();});
   if((!location.hash||location.hash==='#top')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
     opening.hidden=false;document.body.classList.add('opening-active');frame.inert=true;floating.inert=true;opening.focus({preventScroll:true});
-    openingTimer=setTimeout(finishOpening,7000);
-    const titleReady=new Promise(resolve=>{
-      if(!window.lottie||!window.OPENING_TITLE_DATA){resolve();return;}
-      try{
-        titleAnimation=window.lottie.loadAnimation({container:$('#opening-title'),renderer:'svg',loop:false,autoplay:false,animationData:window.OPENING_TITLE_DATA,rendererSettings:{preserveAspectRatio:'xMidYMid meet'}});
-        const ready=()=>{if(!openingDone)opening.classList.add('opening-title-ready');resolve();};
-        if(titleAnimation.isLoaded)ready();else titleAnimation.addEventListener('DOMLoaded',ready);
-        titleAnimation.addEventListener('data_failed',()=>resolve());
-      }catch{resolve();}
-    });
-    Promise.race([Promise.all([titleReady,...[...opening.querySelectorAll('img')].map(img=>img.decode().catch(()=>{}))]),new Promise(resolve=>setTimeout(resolve,1000))]).then(()=>{
+    openingTimer=setTimeout(finishOpening,8000);
+    Promise.race([Promise.all([document.fonts.ready,...[...opening.querySelectorAll('img')].map(img=>img.decode().catch(()=>{}))]),new Promise(resolve=>setTimeout(resolve,1000))]).then(()=>{
       if(!openingDone){
-        opening.classList.add('opening-playing');titleAnimation?.goToAndPlay(0,true);
-        clearTimeout(openingTimer);openingTimer=setTimeout(finishOpening,5500);
+        opening.classList.add('opening-playing');
+        clearTimeout(openingTimer);openingTimer=setTimeout(finishOpening,6800);
       }
     });
   }

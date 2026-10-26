@@ -1,134 +1,35 @@
-/* The reference uses a full-height menu with the invitation shifted to the left. */
-.page-frame { display: contents; }
-.floating-nav {
-  position: fixed;
-  top: auto;
-  bottom: 20px;
-  right: max(20px, calc((100vw - 425px) / 2 + 20px));
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 20;
-}
-.floating-nav > button, .floating-heart {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  color: #1a1a1a;
-  background: rgba(250,250,250,.6);
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: 20px;
-  box-shadow: 0 2px 8px -4px #0002, 0 4px 12px -4px #0002;
-  backdrop-filter: blur(6px);
-}
-.floating-nav > button::after, .floating-heart::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 -8px 16px #fff6;
-  pointer-events: none;
-}
-.floating-nav svg { width: 24px; height: 24px; }
-#quick-menu {
-  position: fixed;
-  inset: 0 auto 0 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 425px;
-  padding: 40px 0;
-  border: 0;
-  border-radius: 0;
-  background: #ededed;
-  color: #1a1a1a;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  z-index: 30;
-  box-shadow: none;
-  font: 14px/22px -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
-}
-.drawer-header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 16px;
-  flex-shrink: 0;
-  height: 20px;
-}
-#menu-close { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0; background: none; }
-#menu-close svg { width: 20px; height: 20px; }
-.drawer-body { display: flex; flex: 1; gap: 24px; min-height: 0; }
-.drawer-card-space { width: 35%; flex-shrink: 0; }
-.drawer-menu-scroll { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; gap: 8px; padding-right: 16px; overflow: hidden; }
-.drawer-actions { display: flex; flex-direction: column; }
-.drawer-actions > button, #quick-menu .drawer-actions > a {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 13px 0;
-  background: none;
-  border: 0;
-  text-align: left;
-  font: 500 14px/22px -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
-  word-break: keep-all;
-}
-.drawer-actions svg { width: 20px; height: 20px; flex-shrink: 0; }
-.drawer-divider { border-top: .5px solid #1a1a1a20; flex-shrink: 0; margin: 0 8px; }
-.drawer-sections { display: flex; flex: 1; flex-direction: column; min-height: 0; overflow-y: auto; padding: 0 8px; scrollbar-width: none; }
-#quick-menu .drawer-sections > a { padding: 8px 0; font-size: 14px; line-height: 22px; font-weight: 500; color: #1a1a1a9e; }
-#quick-menu a:hover { background: #00000005; }
-.drawer-tabbar { display: flex; align-items: center; padding: 0 16px; flex-shrink: 0; }
-.drawer-tabbar > button { flex: 1; min-width: 0; height: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 8px 0; background: none; position: relative; }
-.drawer-tabbar > button + button::before { content: ''; position: absolute; left: 0; top: 14px; width: .5px; height: 60px; background: #1a1a1a20; }
-.drawer-tabbar svg { width: 24px; height: 24px; }
-.drawer-tabbar span { font-size: 12px; line-height: 18px; font-weight: 600; white-space: nowrap; }
-body.nav-open { overflow: hidden; }
-.nav-open .floating-nav { visibility: hidden; }
-.nav-open #page-frame {
-  display: block;
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 425px;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  z-index: 31;
-  pointer-events: none;
-}
-.nav-open .invitation {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  border-radius: 0;
-  transform: translateX(0);
-  box-shadow: none;
-  overflow: hidden;
-  transition: transform .35s ease, top .35s ease, height .35s ease, border-radius .35s ease, box-shadow .35s ease;
-}
-.nav-expanded .invitation {
-  top: 96px;
-  height: calc(100vh - 246px);
-  height: calc(100dvh - 246px);
-  border-radius: 12px;
-  transform: translateX(-65%);
-  box-shadow: 0 2px 4px -2px #0001, 0 6px 16px -6px #0002;
-}
-.nav-open .reveal-ready { opacity: 1; transform: none; }
-@media (max-height: 560px) {
-  #quick-menu { padding: 20px 0; gap: 16px; }
-  .drawer-actions > button, #quick-menu .drawer-actions > a { padding-block: 8px; }
-  .nav-expanded .invitation { top: 60px; height: calc(100dvh - 188px); }
-}
+/* A quiet contents page, with navigation in the invitation's reading order. */
+.page-frame{display:contents}
+.floating-nav{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));right:max(18px,calc((100vw - 425px)/2 + 18px));z-index:20}
+.floating-nav>button{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:12px;background:#faf7f2f5;color:#72555d;border:1px solid #d9c8cc;border-radius:50%;box-shadow:0 3px 14px #59424912;backdrop-filter:blur(8px)}
+.floating-nav>button:hover{background:#f3e9e9;border-color:#bb8b9a}
+.floating-nav svg{width:19px;height:19px}
+#quick-menu{position:fixed;inset:0 auto 0 50%;width:100%;max-width:425px;height:100vh;height:100dvh;z-index:30;display:flex;flex-direction:column;padding:max(30px,env(safe-area-inset-top)) 28px max(18px,env(safe-area-inset-bottom));background:#faf7f2;color:#65534e;opacity:0;transform:translate(-50%,12px);transition:opacity .25s ease,transform .3s cubic-bezier(.22,1,.36,1);font:14px/1.7 var(--font)}
+.nav-expanded #quick-menu{opacity:1;transform:translate(-50%,0)}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-shrink:0;padding-bottom:19px;border-bottom:1px solid #ded2cd}
+.drawer-header p{font:italic 18px/1.4 var(--serif);color:#a17b88;margin-bottom:5px}
+.drawer-header h2{font-size:23px;line-height:1.5;letter-spacing:.025em}
+#menu-title:focus{outline:none}
+#menu-close{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:44px;height:44px;margin-right:-10px;padding:10px;border-radius:50%;background:transparent;color:#8e797e}
+#menu-close:hover{background:#efe5e4}
+#menu-close svg{width:20px;height:20px}
+.drawer-body{display:flex;flex:1;min-height:0}
+.drawer-menu-scroll{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0}
+.drawer-actions{flex-shrink:0;padding:12px 0}
+.drawer-actions>button{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:10px 12px;text-align:left;background:#f0e7e5;border:1px solid #e8dcd9;border-radius:5px;font-size:12px;color:#856b70}
+.drawer-actions svg{width:16px;height:16px;flex-shrink:0}
+.drawer-sections{display:flex;flex:1;flex-direction:column;min-height:0;overflow-y:auto;overscroll-behavior:contain;counter-reset:section;scrollbar-width:thin;scrollbar-color:#d8c6cb transparent;padding-right:4px}
+#quick-menu .drawer-sections>a:not([hidden]){counter-increment:section;display:flex;align-items:center;gap:15px;flex-shrink:0;min-height:44px;padding:9px 6px;border-bottom:1px solid #e9e0db;font-size:14px;line-height:25px;color:#65534e}
+.drawer-sections>a:before{content:counter(section,decimal-leading-zero);width:22px;flex-shrink:0;font:italic 14px/1 var(--serif);color:#b18b98}
+#quick-menu .drawer-sections>a:hover{background:#f1e9e6;color:#9e6176}
+.drawer-tabbar{display:flex;flex-shrink:0;align-items:center;border-top:1px solid #ded2cd;margin-top:15px;padding-top:12px}
+.drawer-tabbar>button{flex:1;min-width:0;min-height:60px;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 3px;background:none;color:#8b7771}
+.drawer-tabbar>button+button{border-left:1px solid #e4d9d4}
+.drawer-tabbar>button:hover{color:#72555d;background:#f1e9e6}
+.drawer-tabbar svg{width:16px;height:16px;flex-shrink:0}
+.drawer-tabbar span{font-size:11px;line-height:17px;white-space:nowrap}
+body.nav-open{overflow:hidden}
+.nav-open .floating-nav{visibility:hidden}
+.nav-open #page-frame{display:block;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:425px;height:100vh;height:100dvh;overflow:hidden;pointer-events:none}
+@media(max-height:600px){#quick-menu{padding-top:18px;padding-bottom:10px}.drawer-header{padding-bottom:12px}.drawer-header p{font-size:15px}.drawer-header h2{font-size:21px}.drawer-actions{padding-block:8px}.drawer-tabbar{margin-top:8px;padding-top:6px}.drawer-tabbar>button{min-height:48px}}
+@media(max-width:350px){#quick-menu{padding-inline:22px}.drawer-tabbar>button{gap:5px}}

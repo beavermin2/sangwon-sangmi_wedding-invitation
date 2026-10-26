@@ -1,0 +1,42 @@
+    <section class="section rsvp-section" id="rsvp" aria-labelledby="rsvp-heading">
+      <div class="rsvp-card">
+        <div class="rsvp-card-top"><span>함께하는 날</span><span>{{DATE_DOT}}</span></div>
+        <h2 id="rsvp-heading">함께할 자리를<br>정성껏 준비할게요</h2>
+        <div class="rsvp-card-message"><p>소중한 걸음을 기다립니다.<br>참석 여부를 미리 알려주시면<br>더 따뜻하게 맞이하겠습니다.</p><img class="rsvp-card-character" src="{{ASSET}}chiikawa-wedding-rsvp.png" alt="" width="96" height="96" loading="lazy" decoding="async"></div>
+        <button class="button rsvp-open" id="rsvp-open" type="button" data-open="rsvp-dialog" aria-haspopup="dialog">참석의사 전달하기</button>
+        <small>보내주신 내용은 신랑 · 신부만 확인합니다.</small>
+      </div>
+    </section>
+    <dialog id="rsvp-entry" class="rsvp-dialog rsvp-entry" aria-modal="false" aria-labelledby="rsvp-entry-title">
+      <div class="dialog-head"><span class="rsvp-entry-label">함께하는 날</span><button class="close-button" type="button" data-close aria-label="참석 안내 닫고 청첩장 보기">×</button></div>
+      <div class="rsvp-entry-body">
+        <h2 id="rsvp-entry-title" tabindex="-1" autofocus>함께할 자리를<br>준비하고 있어요</h2>
+        <p>참석의사를 미리 알려주시면<br>더 정성껏 맞이하겠습니다.</p>
+        <ul class="rsvp-entry-info" aria-label="예식 안내">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4m8-4v4M4 10h16M8 14h1m6 0h1m-8 3h1m6 0h1"/></svg><span class="sr-only">일시: </span><span>{{RSVP_DATE_TIME}}</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 21 0-14 5-4 5 4v14M7 11l-4 3v7h18v-7l-4-3M10 21v-6h4v6M12 7v4m-2-2h4"/></svg><span class="sr-only">장소: </span><span>{{VENUE}}</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 10c0 5-7 10-7 10S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.3"/><path d="M8 22h8"/></svg><span class="sr-only">주소: </span><span>{{ADDRESS}}</span></li>
+        </ul>
+        <button class="button rsvp-submit" id="rsvp-entry-write" type="button">참석의사 전달하기</button>
+        <button class="text-button rsvp-entry-later" id="rsvp-entry-later" type="button">오늘 하루 보지 않기</button>
+      </div>
+    </dialog>
+    <dialog id="rsvp-dialog" class="rsvp-dialog" aria-labelledby="rsvp-title">
+      <div class="dialog-head"><h2 id="rsvp-title">함께하는 날, 알려주세요</h2><button class="close-button" type="button" data-close aria-label="참석의사 닫기">×</button></div>
+      <form id="rsvp-form" class="rsvp-form">
+        <fieldset id="rsvp-fields">
+          <fieldset class="rsvp-choice"><legend>참석 여부</legend><div class="rsvp-options"><label><input type="radio" name="attend" value="참석" required><span>함께할게요</span></label><label><input type="radio" name="attend" value="불참" required><span>마음으로 축하해요</span></label></div></fieldset>
+          <fieldset class="rsvp-choice"><legend>어느 쪽 하객이신가요?</legend><div class="rsvp-options"><label><input type="radio" name="side" value="신랑측" required><span>신랑 측</span></label><label><input type="radio" name="side" value="신부측" required><span>신부 측</span></label></div></fieldset>
+          <label class="rsvp-label" for="rsvp-name">성함</label><input id="rsvp-name" name="name" autocomplete="name" maxlength="20" placeholder="성함을 입력해 주세요" required>
+          <div id="rsvp-attending" hidden>
+            <div id="rsvp-companions-wrap"><label class="rsvp-label" for="rsvp-companions">참석 인원 <small>본인 포함</small></label><select id="rsvp-companions" name="companions"><option value="0">혼자 참석해요</option><option value="1">2명</option><option value="2">3명</option><option value="3">4명</option><option value="4">5명</option><option value="5">6명</option><option value="6">7명</option><option value="7">8명</option><option value="8">9명</option><option value="9">10명 이상</option></select></div>
+            <div id="rsvp-meal-wrap"><label class="rsvp-label" for="rsvp-meal">식사 여부</label><select id="rsvp-meal" name="meal"><option value="미정">미정</option><option value="식사함">식사할게요</option><option value="식사 안 함">식사는 하지 않을게요</option></select></div>
+          </div>
+          <label class="rsvp-label" for="rsvp-message">전하실 말씀</label><textarea id="rsvp-message" name="message" rows="2" maxlength="300" placeholder="동행인별 식사 여부 등 알려주실 내용을 남겨주세요"></textarea>
+          <label class="rsvp-consent"><input type="checkbox" name="consent" required><span>예식 준비를 위해 신랑·신부에게 이름과 참석 정보를 전달하는 데 동의합니다.</span></label>
+        </fieldset>
+        <p id="rsvp-status" role="status" aria-live="polite"></p>
+        <button class="button rsvp-submit" id="rsvp-submit" type="submit">참석의사 보내기</button>
+      </form>
+      <div id="rsvp-success" class="rsvp-success" hidden><span aria-hidden="true">✓</span><h3>마음 잘 받았습니다</h3><p>참석의사가 전달되었습니다.<br>함께해 주시는 마음에 감사드립니다.</p><p class="rsvp-success-note">내용 변경이 필요하면<br>신랑·신부에게 연락해 주세요.</p><button class="button" type="button" data-close>닫기</button></div>
+    </dialog>

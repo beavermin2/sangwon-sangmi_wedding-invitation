@@ -1,45 +1,57 @@
-/* Five-second opening sequence, matching the online reference's pan, zoom and fade. */
-.opening{position:fixed;inset:0;max-width:425px;margin:auto;z-index:80;overflow:hidden;color:white;background:#382c30;isolation:isolate}
+/* A letterpress card assembled over 6.4 seconds, followed by a soft reveal. */
+.opening{position:fixed;inset:0;max-width:425px;margin:auto;z-index:80;overflow:hidden;color:#72555d;background:#faf7f2;isolation:isolate}
+.opening:before{content:'';position:absolute;inset:14px;border:1px solid #bb8b9a30;pointer-events:none}
 .opening:focus{outline:none}
-.opening-images,.opening-shade{position:absolute;inset:0}
-.opening-photo{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center}
-.opening-photo-first{width:120%;z-index:2}
-.opening-photo-second{z-index:1}
-.opening-shade{z-index:3;background:#382c30;opacity:.4}
-.opening-copy{position:absolute;bottom:4%;left:5%;right:5%;aspect-ratio:1080/500;z-index:4;text-align:center}
-.opening-vector,.opening-fallback{position:absolute;inset:0}
-.opening-vector svg{display:block;width:100%;height:100%}
-.opening-title-ready .opening-fallback{visibility:hidden}
-.opening-line{position:absolute;inset:0 0 auto;font:400 clamp(42px,12vw,55px)/.94 var(--serif);letter-spacing:.025em}
-.opening-line-second{opacity:0}
-.opening-caption{position:absolute;bottom:0;left:8%;right:8%;display:flex;justify-content:space-between;font:9px/1.5 Arial,sans-serif;letter-spacing:2px}
-#opening-skip{position:absolute;right:18px;top:max(18px,env(safe-area-inset-top));z-index:5;padding:8px 12px;border:1px solid #ffffff55;border-radius:20px;background:#0002;color:white;font-size:12px}
-.opening-playing{animation:opening-exit 5s linear both}
-.opening-playing .opening-photo-first{animation:opening-pan 2s linear both,opening-first 5s linear both}
-.opening-playing .opening-photo-second{animation:opening-zoom 5s linear both}
-.opening-playing .opening-shade{animation:opening-shade 5s linear both}
-.opening-playing .opening-line-first{animation:opening-title-first 5s ease both}
-.opening-playing .opening-line-second{animation:opening-title-second 5s ease both}
-.opening-playing .opening-caption{animation:opening-caption 5s ease both}
+.opening-card{position:absolute;inset:max(76px,calc(env(safe-area-inset-top) + 54px)) 28px max(38px,env(safe-area-inset-bottom));display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:20px;text-align:center}
+.opening-prologue{font-size:13px;letter-spacing:.15em;--start:.2s}
+[data-opening-letters]{perspective:600px}
+[data-opening-letters]>span{display:inline-block;opacity:0;transform-origin:50% 100%}
+.opening-names{position:relative;justify-self:center;width:max-content;max-width:100%;padding:0 16px}
+.opening-name{font:italic 52px/.98 var(--serif);letter-spacing:-.035em}
+.opening-name-first{text-align:left;padding-right:54px;--start:.95s}
+.opening-name-second{text-align:right;padding-left:54px;margin-top:14px;--start:1.45s}
+.opening-and{position:absolute;top:42px;left:47%;font:30px/1 'La Belle Aurore',cursive;color:#b8788d;opacity:0}
+.opening-portrait{position:relative;width:86%;height:100%;max-height:330px;min-height:0;justify-self:center;align-self:center}
+.opening-portrait-frame{height:100%;overflow:hidden;border-radius:140px 140px 4px 4px;clip-path:inset(50% 50% 50% 50%);background:#e8e2d8}
+.opening-portrait img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%;transform:scale(1.15)}
+.opening-thread{position:absolute;bottom:-15px;left:-10%;width:120%;height:90px;overflow:visible;stroke:#b8788d;stroke-width:1.2;stroke-linecap:round;filter:drop-shadow(0 1px 1px #fff9)}
+.opening-thread path{stroke-dasharray:1;stroke-dashoffset:1}
+.opening-message{padding-top:4px}
+.opening-message p{font-size:13px;letter-spacing:.035em;opacity:0}
+.opening-date{display:inline-block;position:relative;margin-top:15px;padding-top:12px;font:15px/1 var(--serif);letter-spacing:.18em;opacity:0}
+.opening-date:before{content:'';position:absolute;top:0;left:calc(50% - 14px);width:28px;height:1px;background:#b8788d80;transform:scaleX(0)}
+#opening-skip{position:absolute;right:24px;top:max(24px,env(safe-area-inset-top));z-index:5;display:inline-flex;align-items:center;gap:7px;padding:8px 10px;border:0;border-radius:20px;background:transparent;color:#8e797e;font-size:12px;line-height:18px}
+#opening-skip svg{display:block;width:14px;height:14px;flex-shrink:0}
+#opening-skip:hover{background:#b8788d12}
+.opening-playing{animation:opening-exit 6.4s linear both}
+.opening-playing [data-opening-letters]>span{animation:opening-letter 1.25s cubic-bezier(.19,1,.22,1) both;animation-delay:calc(var(--start) + var(--letter)*.065s)}
+.opening-playing .opening-and{animation:opening-ink 1.4s 1.6s ease both}
+.opening-playing .opening-portrait-frame{animation:opening-frame 1.8s 1.8s cubic-bezier(.22,1,.36,1) both}
+.opening-playing .opening-portrait img{animation:opening-photo-drift 4.4s 1.8s cubic-bezier(.2,.6,.3,1) both}
+.opening-playing .opening-thread path{animation:opening-thread 1.7s 2.8s ease-in-out both}
+.opening-playing .opening-message p{animation:opening-ink 1.3s 3.35s cubic-bezier(.22,1,.36,1) both}
+.opening-playing .opening-date{animation:opening-ink 1s 3.8s ease both}
+.opening-playing .opening-date:before{animation:opening-rule 1s 3.8s ease both}
 body.opening-active{overflow:hidden}
 .opening-active .floating-nav{visibility:hidden}
-@keyframes opening-pan{from{transform:translateX(0)}to{transform:translateX(-10%)}}
-@keyframes opening-first{0%,40.3%{opacity:1}40.4%,100%{opacity:0}}
-@keyframes opening-zoom{0%,40%{transform:scale(1)}100%{transform:scale(1.15)}}
-@keyframes opening-shade{0%,25.3%{opacity:.4}40.3%{opacity:1}44%,80%{opacity:.4}84.7%{opacity:1}100%{opacity:0}}
-@keyframes opening-exit{0%,84.7%{opacity:1}100%{opacity:0}}
-@keyframes opening-title-first{0%{opacity:0;transform:translateY(18px)}12%,28%{opacity:1;transform:translateY(0)}40%,100%{opacity:0;transform:translateY(-10px)}}
-@keyframes opening-title-second{0%,40%{opacity:0;transform:translateY(18px)}51%,76%{opacity:1;transform:translateY(0)}87%,100%{opacity:0;transform:translateY(-10px)}}
-@keyframes opening-caption{0%{opacity:0}12%,76%{opacity:1}90%,100%{opacity:0}}
+@keyframes opening-letter{0%{opacity:0;transform:translate3d(0,30px,0) rotateX(-65deg) rotateZ(5deg);filter:blur(3px)}65%{opacity:1;filter:blur(0)}100%{opacity:1;transform:translate3d(0,0,0) rotateX(0) rotateZ(0);filter:blur(0)}}
+@keyframes opening-ink{from{opacity:0;transform:translateY(12px);filter:blur(2px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes opening-frame{from{clip-path:inset(50% 45% 50% 45%)}to{clip-path:inset(0 0 0 0)}}
+@keyframes opening-photo-drift{to{transform:scale(1)}}
+@keyframes opening-thread{to{stroke-dashoffset:0}}
+@keyframes opening-rule{to{transform:scaleX(1)}}
+@keyframes opening-exit{0%,87.5%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-18px)}}
+@media(max-height:650px){.opening-card{inset:64px 28px 26px;gap:13px}.opening-name{font-size:44px}.opening-and{top:35px}.opening-name-second{margin-top:10px}.opening-date{margin-top:10px;padding-top:10px}}
+@media(max-width:350px){.opening-name{font-size:44px}.opening-message p{font-size:12px}.opening-card{margin-inline:-5px}}
 .moments-cover{display:flex;align-items:center;flex-direction:column;gap:20px}
 .moments-cover-photo{width:min(280px,100%);height:auto;aspect-ratio:7/8;object-fit:cover;border-radius:8px}
-.moments-cover-lettering{display:grid;grid-template-columns:110px 1fr;width:100%;margin-top:4px;border-top:1px solid #c7c2bf;text-align:left}
-.moments-cover-lettering>span{padding:12px 8px 12px 0;border-right:1px solid #c7c2bf;font:12px/1.7 var(--font);color:var(--muted)}
-.moments-cover-lettering>em{align-self:center;text-align:center;font:italic 42px/1.3 var(--serif)}
-.moments-cover-lettering>p{grid-column:1/-1;border-top:1px solid #c7c2bf;padding-top:9px;text-align:center;font-size:11px;color:var(--muted)}
-.moments-start{align-self:flex-end;display:flex;gap:12px;align-items:center;padding:12px 0;background:none;font-size:14px}
-.moments-start-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#393532;color:white}
-.moments-start-icon svg{width:22px;height:22px;flex-shrink:0;-webkit-text-stroke:0}
+.moments-cover-lettering{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:4px;text-align:center}
+.moments-cover-lettering>span{font:italic 16px/1.6 var(--serif);color:var(--rose)}
+.moments-cover-lettering>em{font:22px/1.6 var(--font);letter-spacing:-.5px;color:var(--ink);word-break:keep-all}
+.moments-cover-lettering>p{font-size:12px;line-height:23px;color:var(--muted);word-break:keep-all}
+.moments-start{align-self:center;display:flex;gap:14px;align-items:center;padding:10px 18px;background:#f7edf080;border:1px solid #e9d9df;border-radius:24px;font-size:13px;color:#976276}
+.moments-start-icon{display:flex;align-items:center;justify-content:center;width:20px;height:20px;color:inherit}
+.moments-start-icon svg{width:19px;height:19px;flex-shrink:0;-webkit-text-stroke:0}
 .moments-start:hover .moments-start-icon{transform:translateX(3px)}
 .moments-start-icon{transition:transform .25s ease}
 @media(prefers-reduced-motion:reduce){.opening{display:none!important}.moments-start-icon{transition:none}}
