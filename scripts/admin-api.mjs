@@ -157,10 +157,22 @@ export function createAdmin({ root, port, send }) {
         return send(res, 200, { ok: true, pushed: false, branch, log: log.join('\n'),
           message: changed ? `${branch} 브랜치에 커밋했습니다. 배포는 main 브랜치에서만 됩니다.` : '커밋할 변경이 없습니다.' });
       }
-      const p = await git('push', 'origin', 'main');
+      let p = await git('push', 'origin', 'main');
       log.push(p.out);
+      // 다른 PC(회사·집)에서 먼저 배포했으면 GitHub 쪽이 앞서 있어 거절된다. 그 변경을 받아 내 커밋을 뒤에 붙이고 다시 올린다.
+      if (p.code !== 0 && /rejected|fetch first|non-fast-forward/.test(p.out)) {
+        const pull = await git('pull', '--rebase', 'origin', 'main');
+        log.push(pull.out);
+        if (pull.code !== 0) {
+          await git('rebase', '--abort');
+          return send(res, 409, { ok: false, log: log.join('\n'),
+            error: '다른 PC 에서 같은 항목을 바꿔서 자동으로 합치지 못했습니다. 이 PC 의 변경은 그대로 있습니다. 터미널에서 git pull 후 다시 시도하세요' });
+        }
+        p = await git('push', 'origin', 'main');
+        log.push(p.out);
+      }
       if (p.code !== 0) {
-        return send(res, 500, { ok: false, error: 'push 에 실패했습니다. 터미널에서 git push 로 로그인 상태를 확인하세요', log: log.join('\n') });
+        return send(res, 500, { ok: false, error: 'push 에 실패했습니다. wedding-admin.bat 을 다시 실행해 GitHub 로그인을 확인하세요', log: log.join('\n') });
       }
       send(res, 200, { ok: true, pushed: true, branch, log: log.join('\n'),
         message: changed ? '커밋하고 GitHub 에 올렸습니다. 2~3분 뒤 배포됩니다.' : '새 변경은 없고, 기존 커밋을 GitHub 에 올렸습니다.' });

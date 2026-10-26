@@ -1,0 +1,4 @@
+# wedding-admin.bat is downloaded on its own from GitHub (raw), so store it byte-for-byte with CRLF.
+*.bat -text
+# Windows PowerShell launcher script: CRLF on checkout
+*.ps1 text eol=crlf

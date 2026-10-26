@@ -43,6 +43,26 @@ npm run admin
   `main` 브랜치에서만 push 하고, 다른 브랜치에서는 커밋만 합니다. push 로그인이 풀렸다면 터미널에서 `git push` 를 한 번 실행해 다시 로그인하세요.
 
 직접 고칠 때는 `data/wedding.json` 이나 `data/images/` 를 고친 뒤 commit·push 만 하면 자동으로 다시 배포됩니다.
+
+## 다른 PC(집 노트북 등)에서 관리자 쓰기 — Windows
+`wedding-admin.bat` 파일 하나로 설치부터 실행까지 됩니다.
+
+**처음 한 번**
+1. 노트북 브라우저에서 아래 주소를 열고 **Ctrl+S** → 파일 이름 `wedding-admin.bat`, 파일 형식 **모든 파일** 로 저장합니다(예: 바탕화면).
+   https://github.com/beavermin2/sangwon-sangmi_wedding-invitation/raw/main/wedding-admin.bat
+2. 저장한 파일을 더블클릭합니다. "Windows의 PC 보호" 창이 뜨면 **추가 정보 → 실행** 을 누릅니다.
+3. Git·Node.js 가 없으면 설치할지 묻습니다. `Y` 로 설치한 뒤 창을 닫고 **파일을 다시 더블클릭** 합니다.
+4. 프로젝트가 `C:\Users\(사용자)\wedding-invitation` 에 내려받아지고, GitHub 로그인 코드가 나옵니다.
+   브라우저에서 https://github.com/login/device 를 열어 **beavermin2** 계정으로 코드를 입력합니다(배포 버튼용, 한 번만).
+5. 관리자 페이지 `http://localhost:4000/admin/` 이 자동으로 열립니다.
+
+**그다음부터**: 같은 파일을 더블클릭하면 다른 PC 에서 배포한 내용을 먼저 받아온 뒤 관리자 페이지가 열립니다.
+검은 창을 닫으면 관리자 페이지가 꺼집니다.
+
+**두 PC 를 오갈 때**
+- 한 PC 에서 작업을 마치면 **배포** 를 눌러 두세요. 그래야 다른 PC 가 최신 내용을 받습니다.
+- 다른 PC 가 먼저 배포했어도 **배포** 버튼이 그 변경을 받아 합친 뒤 올립니다. 두 PC 에서 같은 칸을 동시에 바꾼 경우만 자동으로 합치지 못하고 알려 줍니다.
+- 관리자 페이지는 그 PC 안에서만 열립니다(같은 와이파이의 다른 기기에서도 접속 불가).
 GitHub Actions 가 대표 템플릿만 새로 빌드하므로 `build/`·`dist/` 는 올리지 않습니다(.gitignore).
 
 ## 배포 주소 연결
