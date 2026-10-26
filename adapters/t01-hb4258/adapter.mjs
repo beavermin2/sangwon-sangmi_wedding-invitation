@@ -119,6 +119,8 @@ export async function apply({ wedding: w, out, images }) {
     ["height: 360, overflow: 'hidden' }}>", "minHeight: 360, overflow: 'hidden' }}>"],
     ['width="100%" height="100%" alt="" eager={true} />', 'width="100%" height="auto" alt="" eager={true} />'],
     ['rgba(251,246,238,0) 55%', 'rgba(251,246,238,0) 82%'],
+    // 인용구 출처 앞의 줄표(—) 없이 출처만
+    ['}}>— {quote.author}</div>', '}}>{quote.author}</div>'],
     ['    </section>\n  );\n}\n\n// 02. Invitation', '      <FallingDoodles />\n    </section>\n  );\n}\n\n// 02. Invitation'],
     // 달력: 예식일 표시를 파란 원 대신 빨간 하트로
     [`                    <div style={{
