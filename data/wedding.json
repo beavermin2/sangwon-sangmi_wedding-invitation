@@ -167,7 +167,16 @@
     },
     "music": {
       "enabled": false,
-      "src": ""
+      "src": "",
+      "autoplay": true,
+      "volume": 0.6
+    },
+    "video": {
+      "enabled": false,
+      "title": "",
+      "youtube": "",
+      "src": "",
+      "poster": ""
     }
   },
   "templateOptions": {
