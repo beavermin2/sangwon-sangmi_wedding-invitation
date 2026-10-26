@@ -119,6 +119,16 @@ export async function apply({ wedding: w, out, images }) {
     ["height: 360, overflow: 'hidden' }}>", "minHeight: 360, overflow: 'hidden' }}>"],
     ['width="100%" height="100%" alt="" eager={true} />', 'width="100%" height="auto" alt="" eager={true} />'],
     ['rgba(251,246,238,0) 55%', 'rgba(251,246,238,0) 82%'],
+    // 표지 시간·장소 줄을 굵게
+    [`            fontWeight: 300, marginTop: 8,
+          }}>{d.date.venueLineKo}</div>`,
+    `            fontWeight: 600, marginTop: 8,
+          }}>{d.date.venueLineKo}</div>`],
+    // 표지 아래쪽의 나뭇가지·꽃 장식은 빼고 흩날리는 손그림 꽃만 남긴다
+    [`      <div style={{ position: 'absolute', bottom: 30, left: 0, right: 0, height: 100, pointerEvents: 'none' }}>
+        <FlowerScatter width={375} height={100} variant={THEME.flowerVariant} density={THEME.flowerDensity * 0.6} />
+      </div>
+`, ''],
     // 인용구 출처 앞의 줄표(—) 없이 출처만
     ['}}>— {quote.author}</div>', '}}>{quote.author}</div>'],
     ['    </section>\n  );\n}\n\n// 02. Invitation', '      <FallingDoodles />\n    </section>\n  );\n}\n\n// 02. Invitation'],
