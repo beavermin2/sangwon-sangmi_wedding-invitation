@@ -19,12 +19,12 @@
     "parents": {
       "father": {
         "name": "민병근",
-        "phone": "010-0000-0002",
+        "phone": "",
         "deceased": false
       },
       "mother": {
         "name": "구연단",
-        "phone": "010-0000-0003",
+        "phone": "",
         "deceased": false
       }
     }
@@ -41,12 +41,12 @@
     "parents": {
       "father": {
         "name": "고문학",
-        "phone": "010-00000000",
+        "phone": "",
         "deceased": true
       },
       "mother": {
         "name": "석혜정",
-        "phone": "010-0000-0006",
+        "phone": "",
         "deceased": false
       }
     }
@@ -123,11 +123,11 @@
     ]
   },
   "accounts": {
-    "note": "참석이 어려우신 분들을 위해\n계좌번호를 안내드립니다",
+    "note": "마음 전하는 곳",
     "groom": [
       {
         "owner": "민상원",
-        "relation": "아들",
+        "relation": "신랑",
         "bank": "신한은행",
         "number": "110-082-305096",
         "kakaopay": ""
@@ -137,8 +137,8 @@
       {
         "owner": "고상미",
         "relation": "신부",
-        "bank": "국민은행",
-        "number": "000-000-000000",
+        "bank": "우리은행",
+        "number": "1002-433-410753",
         "kakaopay": ""
       }
     ]
@@ -166,10 +166,10 @@
       "naverClientId": ""
     },
     "music": {
-      "enabled": false,
-      "src": "",
+      "enabled": true,
+      "src": "media/bgm-1793017915812.mp3",
       "autoplay": true,
-      "volume": 0.6
+      "volume": 1
     },
     "video": {
       "enabled": false,
