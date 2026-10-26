@@ -189,7 +189,7 @@ node scripts/build.mjs t08-paper-rose
 node scripts/dist.mjs --build
 ```
 
-`data/wedding.json`의 `template`이 배포 루트 템플릿을 결정합니다. 이 문서 작성 시 값은 `t01-hb4258`이며 페이퍼 & 로즈 미리보기는 `dist/test1.html`에도 생성됩니다. 페이퍼 & 로즈를 사이트 첫 페이지로 배포하려면 관리자 템플릿 선택 또는 JSON을 통해 **`t08-paper-rose`를 대표로 선택한 뒤** 최종 빌드를 확인하세요. 문서 추가 자체가 대표 템플릿을 바꾸지는 않습니다.
+`data/wedding.json`의 `template`이 배포 루트 템플릿을 결정합니다. 현재 값은 **`t08-paper-rose`**이며 사이트 첫 페이지에 페이퍼 & 로즈를 배포합니다. 미리보기는 `dist/test1.html`에도 생성됩니다. `site.url`은 현재 GitHub Pages 주소로 지정되어 있으므로 저장소나 도메인을 옮기면 함께 변경하세요. 다른 템플릿을 배포하려면 관리자 템플릿 선택 또는 JSON 수정 후 최종 빌드를 확인합니다.
 
 [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml)은 **main 브랜치 push 시 GitHub Pages를 자동 배포**합니다. 서버 반영 전 검토만 하려면 준비 브랜치에 push하고, 배포할 시점에 main으로 병합하세요. GitHub Pages 설정은 Source가 GitHub Actions여야 합니다. Workflow는 `SITE_URL`을 공급하며 Supabase SQL이나 Auth 설정을 자동 설치하지 않습니다.
 
