@@ -91,7 +91,7 @@ test('페이퍼 & 로즈: 선택된 템플릿 빌드, 기능 갱신, 배포와 �
     const previewContext = { window: {} };
     vm.runInNewContext(await readFile(join(dist, 'preview-assets/test1/data.js'), 'utf8'), previewContext);
     assert.equal(previewContext.window.PREVIEW_DATA.publicUrl, 'https://example.com/wedding/test1.html');
-    for (const file of ['style.css', 'app.js', 'guestbook.js', 'rsvp.js', 'rsvp.css', 'lottie-LICENSE.md', 'supabase-LICENSE']) {
+    for (const file of ['style.css', 'app.js', 'guestbook.js', 'backend-resilience.js', 'photo-share.js', 'photo-share-core.js', 'rsvp.js', 'rsvp.css', 'lottie-LICENSE.md', 'supabase-LICENSE']) {
       assert.deepEqual(await readFile(join(dist, 'assets/paper-rose', file)), await readFile(join(dist, 'preview-assets/test1', file)));
     }
   } finally {

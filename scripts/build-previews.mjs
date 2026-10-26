@@ -176,7 +176,7 @@ export async function buildPaperRose({ root, dist, wedding: w, template = false 
   values.RSVP=values.RSVP.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw new Error(`Unknown RSVP placeholder: ${key}`);return String(values[key]);});
   values.PHOTO_SHARE=values.PHOTO_SHARE.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw new Error(`Unknown photo share placeholder: ${key}`);return String(values[key]);});
   html=html.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw new Error(`Unknown preview placeholder: ${key}`);return String(values[key]);});
-  for(const file of ['style.css','drawer.css','opening.css','app.js','guestbook.css','guestbook.js','rsvp.css','rsvp.js','rsvp-entry.js','photo-share.css','photo-share.js','photo-share-core.js'])await copyFile(join(source,file),join(assetDir,file));
+  for(const file of ['style.css','drawer.css','opening.css','app.js','guestbook.css','guestbook.js','backend-resilience.js','rsvp.css','rsvp.js','rsvp-entry.js','photo-share.css','photo-share.js','photo-share-core.js'])await copyFile(join(source,file),join(assetDir,file));
   for(const file of ['lottie_svg.min.js','lottie-LICENSE.md','supabase.js','supabase-LICENSE','LaBelleAurore-Regular.ttf','LaBelleAurore-OFL.txt'])await copyFile(join(source,'vendor',file),join(assetDir,file));
   const openingTitle=JSON.parse(await readFile(join(source,'opening-title.json'),'utf8'));
   await writeFile(join(assetDir,'opening-title-data.js'),`window.OPENING_TITLE_DATA = ${JSON.stringify(openingTitle).replace(/</g,'\\u003c')};\n`);

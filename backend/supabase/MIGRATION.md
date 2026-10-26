@@ -184,7 +184,7 @@ from public.wedding_photo_admin;
 ## 9. 빌드·GitHub 반영
 
 ```powershell
-node --test scripts/photo-share.test.mjs scripts/rsvp.test.mjs scripts/rsvp-entry.test.mjs scripts/paper-rose.test.mjs
+node --test scripts/backend-resilience.test.mjs scripts/photo-share.test.mjs scripts/rsvp.test.mjs scripts/rsvp-entry.test.mjs scripts/paper-rose.test.mjs
 node scripts/build.mjs t08-paper-rose
 node scripts/dist.mjs --build
 ```
@@ -198,6 +198,14 @@ node scripts/dist.mjs --build
 GitHub에 포함할 파일: 소스, 공개 연결 JSON, 이 문서, `backend/supabase/*.sql`, 준비 스크립트. 제외할 파일: `.work/`, 관리자 비밀키, DB 덤프, 실제 업로드 사진, 환경별 비밀번호, 생성된 `build/`·`dist/`.
 
 ## 10. 자주 생기는 오류
+
+### 사용량 초과·일시 중지·장애 시 청첩장 동작
+
+청첩장 본문·메뉴·로컬 사진·예식 안내는 정적 파일로 제공되며 Supabase 응답을 기다리지 않습니다. 방명록(좋아요·첨부 사진 포함)과 축하 사진 공유에만 장애 안내를 표시합니다. 402/429/5xx, 네트워크 실패 및 응답 지연을 처리하며, SDK 로드는 15초, 일반 API/인증 작업은 20초, 업로드는 35초 안에 실패 처리를 시작합니다. 여러 단계인 전송 전체 시간은 각 단계 시간의 합이 될 수 있습니다.
+
+실패하면 작성 중인 내용과 선택 사진은 현재 페이지에 유지되고 모달 조작 잠금이 해제됩니다. 사진 업로드 상태를 확인하지 못한 경우 '기간 종료'로 오인하지 않고 연결 실패로 표시합니다. 방명록의 '다시 불러오기', 사진 공유의 '연결 다시 확인하기'로 복구를 시도할 수 있습니다. 이미지 자체나 DB 데이터를 읽을 수 없는 장애에서는 그 기능의 자료를 보여 줄 수 없으며, 실제 저장 확인 없이 전송 성공으로 표시하지 않습니다.
+
+선택 사진은 브라우저 메모리에 있으므로 새로고침·탭 종료까지 보존되는 것은 아닙니다. 사용량 제한 자체는 에러 처리로 해제되지 않으며, Supabase에서 제한 원인을 해결한 후 기능을 다시 이용해야 합니다. 정적 호스팅 자체가 중단되는 경우는 이 처리 범위에 포함되지 않습니다.
 
 | 증상 | 확인할 부분 |
 | --- | --- |

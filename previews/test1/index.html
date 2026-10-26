@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="{{ASSET}}photo-share.css">
   <script src="{{ASSET}}data.js" defer></script>
   <script src="{{ASSET}}app.js" defer></script>
-  <script src="{{ASSET}}guestbook.js" defer></script>
+  <script type="module" src="{{ASSET}}guestbook.js"></script>
   <script src="{{ASSET}}rsvp.js" defer></script>
   <script src="{{ASSET}}rsvp-entry.js" defer></script>
   <script type="module" src="{{ASSET}}photo-share.js"></script>
@@ -122,7 +122,7 @@
       <button class="button guestbook-write" type="button" id="guestbook-open" data-open="guestbook-dialog">축하 메시지 남기기 <span aria-hidden="true">♡</span></button>
       <p id="guestbook-status" class="guestbook-status" role="status">축하 메시지를 불러오고 있습니다.</p>
       <div id="guestbook-list" class="guestbook-list" role="region" aria-label="좌우로 넘겨 보는 축하 메시지" tabindex="0" hidden><div id="guestbook-track" class="guestbook-track"></div></div>
-      <div class="guestbook-list-actions"><button class="text-button" id="guestbook-all" type="button" data-open="guestbook-all-dialog">전체보기</button></div>
+      <div class="guestbook-list-actions"><button class="text-button" id="guestbook-retry" type="button" hidden>다시 불러오기</button><button class="text-button" id="guestbook-all" type="button" data-open="guestbook-all-dialog">전체보기</button></div>
     </section>
 
     <section class="section account-section" id="accounts">

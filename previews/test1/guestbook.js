@@ -1,13 +1,15 @@
 /* Supabase photo guestbook. Only the publishable key is shipped to the browser. */
+import {getBackendClient,loadBackendScript,withTimeout,isServiceUnavailable} from './backend-resilience.js';
 (() => {
   'use strict';
   const config=window.PREVIEW_DATA.guestbook;
   const $=selector=>document.querySelector(selector);
-  const sdkUrl=new URL('./supabase.js',document.currentScript.src).href;
+  const sdkUrl=new URL('./supabase.js',import.meta.url).href;
   const form=$('#guestbook-form'),dialog=$('#guestbook-dialog');
   const status=$('#guestbook-form-status'),submit=$('#guestbook-submit');
   const fields=$('#guestbook-fields'),fileInput=$('#guestbook-file');
   const list=$('#guestbook-list'),listStatus=$('#guestbook-status');
+  const retry=$('#guestbook-retry');
   const track=$('#guestbook-track');
   const loadedEntries=[];
   function renderCards(){
@@ -28,8 +30,8 @@
       const client=await getClient();const ids=new Set();
       for(let start=0;;start+=100){
         if(request!==allRequest||!allDialog.open)return;
-        const {data,error}=await client.from(config.table).select('id,name,message,image_path,created_at')
-          .order('created_at',{ascending:false}).order('id',{ascending:false}).range(start,start+99);
+        const {data,error}=await withTimeout(()=>client.from(config.table).select('id,name,message,image_path,created_at')
+          .order('created_at',{ascending:false}).order('id',{ascending:false}).range(start,start+99));
         if(request!==allRequest||!allDialog.open)return;
         if(error)throw error;
         for(const entry of data){if(!ids.has(entry.id)){ids.add(entry.id);allList.append(cardFor(entry));}}
@@ -43,7 +45,7 @@
   allRetry.addEventListener('click',loadAllEntries);
   allDialog.addEventListener('close',()=>{allRequest++;});
   const draftKey='wedding-guestbook-draft:'+new URL(config.projectUrl).hostname;
-  let clientPromise,loading=false,offset=0,submitting=false,converting=false;
+  let loading=false,offset=0,submitting=false,converting=false;
   let selectedBlob=null,previewUrl=null,uploadedPath=null,captchaToken='',captchaId=null;
   let photoRequest=0,selectionVersion=0;
   const shownIds=new Set();
@@ -72,7 +74,7 @@
     const revision=likeRevision;
     try{
       const client=await getClient();
-      const {data,error}=await client.rpc('guestbook_like_stats',{entry_ids:ids});
+      const {data,error}=await withTimeout(()=>client.rpc('guestbook_like_stats',{entry_ids:ids}));
       if(error)throw error;
       if(revision!==likeRevision)return;
       for(const row of data){const state=likeState(row.guestbook_id);if(!state.busy){state.count=Number(row.like_count);state.liked=row.liked;state.error='';paintLikes(row.guestbook_id);}}
@@ -104,10 +106,10 @@
   }
   async function likeSession(client){
     if(!likeAuthPromise)likeAuthPromise=(async()=>{
-      const {data,error}=await client.auth.getSession();if(error)throw error;
+      const {data,error}=await withTimeout(()=>client.auth.getSession());if(error)throw error;
       if(data.session)return;
       const token=await likeCaptcha();
-      const result=await client.auth.signInAnonymously(token?{options:{captchaToken:token}}:{});
+      const result=await withTimeout(()=>client.auth.signInAnonymously(token?{options:{captchaToken:token}}:{}));
       if(result.error)throw result.error;
     })().finally(()=>{likeAuthPromise=null;});
     return likeAuthPromise;
@@ -118,14 +120,14 @@
     try{
       const client=await getClient();
       if(state.count===null){
-        const {data,error}=await client.rpc('guestbook_like_stats',{entry_ids:[id]});
+        const {data,error}=await withTimeout(()=>client.rpc('guestbook_like_stats',{entry_ids:[id]}));
         if(error||!data?.length)throw userError('좋아요를 불러오지 못했습니다. 잠시 후 다시 눌러 주세요.');
         state.count=Number(data[0].like_count);state.liked=data[0].liked;
       }
       await likeSession(client);
       const desired=state.retryTarget??!state.liked;
       state.retryTarget=desired;
-      const {data,error}=await client.rpc('set_guestbook_like',{entry_id:id,should_like:desired});
+      const {data,error}=await withTimeout(()=>client.rpc('set_guestbook_like',{entry_id:id,should_like:desired}));
       if(error)throw error;
       if(!data?.length)throw new Error('Missing like result');
       state.count=Number(data[0].like_count);state.liked=data[0].liked;delete state.retryTarget;
@@ -133,26 +135,8 @@
     finally{state.busy=false;likeRevision++;paintLikes(id);}
   }
 
-  function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error('network'));document.head.append(s);});}
-  async function timedFetch(input,options={}){
-    const controller=new AbortController();
-    const abort=()=>controller.abort();
-    options.signal?.addEventListener('abort',abort,{once:true});
-    if(options.signal?.aborted)controller.abort();
-    const timer=setTimeout(abort,20000);
-    try{return await fetch(input,{...options,signal:controller.signal});}
-    finally{clearTimeout(timer);options.signal?.removeEventListener('abort',abort);}
-  }
-  function getClient(){
-    if(!clientPromise)clientPromise=(async()=>{
-      if(!window.supabase)await loadScript(sdkUrl);
-      return window.supabase.createClient(config.projectUrl,config.publishableKey,{
-        auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'wedding-'+new URL(config.projectUrl).hostname},
-        global:{fetch:timedFetch}
-      });
-    })().catch(error=>{clientPromise=null;throw error;});
-    return clientPromise;
-  }
+  const loadScript=loadBackendScript;
+  const getClient=()=>getBackendClient(config,sdkUrl);
   function setMessage(text){status.textContent=text;}
   function syncDisabled(){
     fields.disabled=submitting;
@@ -174,6 +158,7 @@
   function errorMessage(error){
     const code=String(error?.code||''),message=String(error?.message||'').toLowerCase();
     if(code==='23505')return '이 브라우저에서 이미 메시지를 남기셨습니다. 수정·삭제는 신랑·신부에게 요청해 주세요.';
+    if(isServiceUnavailable(error))return '방명록 연결이 잠시 원활하지 않습니다. 작성 내용은 유지되니 잠시 후 다시 시도해 주세요. 청첩장은 계속 이용하실 수 있어요.';
     if(code==='anonymous_provider_disabled'||message.includes('anonymous sign-ins are disabled'))return '아직 방명록 작성 준비가 완료되지 않았습니다. 잠시 후 다시 시도해 주세요.';
     if(message.includes('captcha'))return '자동 등록 방지 확인이 필요합니다. 확인 후 다시 시도해 주세요.';
     if(code==='over_request_rate_limit'||Number(error?.status)===429)return '요청이 많아 잠시 쉬고 있습니다. 잠시 후 다시 시도해 주세요.';
@@ -186,7 +171,7 @@
 
   async function signedPhoto(path){
     const client=await getClient();
-    const {data,error}=await client.storage.from(config.bucket).createSignedUrl(path,300);
+    const {data,error}=await withTimeout(()=>client.storage.from(config.bucket).createSignedUrl(path,300));
     if(error)throw error;
     const url=new URL(data.signedUrl);
     if(url.origin!==new URL(config.projectUrl).origin)throw new Error('Unexpected photo origin');
@@ -238,24 +223,27 @@
   }
   async function loadEntries(reset=false){
     if(loading)return;
-    loading=true;
+    loading=true;retry.disabled=true;
     listStatus.textContent='축하 메시지를 불러오고 있습니다.';
     const start=reset?0:offset;
     try{
       const client=await getClient();
-      const {data,error}=await client.from(config.table).select('id,name,message,image_path,created_at')
-        .order('created_at',{ascending:false}).order('id',{ascending:false}).range(start,start+pageSize-1);
+      const {data,error}=await withTimeout(()=>client.from(config.table).select('id,name,message,image_path,created_at')
+        .order('created_at',{ascending:false}).order('id',{ascending:false}).range(start,start+pageSize-1));
       if(error)throw error;
       if(reset){loadedEntries.length=0;shownIds.clear();}
       for(const entry of data){if(!shownIds.has(entry.id)){shownIds.add(entry.id);loadedEntries.push(entry);}}
       offset=start+data.length;
       renderCards();
+      retry.hidden=true;
       loadLikes(data.map(entry=>entry.id));
       listStatus.textContent=shownIds.size?'':'첫 번째 축하 메시지를 남겨주세요.';
-    }catch{listStatus.textContent='메시지를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.';}
-    finally{loading=false;}
+    }catch{listStatus.textContent='방명록을 잠시 불러올 수 없습니다. 청첩장은 계속 이용하실 수 있어요.';retry.hidden=false;}
+    finally{loading=false;retry.disabled=false;}
   }
-  new IntersectionObserver((entries,observer)=>{if(entries.some(e=>e.isIntersecting)){observer.disconnect();loadEntries(true);}},{rootMargin:'300px'}).observe($('#guestbook'));
+  retry.addEventListener('click',()=>loadEntries(true));
+  if('IntersectionObserver' in window)new IntersectionObserver((entries,observer)=>{if(entries.some(e=>e.isIntersecting)){observer.disconnect();loadEntries(true);}},{rootMargin:'300px'}).observe($('#guestbook'));
+  else loadEntries(true);
 
   async function prepareCaptcha(){
     if(!config.turnstileSiteKey||captchaId!==null)return;
@@ -269,7 +257,7 @@
   }
   $('#guestbook-open').addEventListener('click',async()=>{
     try{
-      const client=await getClient();const {data,error}=await client.auth.getSession();if(error)throw error;
+      const client=await getClient();const {data,error}=await withTimeout(()=>client.auth.getSession());if(error)throw error;
       const draft=readDraft();
       if(draft&&data.session?.user.id===draft.userId){
         if(!$('#guestbook-name').value)$('#guestbook-name').value=draft.name||'';
@@ -330,11 +318,11 @@
     submitting=true;syncDisabled();setMessage('메시지를 저장하고 있습니다.');
     let saved=false;
     try{
-      const client=await getClient();let {data,error}=await client.auth.getSession();if(error)throw error;
+      const client=await getClient();let {data,error}=await withTimeout(()=>client.auth.getSession());if(error)throw error;
       let user=data.session?.user;
       if(!user){
         if(config.turnstileSiteKey&&!captchaToken)throw userError('자동 등록 방지 확인을 먼저 완료해 주세요.');
-        const result=await client.auth.signInAnonymously(config.turnstileSiteKey?{options:{captchaToken}}:{});
+        const result=await withTimeout(()=>client.auth.signInAnonymously(config.turnstileSiteKey?{options:{captchaToken}}:{}));
         if(result.error)throw result.error;user=result.data.user;
       }
       const previous=readDraft();
@@ -348,14 +336,14 @@
         if(retryDigest&&retryDigest!==digest)throw userError('앞서 전송을 시도한 사진이 있습니다. 같은 사진을 다시 선택하거나 사진을 빼고 메시지만 등록해 주세요.');
         saveDraft(user.id,digest);
         setMessage('사진을 저장하고 있습니다.');
-        const result=await client.storage.from(config.bucket).upload(path,selectedBlob,{contentType:'image/webp',upsert:false});
+        const result=await withTimeout(()=>client.storage.from(config.bucket).upload(path,selectedBlob,{contentType:'image/webp',upsert:false}),35000);
         const duplicate=String(result.error?.statusCode)==='409'||/already exists|duplicate/i.test(result.error?.message||'');
         // Reuse an immutable upload only when retrying the same file.
         if(result.error&&!(duplicate&&retryDigest===digest))throw result.error;
         uploadedPath=path;saveDraft(user.id);
       }
       saveDraft(user.id);syncDisabled();setMessage('메시지를 등록하고 있습니다.');
-      const result=await client.from(config.table).insert({name,message,image_path:uploadedPath});
+      const result=await withTimeout(()=>client.from(config.table).insert({name,message,image_path:uploadedPath}));
       if(result.error)throw result.error;
       saved=true;
       try{localStorage.removeItem(draftKey);}catch{}

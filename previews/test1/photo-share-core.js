@@ -1,3 +1,4 @@
+import {withTimeout} from './backend-resilience.js';
 export const MAX_FILES=5,MAX_FILE_BYTES=25*1024*1024,MAX_UPLOAD_BYTES=2*1024*1024;
 export function validatePhotos(files){
   if(!files.length)throw new Error('사진을 선택해 주세요.');
@@ -19,16 +20,16 @@ export async function validatePhotoSignature(file){
 export async function sendPhoto(client,entry,sender,message){
   if(entry.done)return;
   if(!entry.path){
-    const result=await client.rpc('reserve_wedding_photo_v2',{request_id:entry.id,sender_name:sender,photo_message:message,photo_mode:entry.storageMode||'compressed',photo_type:entry.blob.type||'image/jpeg',photo_name:entry.file?.name||''});
+    const result=await withTimeout(()=>client.rpc('reserve_wedding_photo_v2',{request_id:entry.id,sender_name:sender,photo_message:message,photo_mode:entry.storageMode||'compressed',photo_type:entry.blob.type||'image/jpeg',photo_name:entry.file?.name||''}));
     if(result.error)throw result.error;
     entry.path=result.data;
   }
-  const finish=()=>client.rpc('finish_wedding_photo',{request_id:entry.id});
+  const finish=()=>withTimeout(()=>client.rpc('finish_wedding_photo',{request_id:entry.id}));
   let completed=await finish();
   if(completed.error)throw completed.error;
   if(completed.data===true){entry.done=true;return;}
   const bucket=entry.storageMode==='original'?'wedding-original-photos':'wedding-shared-photos';
-  const uploaded=await client.storage.from(bucket).upload(entry.path,entry.blob,{contentType:entry.blob.type||'image/jpeg',upsert:false,cacheControl:'3600'});
+  const uploaded=await withTimeout(()=>client.storage.from(bucket).upload(entry.path,entry.blob,{contentType:entry.blob.type||'image/jpeg',upsert:false,cacheControl:'3600'}),35000);
   // A timed-out request may have reached storage. Confirm before retrying a file.
   completed=await finish();
   if(completed.data===true&&!completed.error){entry.done=true;return;}
