@@ -102,7 +102,7 @@
   (function () {
     'use strict';
 
-    var W = null, CATALOG = [], IMAGES = [], BRANCH = '', dirty = false;
+    var W = null, CATALOG = [], IMAGES = [], MEDIA = [], BRANCH = '', dirty = false;
 
     /* ── 경로 도구 ─────────────────────────────────────────── */
     function get(path) {
@@ -180,12 +180,12 @@
         input = el('select', {}, f.options.map(function (o) { return el('option', { value: o[0], text: o[1] }); }));
         input.value = v || f.options[0][0];
       } else {
-        input = el('input', { type: f.type || 'text', placeholder: f.placeholder, inputmode: f.inputmode, autocomplete: 'off', list: f.list });
+        input = el('input', { type: f.type || 'text', placeholder: f.placeholder, inputmode: f.inputmode, autocomplete: 'off', list: f.list, min: f.min, max: f.max, step: f.step });
         input.value = v == null ? '' : v;
       }
       input.addEventListener(f.type === 'select' ? 'change' : 'input', function () {
         var val = input.value;
-        if (f.type === 'number') val = val === '' ? '' : Number(val);
+        if (f.type === 'number' || f.type === 'range') val = val === '' ? '' : Number(val);
         set(f.path, val);
       });
       return el('label', { class: 'f' + (f.wide ? ' wide' : '') }, [f.label, input, f.hint ? el('small', { text: f.hint }) : null]);
@@ -308,6 +308,7 @@
         ], { icon: '📌', title: '', detail: '' }, '안내 추가', re)])];
       } },
       { id: 'photos', title: '사진', render: photosTab },
+      { id: 'media', title: '음악·영상', render: mediaTab },
       { id: 'accounts', title: '계좌', render: function (re) {
         var fields = [
           { key: 'owner', label: '예금주', width: '1fr' },
@@ -471,6 +472,104 @@
           photos.length ? null : el('p', { class: 'note warn', text: '갤러리 사진이 없으면 템플릿의 데모 사진이 나옵니다.' }), cleanup])];
     }
 
+    /* ── 음악·영상 ─────────────────────────────────────────── */
+    // 음악·동영상은 줄이지 않고 그대로 올린다(서버가 종류·크기를 다시 확인).
+    var MEDIA_LIMIT = { mp3: 12, m4a: 12, mp4: 45 };
+    function uploadMedia(file, prefix, allowed) {
+      var ext = (file.name.split('.').pop() || '').toLowerCase();
+      if (allowed.indexOf(ext) < 0) return Promise.reject(new Error(allowed.join('/') + ' 파일만 올릴 수 있습니다'));
+      if (file.size > MEDIA_LIMIT[ext] * 1024 * 1024) return Promise.reject(new Error(MEDIA_LIMIT[ext] + 'MB 이하 파일만 올릴 수 있습니다 (지금 ' + (file.size / 1048576).toFixed(1) + 'MB)'));
+      var name = prefix + '-' + Date.now() + '.' + ext;
+      return api('POST', '/api/admin/upload?name=' + encodeURIComponent(name), file, file.type || 'application/octet-stream').then(function (res) {
+        MEDIA.push({ name: name, path: res.path, size: res.size });
+        return res.path;
+      });
+    }
+    function pickMedia(accept, cb) {
+      var i = el('input', { type: 'file', accept: accept });
+      i.addEventListener('change', function () { if (i.files.length) cb(i.files[0]); });
+      i.click();
+    }
+    function mb(path) {
+      var m = MEDIA.filter(function (x) { return x.path === path; })[0];
+      return m ? (m.size / 1048576).toFixed(1) + 'MB' : '';
+    }
+
+    function mediaTab(re) {
+      var musicSrc = get('features.music.src');
+      var hasMusic = musicSrc && MEDIA.some(function (x) { return x.path === musicSrc; });
+      var musicBtns = el('div', { class: 'actions' }, [
+        el('button', { class: 'btn', type: 'button', text: hasMusic ? '음악 바꾸기' : '음악 올리기', onclick: function () {
+          pickMedia('audio/mpeg,audio/mp4,.mp3,.m4a', function (file) {
+            toast('올리는 중…');
+            uploadMedia(file, 'bgm', ['mp3', 'm4a']).then(function (p) {
+              set('features.music.src', p);
+              if (!get('features.music.enabled')) set('features.music.enabled', true);
+              re(); toast('올렸습니다. 저장을 눌러 반영하세요');
+            }).catch(function (e) { toast(e.message, true); });
+          });
+        } }),
+        hasMusic ? el('button', { class: 'btn', type: 'button', text: '빼기', onclick: function () { set('features.music.src', ''); re(); } }) : null,
+      ]);
+      var musicCard = card('배경음악 (BGM)', '청첩장 오른쪽 위에 ♪ 버튼이 생깁니다. 휴대폰은 소리 자동 재생을 막아서, 하객이 화면을 처음 누를 때 재생을 시작합니다.', [
+        grid([
+          { path: 'features.music.enabled', label: '배경음악 사용', type: 'check' },
+          { path: 'features.music.autoplay', label: '첫 터치 때 자동 재생', type: 'check', hint: '끄면 ♪ 버튼을 눌러야 재생' },
+          { path: 'features.music.volume', label: '음량', type: 'range', min: '0.1', max: '1', step: '0.05' },
+        ]),
+        el('p', { class: 'note', text: hasMusic ? '현재 파일: ' + musicSrc.split('/').pop() + ' (' + mb(musicSrc) + ')' : 'mp3 또는 m4a, 12MB 이하. 3~4분 길이의 곡이면 충분합니다(반복 재생).' }),
+        hasMusic ? el('audio', { controls: true, src: '/data/' + musicSrc, preload: 'none', style: 'width:100%;margin:8px 0' }) : null,
+        musicBtns,
+      ]);
+
+      var videoSrc = get('features.video.src');
+      var hasVideo = videoSrc && MEDIA.some(function (x) { return x.path === videoSrc; });
+      var poster = get('features.video.poster');
+      var hasPoster = poster && IMAGES.some(function (x) { return x.path === poster; });
+      var videoCard = card('동영상', '유튜브 주소를 넣거나 mp4 파일을 직접 올립니다. 둘 다 있으면 유튜브를 씁니다.', [
+        grid([
+          { path: 'features.video.enabled', label: '동영상 사용', type: 'check' },
+          { path: 'features.video.title', label: '제목 (선택)', placeholder: '예: 우리의 이야기' },
+          { path: 'features.video.youtube', label: '유튜브 주소 (추천)', type: 'url', wide: true, placeholder: 'https://youtu.be/…', hint: '유튜브에 "일부 공개"로 올리면 링크를 가진 사람만 볼 수 있습니다. 저장소 용량도 차지하지 않습니다' },
+        ]),
+        el('p', { class: 'note', text: '또는 mp4 파일 직접 올리기 — 45MB 이하. 파일은 GitHub 저장소에 함께 올라가므로 1~2분 이내의 짧은 영상을 권장합니다.' }),
+        hasVideo ? el('video', { controls: true, src: '/data/' + videoSrc, preload: 'metadata', poster: hasPoster ? '/data/' + poster : false, style: 'width:100%;max-height:320px;background:#000;border-radius:10px;margin:8px 0' }) : null,
+        hasVideo ? el('p', { class: 'note', text: '현재 파일: ' + videoSrc.split('/').pop() + ' (' + mb(videoSrc) + ')' }) : null,
+        el('div', { class: 'actions' }, [
+          el('button', { class: 'btn', type: 'button', text: hasVideo ? '영상 바꾸기' : 'mp4 올리기', onclick: function () {
+            pickMedia('video/mp4,.mp4', function (file) {
+              toast('올리는 중… (큰 파일은 시간이 걸립니다)');
+              uploadMedia(file, 'video', ['mp4']).then(function (p) {
+                set('features.video.src', p);
+                if (!get('features.video.enabled')) set('features.video.enabled', true);
+                re(); toast('올렸습니다. 저장을 눌러 반영하세요');
+              }).catch(function (e) { toast(e.message, true); });
+            });
+          } }),
+          hasVideo ? el('button', { class: 'btn', type: 'button', text: '영상 빼기', onclick: function () { set('features.video.src', ''); re(); } }) : null,
+          hasVideo ? el('button', { class: 'btn', type: 'button', text: hasPoster ? '표지 바꾸기' : '표지 사진 올리기', onclick: function () {
+            pickFiles(false, function (files) {
+              uploadFile(files[0], 'poster', { max: 1280 }).then(function (p) { set('features.video.poster', p); re(); toast('표지를 올렸습니다. 저장을 눌러 반영하세요'); })
+                .catch(function (e) { toast(e.message, true); });
+            });
+          } }) : null,
+        ]),
+      ]);
+
+      // 어디에도 쓰이지 않는 음악·영상 파일 정리
+      var usedMedia = [musicSrc, videoSrc];
+      var unused = MEDIA.filter(function (x) { return usedMedia.indexOf(x.path) < 0; });
+      var cleanup = unused.length ? card('파일 정리', null, [el('button', { class: 'btn', type: 'button', text: '안 쓰는 음악·영상 ' + unused.length + '개 지우기', onclick: function () {
+        if (dirty) { toast('먼저 저장한 뒤 정리하세요', true); return; }
+        if (!confirm('어디에도 쓰이지 않는 파일 ' + unused.length + '개를 data/media 에서 지웁니다.')) return;
+        Promise.all(unused.map(function (x) { return api('DELETE', '/api/admin/image?name=' + encodeURIComponent(x.name)); }))
+          .then(function () { MEDIA = MEDIA.filter(function (x) { return unused.indexOf(x) < 0; }); re(); toast('정리했습니다'); })
+          .catch(function (e) { toast(e.message, true); });
+      } })]) : null;
+
+      return [musicCard, videoCard, cleanup];
+    }
+
     /* ── 화면 그리기 ───────────────────────────────────────── */
     var current = 'people';
     function renderTabs() {
@@ -496,7 +595,10 @@
 
     function load() {
       return api('GET', '/api/admin/state').then(function (s) {
-        W = s.wedding; CATALOG = s.catalog; IMAGES = s.images; BRANCH = s.branch;
+        W = s.wedding; CATALOG = s.catalog; IMAGES = s.images; MEDIA = s.media || []; BRANCH = s.branch;
+        // 예전 wedding.json 에 없는 음악·영상 항목은 빌드 기본값과 같게 채운다(자동 재생 켬, 음량 0.6)
+        W.features.music = Object.assign({ enabled: false, src: '', autoplay: true, volume: 0.6 }, W.features.music);
+        W.features.video = Object.assign({ enabled: false, title: '', youtube: '', src: '', poster: '' }, W.features.video);
         try { current = localStorage.getItem('admin-tab') || current; } catch (e) {}
         if (!TABS.some(function (t) { return t.id === current; })) current = 'people';
         renderTabs(); render();

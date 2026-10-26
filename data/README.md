@@ -25,7 +25,8 @@
 | `venue.naverPlaceId` / `venue.kakaoPlaceId` | (선택) 지도 앱의 장소 번호. 있으면 지도 버튼이 장소 페이지로, 없으면 이름 검색·좌표로 열립니다. |
 | `ceremony.holidays` | (선택) 예식 달의 공휴일 날짜 배열. 일부 템플릿 달력에 빨간 날로 표시됩니다. 예: `[5]` |
 | `features.map` | 카카오맵·네이버 지도 키. 카카오맵은 공유 키와 같은 키를 써도 됩니다. |
-| `features.music` | 배경음악 on/off와 파일 경로. |
+| `features.music` | 배경음악 on/off, 파일(`media/…mp3·m4a`, 12MB 이하), `autoplay`(첫 터치 때 재생), `volume`(0.1~1). 청첩장 오른쪽 위에 ♪ 버튼이 생깁니다. |
+| `features.video` | 동영상 on/off, 제목, `youtube`(유튜브 주소, 추천) 또는 `src`(`media/…mp4`, 45MB 이하)와 표지 사진 `poster`. 둘 다 있으면 유튜브를 씁니다. |
 
 ## 템플릿별 반영 방식
 

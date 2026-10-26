@@ -91,6 +91,20 @@ export const kakaoMapKey = (w) => {
   return (f.map && f.map.kakaoJsKey) || (f.kakaoShare && f.kakaoShare.jsKey) || '';
 };
 
+// 유튜브 주소에서 영상 ID(11자) 추출: youtu.be/ID, watch?v=ID, /shorts/ID, /embed/ID, /live/ID
+export function youtubeId(url) {
+  let u;
+  try { u = new URL(String(url || '').trim()); } catch { return ''; }
+  if (!/^https?:$/.test(u.protocol)) return '';
+  const host = u.hostname.replace(/^(www|m)\./, '');
+  let id = '';
+  if (host === 'youtu.be') id = u.pathname.slice(1).split('/')[0];
+  else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+    id = u.searchParams.get('v') || (u.pathname.match(/^\/(shorts|embed|live)\/([^/?#]+)/) || [])[2] || '';
+  }
+  return /^[\w-]{11}$/.test(id) ? id : '';
+}
+
 export const escapeHtml = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 

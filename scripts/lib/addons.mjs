@@ -1,8 +1,8 @@
 // 공통 모듈(addons/)을 빌드 결과물에 넣는다: 파일 복사, config.js 생성, HTML 에 <script> 삽입.
-import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { FLOWER_MARK, kstParts, usesFlowerImage, venueLine } from './wedding.mjs';
+import { FLOWER_MARK, kstParts, usesFlowerImage, venueLine, youtubeId } from './wedding.mjs';
 
 const SRC = fileURLToPath(new URL('../../addons/', import.meta.url));
 const MARK = '<!-- wedding-addons -->';
@@ -18,6 +18,8 @@ export async function injectAddons({ wedding: w, id, out, images, options = {} }
   const dir = join(out, 'addons');
   await mkdir(dir, { recursive: true });
   for (const name of ['wedding-addons.js', 'wedding-addons.css', 'mourn-flower.svg']) await copyFile(join(SRC, name), join(dir, name));
+  // 이전 빌드에서 남은 음악·영상 파일 정리
+  for (const name of await readdir(dir)) if (/^(bgm|video|video-poster)\./.test(name)) await rm(join(dir, name));
 
   // 카카오 공유 카드 사진: site.ogImage → gallery.cover 순
   let image = '';
@@ -27,6 +29,22 @@ export async function injectAddons({ wedding: w, id, out, images, options = {} }
     await images.copy(pic, join(dir, image));
   }
 
+  // 배경음악·동영상 파일은 data/media/ 에서 addons/ 로 복사(파일이 없으면 기능을 끈다)
+  const copyMedia = async (rel, as) => {
+    if (!rel || !images.has(rel)) return '';
+    const name = `${as}${extname(rel).toLowerCase()}`;
+    await images.copy(rel, join(dir, name));
+    return name;
+  };
+  const m = f.music || {};
+  const musicSrc = m.enabled ? await copyMedia(m.src, 'bgm') : '';
+  if (m.enabled && !musicSrc) warnings.push('배경음악 파일이 없어 BGM 을 넣지 않았습니다');
+  const v = f.video || {};
+  const yt = v.enabled ? youtubeId(v.youtube) : '';
+  const videoSrc = v.enabled && !yt ? await copyMedia(v.src, 'video') : '';
+  const poster = v.enabled && videoSrc ? await copyMedia(v.poster, 'video-poster') : '';
+  if (v.enabled && !yt && !videoSrc) warnings.push('동영상(유튜브 주소 또는 파일)이 없어 영상 칸을 넣지 않았습니다');
+
   const when = kstParts(w.ceremony.datetime);
   const kakaoOn = !!(f.kakaoShare && f.kakaoShare.enabled);
   const config = {
@@ -35,6 +53,12 @@ export async function injectAddons({ wedding: w, id, out, images, options = {} }
     mount: options.mount || null,
     // 고인 표시를 흰 국화 그림으로 바꿀 텍스트 표식
     mournMark: usesFlowerImage() ? FLOWER_MARK : '',
+    music: musicSrc ? {
+      src: musicSrc,
+      autoplay: m.autoplay !== false,
+      volume: Math.max(0.05, Math.min(1, Number(m.volume) || 0.6)),
+    } : null,
+    video: yt || videoSrc ? { title: v.title || '', youtube: yt, src: videoSrc, poster } : null,
     rsvp: f.rsvp && f.rsvp.enabled ? {
       enabled: true,
       endpoint: f.rsvp.endpoint || '',

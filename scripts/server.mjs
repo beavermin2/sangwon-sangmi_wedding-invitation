@@ -19,7 +19,7 @@ const MIME = {
   '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
-  '.gif': 'image/gif', '.ico': 'image/x-icon', '.mp3': 'audio/mpeg',
+  '.gif': 'image/gif', '.ico': 'image/x-icon', '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4', '.mp4': 'video/mp4',
   '.ttf': 'font/ttf', '.woff': 'font/woff', '.woff2': 'font/woff2', '.otf': 'font/otf',
 };
 
@@ -80,7 +80,19 @@ async function serveStatic(req, res) {
   if (/^\/\.(git|work)(\/|$)/.test(path)) return send(res, 403, 'forbidden', 'text/plain');
   try {
     if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
-    send(res, 200, await readFile(file), MIME[extname(file).toLowerCase()] || 'application/octet-stream');
+    const type = MIME[extname(file).toLowerCase()] || 'application/octet-stream';
+    const data = await readFile(file);
+    // 음악·동영상은 Range 요청(구간 읽기)을 지원해야 Safari 재생·탐색이 된다.
+    const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (m && /^(audio|video)\//.test(type)) {
+      const size = data.length;
+      const start = m[1] === '' ? Math.max(0, size - Number(m[2])) : Number(m[1]);
+      const end = m[1] !== '' && m[2] !== '' ? Math.min(Number(m[2]), size - 1) : size - 1;
+      if (start > end || start >= size) { res.writeHead(416, { 'Content-Range': `bytes */${size}` }); return res.end(); }
+      res.writeHead(206, { 'Content-Type': type, 'Content-Range': `bytes ${start}-${end}/${size}`, 'Accept-Ranges': 'bytes', 'Content-Length': end - start + 1, 'Cache-Control': 'no-store' });
+      return res.end(data.subarray(start, end + 1));
+    }
+    send(res, 200, data, type);
   } catch {
     send(res, 404, 'not found', 'text/plain');
   }

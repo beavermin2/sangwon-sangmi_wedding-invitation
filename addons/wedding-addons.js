@@ -57,11 +57,134 @@
     }).observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
+  /* ── 배경음악: 오른쪽 위 고정 버튼 ─────────────────────────────
+     모바일 브라우저는 소리 자동 재생을 막으므로, 자동 재생이 켜져 있으면 첫 터치 때 시작한다.
+     하객이 직접 끄면 그 뒤로는 저절로 다시 켜지 않는다. 동영상을 재생하면 잠시 멈춘다. */
+  var bgm = null;
+  function musicButton() {
+    var M = C.music;
+    var OFF_KEY = 'wedding-bgm-off:' + C.id;
+    var audio = new Audio(BASE + M.src);
+    audio.loop = true;
+    audio.volume = M.volume;
+    audio.preload = 'auto';
+    var userOff = false;
+    try { userOff = sessionStorage.getItem(OFF_KEY) === '1'; } catch (e) {}
+
+    var host = document.createElement('div');
+    host.id = 'wedding-bgm';
+    var root = host.attachShadow({ mode: 'open' });
+    var style = document.createElement('style');
+    style.textContent =
+      ':host{all:initial}' +
+      'button{position:fixed;top:14px;right:14px;z-index:2147483000;width:42px;height:42px;border-radius:50%;' +
+      'border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.88);box-shadow:0 2px 10px rgba(0,0,0,.12);' +
+      'display:grid;place-items:center;cursor:pointer;padding:0;color:' + (C.accent || '#b5776b') + ';-webkit-tap-highlight-color:transparent}' +
+      'button:focus-visible{outline:2px solid currentColor;outline-offset:2px}' +
+      'svg{width:20px;height:20px}' +
+      '.on .wave{animation:wave 1s ease-in-out infinite;transform-origin:bottom}' +
+      '.on .wave:nth-child(2){animation-delay:.2s}.on .wave:nth-child(3){animation-delay:.4s}' +
+      '.slash{display:none}.off .slash{display:block}' +
+      '@keyframes wave{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}' +
+      '@media (prefers-reduced-motion:reduce){.on .wave{animation:none}}';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">' +
+      '<rect class="wave" x="4" y="6" width="3" height="12" rx="1.5"/>' +
+      '<rect class="wave" x="10.5" y="3" width="3" height="18" rx="1.5"/>' +
+      '<rect class="wave" x="17" y="8" width="3" height="10" rx="1.5"/>' +
+      '<line class="slash" x1="3" y1="21" x2="21" y2="3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+    root.appendChild(style);
+    root.appendChild(btn);
+    document.body.appendChild(host);
+
+    function show() {
+      var on = !audio.paused;
+      btn.className = on ? 'on' : 'off';
+      btn.setAttribute('aria-label', on ? '배경음악 끄기' : '배경음악 켜기');
+      btn.setAttribute('aria-pressed', String(on));
+    }
+    function play() { return audio.play().then(show, function () { show(); return Promise.reject(); }); }
+    audio.addEventListener('play', show);
+    audio.addEventListener('pause', show);
+    show();
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (audio.paused) { userOff = false; try { sessionStorage.removeItem(OFF_KEY); } catch (er) {} play().catch(function () {}); }
+      else { userOff = true; try { sessionStorage.setItem(OFF_KEY, '1'); } catch (er) {} audio.pause(); }
+    });
+
+    // 자동 재생: 먼저 바로 시도하고, 막히면 첫 터치·클릭·키 입력 때 시작
+    if (M.autoplay && !userOff) {
+      play().catch(function () {
+        var events = ['click', 'touchend', 'keydown'];
+        var start = function () {
+          events.forEach(function (t) { document.removeEventListener(t, start, true); });
+          if (!userOff && audio.paused) play().catch(function () {});
+        };
+        events.forEach(function (t) { document.addEventListener(t, start, true); });
+      });
+    }
+
+    // 다른 앱·탭으로 가면 멈추고, 돌아오면 이어서
+    var resume = false;
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { resume = !audio.paused; audio.pause(); }
+      else if (resume && !userOff) { play().catch(function () {}); }
+    });
+
+    var pausedForVideo = false;
+    return {
+      videoPlaying: function () { if (!audio.paused) { pausedForVideo = true; audio.pause(); } },
+      videoStopped: function () { if (pausedForVideo && !userOff) { pausedForVideo = false; play().catch(function () {}); } },
+    };
+  }
+  if (C.music && C.music.src) bgm = musicButton();
+
   // 저장소 주소가 없으면 배포된 청첩장에서는 숨기고, 내 PC 미리보기에서만 '저장 안 됨'으로 보여 준다.
   var rsvpOn = C.rsvp && C.rsvp.enabled && (C.rsvp.endpoint || LOCAL);
   var guestbookOn = C.guestbook && C.guestbook.enabled && (C.guestbook.endpoint || LOCAL);
   var shareOn = C.share && C.share.enabled;
-  if (!rsvpOn && !guestbookOn && !shareOn) return;
+  var videoOn = !!C.video;
+  if (!rsvpOn && !guestbookOn && !shareOn && !videoOn) return;
+
+  /* ── 동영상: 유튜브 또는 직접 올린 mp4 ──────────────────────── */
+  function videoSection() {
+    var V = C.video;
+    var frame = el('div', { class: 'video-frame' });
+    if (V.youtube) {
+      // 유튜브 재생 상태를 받아 배경음악을 멈추기 위해 enablejsapi 사용
+      var iframe = el('iframe', {
+        src: 'https://www.youtube-nocookie.com/embed/' + V.youtube + '?rel=0&playsinline=1&enablejsapi=1&origin=' + encodeURIComponent(location.origin),
+        title: V.title || '영상',
+        allow: 'accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen',
+        allowfullscreen: true,
+        loading: 'lazy',
+        referrerpolicy: 'strict-origin-when-cross-origin',
+      });
+      iframe.addEventListener('load', function () {
+        try { iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 'wedding-video' }), '*'); } catch (e) {}
+      });
+      window.addEventListener('message', function (e) {
+        if (e.source !== iframe.contentWindow || !bgm || !/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)) return;
+        var data;
+        try { data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch (er) { return; }
+        var st = data && data.info && data.info.playerState;
+        if (st === 1) bgm.videoPlaying();
+        else if (st === 0 || st === 2) bgm.videoStopped();
+      });
+      frame.appendChild(iframe);
+    } else {
+      var video = el('video', { src: BASE + V.src, controls: true, playsinline: true, preload: 'metadata', poster: V.poster ? BASE + V.poster : false });
+      video.addEventListener('play', function () { if (bgm) bgm.videoPlaying(); });
+      video.addEventListener('pause', function () { if (bgm) bgm.videoStopped(); });
+      video.addEventListener('ended', function () { if (bgm) bgm.videoStopped(); });
+      frame.appendChild(video);
+    }
+    return el('section', { class: 'card video', id: 'wa-video' }, [V.title ? el('h2', { text: V.title }) : null, frame]);
+  }
 
   function el(tag, attrs, children) {
     var n = document.createElement(tag);
@@ -312,6 +435,7 @@
     if (C.accent) host.style.setProperty('--wa-accent', C.accent);
     root.appendChild(el('link', { rel: 'stylesheet', href: BASE + 'wedding-addons.css' }));
     var wrap = el('div', { class: 'wrap' });
+    if (videoOn) wrap.appendChild(videoSection());
     if (rsvpOn) wrap.appendChild(rsvpSection());
     if (guestbookOn) wrap.appendChild(guestbookSection());
     if (shareOn) wrap.appendChild(shareSection());

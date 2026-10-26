@@ -1,21 +1,35 @@
 // 관리자 페이지(/admin/) API. 로컬 서버(scripts/server.mjs)에서만 동작한다.
 //   GET    /api/admin/state            wedding.json, 템플릿 목록, data/images 파일 목록, git 브랜치
 //   PUT    /api/admin/wedding          wedding.json 저장(검증 후 원자적으로 교체)
-//   POST   /api/admin/upload?name=…    사진 1장 저장(본문 = 이미지 바이트) → data/images/<name>
-//   DELETE /api/admin/image?name=…     data/images/<name> 삭제
+//   POST   /api/admin/upload?name=…    파일 1개 저장(본문 = 파일 바이트). 확장자로 종류를 정한다
+//                                      사진(jpg/png/webp) → data/images/, 음악(mp3/m4a)·동영상(mp4) → data/media/
+//   DELETE /api/admin/image?name=…     위 파일 삭제
 //   POST   /api/admin/build            대표 템플릿 빌드 + dist/ 생성(미리보기용)
 //   POST   /api/admin/deploy           data/ 변경을 커밋하고 main 이면 push → GitHub Actions 가 배포
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
+import { youtubeId } from './lib/wedding.mjs';
 
-const MAX_UPLOAD = 15 * 1024 * 1024;
-const IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+const MB = 1024 * 1024;
+// 파일 종류별 저장 폴더·크기 제한·내용 확인(확장자만 믿지 않고 파일 앞부분으로 판별)
+const ftyp = (b) => b.slice(4, 8).toString('ascii') === 'ftyp';
+const KINDS = {
+  '.jpg': { dir: 'images', max: 15 * MB, label: '사진', check: (b) => b[0] === 0xff && b[1] === 0xd8 },
+  '.jpeg': { dir: 'images', max: 15 * MB, label: '사진', check: (b) => b[0] === 0xff && b[1] === 0xd8 },
+  '.png': { dir: 'images', max: 15 * MB, label: '사진', check: (b) => b.slice(1, 4).toString('ascii') === 'PNG' },
+  '.webp': { dir: 'images', max: 15 * MB, label: '사진', check: (b) => b.slice(0, 4).toString('ascii') === 'RIFF' && b.slice(8, 12).toString('ascii') === 'WEBP' },
+  '.mp3': { dir: 'media', max: 12 * MB, label: '음악', check: (b) => b.slice(0, 3).toString('ascii') === 'ID3' || (b[0] === 0xff && (b[1] & 0xe0) === 0xe0) },
+  '.m4a': { dir: 'media', max: 12 * MB, label: '음악', check: ftyp },
+  // GitHub 은 50MB 를 넘는 파일에 경고, 100MB 를 넘으면 거부한다.
+  '.mp4': { dir: 'media', max: 45 * MB, label: '동영상', check: ftyp },
+};
 
 export function createAdmin({ root, port, send }) {
   const DATA = join(root, 'data');
   const IMAGES = join(DATA, 'images');
+  const MEDIA = join(DATA, 'media');
   const WEDDING = join(DATA, 'wedding.json');
   const CATALOG = join(root, 'templates', 'catalog.json');
   let busy = false;
@@ -42,11 +56,22 @@ export function createAdmin({ root, port, send }) {
     return Buffer.concat(chunks);
   }
 
-  // 파일 이름은 영문·숫자·-_. 만, 확장자는 사진만
-  function safeImageName(name) {
+  // 파일 이름은 영문·숫자·-_. 만, 확장자는 KINDS 에 있는 것만
+  function safeFile(name) {
     const n = basename(String(name || ''));
-    if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(n) || !IMAGE_EXT.has(extname(n).toLowerCase())) return null;
-    return n;
+    const kind = KINDS[extname(n).toLowerCase()];
+    if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(n) || !kind) return null;
+    return { name: n, kind, file: join(DATA, kind.dir, n), path: `${kind.dir}/${n}` };
+  }
+
+  async function listDir(dir, sub) {
+    const out = [];
+    for (const f of existsSync(dir) ? await readdir(dir) : []) {
+      const kind = KINDS[extname(f).toLowerCase()];
+      if (!kind || kind.dir !== sub) continue;
+      out.push({ name: f, path: `${sub}/${f}`, size: (await stat(join(dir, f))).size });
+    }
+    return out;
   }
 
   function run(cmd, args, env) {
@@ -78,19 +103,20 @@ export function createAdmin({ root, port, send }) {
         errors.push(`${f === 'rsvp' ? '참석 여부' : '방명록'} 저장소 주소는 https://script.google.com/macros/s/…/exec 형식이어야 합니다`);
       }
     }
+    const music = w.features.music || {};
+    if (music.src && !/^media\/[A-Za-z0-9][\w.-]*\.(mp3|m4a)$/.test(music.src)) errors.push('배경음악 파일 경로가 올바르지 않습니다');
+    const video = w.features.video || {};
+    if (video.src && !/^media\/[A-Za-z0-9][\w.-]*\.mp4$/.test(video.src)) errors.push('동영상 파일 경로가 올바르지 않습니다');
+    if (video.youtube && !youtubeId(video.youtube)) errors.push('유튜브 주소를 확인하세요 (예: https://youtu.be/xxxxxxxxxxx)');
     return errors;
   }
 
   async function state(res) {
-    const files = existsSync(IMAGES) ? await readdir(IMAGES) : [];
-    const images = [];
-    for (const f of files) {
-      if (!IMAGE_EXT.has(extname(f).toLowerCase())) continue;
-      const s = await stat(join(IMAGES, f));
-      images.push({ name: f, path: `images/${f}`, size: s.size });
-    }
     const branch = (await git('rev-parse', '--abbrev-ref', 'HEAD')).out.trim();
-    send(res, 200, { wedding: await readJson(WEDDING), catalog: await readJson(CATALOG), images, branch });
+    send(res, 200, {
+      wedding: await readJson(WEDDING), catalog: await readJson(CATALOG), branch,
+      images: await listDir(IMAGES, 'images'), media: await listDir(MEDIA, 'media'),
+    });
   }
 
   async function saveWedding(req, res) {
@@ -105,23 +131,23 @@ export function createAdmin({ root, port, send }) {
   }
 
   async function upload(req, res, url) {
-    const name = safeImageName(url.searchParams.get('name'));
-    if (!name) return send(res, 400, { error: '파일 이름은 영문·숫자로 된 jpg/png/webp 여야 합니다' });
-    const buf = await body(req, MAX_UPLOAD);
-    // 확장자만 믿지 않고 파일 앞부분(매직 넘버)으로 사진인지 확인
-    const isJpg = buf[0] === 0xff && buf[1] === 0xd8;
-    const isPng = buf.slice(1, 4).toString('ascii') === 'PNG';
-    const isWebp = buf.slice(0, 4).toString('ascii') === 'RIFF' && buf.slice(8, 12).toString('ascii') === 'WEBP';
-    if (!isJpg && !isPng && !isWebp) return send(res, 400, { error: '사진 파일(jpg/png/webp)만 올릴 수 있습니다' });
-    await writeFile(join(IMAGES, name), buf);
-    send(res, 200, { ok: true, path: `images/${name}`, size: buf.length });
+    const f = safeFile(url.searchParams.get('name'));
+    if (!f) return send(res, 400, { error: '파일 이름은 영문·숫자로, 사진(jpg/png/webp)·음악(mp3/m4a)·동영상(mp4)만 올릴 수 있습니다' });
+    let buf;
+    try { buf = await body(req, f.kind.max); } catch (e) {
+      if (e.status === 413) return send(res, 413, { error: `${f.kind.label} 파일은 ${f.kind.max / MB}MB 이하만 올릴 수 있습니다` });
+      throw e;
+    }
+    if (!f.kind.check(buf)) return send(res, 400, { error: `${extname(f.name)} ${f.kind.label} 파일이 아닙니다` });
+    await mkdir(join(DATA, f.kind.dir), { recursive: true });
+    await writeFile(f.file, buf);
+    send(res, 200, { ok: true, path: f.path, size: buf.length });
   }
 
-  async function removeImage(res, url) {
-    const name = safeImageName(url.searchParams.get('name'));
-    if (!name) return send(res, 400, { error: '잘못된 파일 이름입니다' });
-    const file = join(IMAGES, name);
-    if (existsSync(file)) await unlink(file);
+  async function removeFile(res, url) {
+    const f = safeFile(url.searchParams.get('name'));
+    if (!f) return send(res, 400, { error: '잘못된 파일 이름입니다' });
+    if (existsSync(f.file)) await unlink(f.file);
     send(res, 200, { ok: true });
   }
 
@@ -189,7 +215,7 @@ export function createAdmin({ root, port, send }) {
       if (route === 'GET /api/admin/state') await state(res);
       else if (route === 'PUT /api/admin/wedding') await saveWedding(req, res);
       else if (route === 'POST /api/admin/upload') await upload(req, res, url);
-      else if (route === 'DELETE /api/admin/image') await removeImage(res, url);
+      else if (route === 'DELETE /api/admin/image') await removeFile(res, url);
       else if (route === 'POST /api/admin/build') await build(res);
       else if (route === 'POST /api/admin/deploy') await deploy(res);
       else send(res, 404, { error: 'not found' });
