@@ -40,7 +40,8 @@ function person(p, images, warn, fallbackPhoto) {
 }
 
 // 공통 모듈: 템플릿의 카카오 공유 섹션 바로 위에 붙이고, 공유 버튼은 템플릿 것을 쓴다.
-export const addons = { mount: { selector: '#root section:nth-last-of-type(2)', where: 'beforebegin' }, share: false, accent: '#9c7a5b' };
+// 맨 아래 THANK YOU 꼬리말을 빼므로 공유 섹션이 마지막 섹션이다.
+export const addons = { mount: { selector: '#root section:last-of-type', where: 'beforebegin' }, share: false, accent: '#9c7a5b' };
 
 export async function apply({ wedding: w, out, images }) {
   const warnings = [];
@@ -137,6 +138,9 @@ export async function apply({ wedding: w, out, images }) {
   const flowersTag = '<script type="text/babel" src="./components/flowers.jsx"></script>';
   if (!html.includes(flowersTag)) throw new Error('index.html 에서 flowers.jsx 스크립트를 찾지 못했습니다');
   html = html.replace(flowersTag, `${flowersTag}\n<script type="text/babel" src="./components/falling-doodles.jsx"></script>`);
+  // 카카오톡 공유 아래의 꽃 장식·THANK YOU 꼬리말은 넣지 않는다.
+  if (!/\s*<FooterSection \/>/.test(html)) throw new Error('index.html 에서 <FooterSection /> 을 찾지 못했습니다');
+  html = html.replace(/\r?\n\s*<FooterSection \/>/, '');
   const og = {
     'og:title': w.site.title,
     'og:description': w.site.description || `${when.dateTimeKo} · ${venueLine(w.venue)}`,
