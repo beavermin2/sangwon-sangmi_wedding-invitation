@@ -1,0 +1,192 @@
+{
+  "template": "t01-hb4258",
+  "site": {
+    "url": "",
+    "title": "이도현 ♥ 한지우 결혼합니다",
+    "description": "2027년 5월 15일 토요일 오후 12시 30분 · 더채플앳청담",
+    "ogImage": "images/og.jpg",
+    "favicon": "images/favicon.png"
+  },
+  "groom": {
+    "name": "이도현",
+    "nameEn": {
+      "first": "Dohyun",
+      "last": "Lee"
+    },
+    "relation": "장남",
+    "phone": "010-0000-0001",
+    "photo": "images/groom.jpg",
+    "parents": {
+      "father": {
+        "name": "이정우",
+        "phone": "010-0000-0002",
+        "deceased": false
+      },
+      "mother": {
+        "name": "박수진",
+        "phone": "010-0000-0003",
+        "deceased": false
+      }
+    }
+  },
+  "bride": {
+    "name": "한지우",
+    "nameEn": {
+      "first": "Jiwoo",
+      "last": "Han"
+    },
+    "relation": "차녀",
+    "phone": "010-0000-0004",
+    "photo": "images/bride.jpg",
+    "parents": {
+      "father": {
+        "name": "한성호",
+        "phone": "010-0000-0005",
+        "deceased": false
+      },
+      "mother": {
+        "name": "김은영",
+        "phone": "010-0000-0006",
+        "deceased": false
+      }
+    }
+  },
+  "ceremony": {
+    "datetime": "2027-05-15T12:30:00+09:00"
+  },
+  "venue": {
+    "name": "더채플앳청담",
+    "hall": "커티지홀",
+    "floor": "3층",
+    "address": "서울특별시 강남구 선릉로 757",
+    "addressDetail": "7호선 청담역 13번 출구 도보 10분",
+    "phone": "02-0000-0000",
+    "lat": 37.5236,
+    "lng": 127.045,
+    "naverPlaceId": "",
+    "kakaoPlaceId": "",
+    "transport": [
+      {
+        "type": "subway",
+        "label": "지하철",
+        "detail": "7호선 청담역 13번 출구 도보 10분"
+      },
+      {
+        "type": "bus",
+        "label": "버스",
+        "detail": "간선 301, 342 · 청담사거리 하차"
+      },
+      {
+        "type": "car",
+        "label": "자가용",
+        "detail": "건물 지하 주차장 2시간 무료"
+      }
+    ]
+  },
+  "greeting": {
+    "title": "저희 결혼합니다",
+    "message": "서로가 마주 보며 다져온 사랑을\n이제 함께 한 곳을 바라보며\n걸어갈 수 있는 큰 울타리로 키우고자 합니다.\n\n귀한 걸음 하시어 축복해 주시면 감사하겠습니다.",
+    "quote": {
+      "text": "",
+      "author": ""
+    }
+  },
+  "notices": [
+    {
+      "icon": "🍽",
+      "title": "식사 안내",
+      "detail": "예식 후 2층 연회장에서 뷔페가 제공됩니다."
+    },
+    {
+      "icon": "🅿",
+      "title": "주차 안내",
+      "detail": "건물 지하 주차장 2시간 무료입니다."
+    }
+  ],
+  "gallery": {
+    "cover": "images/cover.jpg",
+    "photos": []
+  },
+  "accounts": {
+    "note": "참석이 어려우신 분들을 위해\n계좌번호를 안내드립니다",
+    "groom": [
+      {
+        "owner": "이도현",
+        "relation": "신랑",
+        "bank": "은행명",
+        "number": "000-000-000000",
+        "kakaopay": ""
+      },
+      {
+        "owner": "이정우",
+        "relation": "아버지",
+        "bank": "은행명",
+        "number": "000-000-000000",
+        "kakaopay": ""
+      }
+    ],
+    "bride": [
+      {
+        "owner": "한지우",
+        "relation": "신부",
+        "bank": "은행명",
+        "number": "000-000-000000",
+        "kakaopay": ""
+      },
+      {
+        "owner": "한성호",
+        "relation": "아버지",
+        "bank": "은행명",
+        "number": "000-000-000000",
+        "kakaopay": ""
+      }
+    ]
+  },
+  "features": {
+    "rsvp": {
+      "enabled": true,
+      "deadline": "2027-05-01",
+      "askCompanions": true,
+      "askMeal": true,
+      "endpoint": ""
+    },
+    "guestbook": {
+      "enabled": true,
+      "provider": "google-sheets",
+      "endpoint": ""
+    },
+    "kakaoShare": {
+      "enabled": true,
+      "jsKey": "",
+      "buttonText": "모바일 청첩장 보기"
+    },
+    "map": {
+      "kakaoJsKey": "",
+      "naverClientId": ""
+    },
+    "music": {
+      "enabled": false,
+      "src": ""
+    }
+  },
+  "templateOptions": {
+    "t02-nerdkim": {
+      "defaultVersion": "main",
+      "firstMetAt": "2022-03-01T00:00:00+09:00",
+      "groom": {
+        "role": "",
+        "mbti": "",
+        "hobby": "",
+        "note": "",
+        "rankExpr": ""
+      },
+      "bride": {
+        "role": "",
+        "mbti": "",
+        "hobby": "",
+        "note": "",
+        "rankExpr": ""
+      }
+    }
+  }
+}

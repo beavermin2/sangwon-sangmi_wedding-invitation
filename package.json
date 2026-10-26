@@ -1,0 +1,12 @@
+{
+  "name": "wedding-invitation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs && node scripts/server.mjs",
+    "build:addons": "node scripts/build.mjs --addons-only",
+    "dist": "node scripts/dist.mjs",
+    "dist:test": "node scripts/dist.mjs --allow-demo"
+  }
+}

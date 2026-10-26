@@ -1,0 +1,151 @@
+[
+  {
+    "id": "t01-hb4258",
+    "title": "클래식 화이트",
+    "repo": "hb4258/wedding-mobile-invitation",
+    "commit": "db6b5daf3acdac94ac75f96687a0f0002dab64ba",
+    "license": "MIT",
+    "stack": "static",
+    "build": false,
+    "features": [
+      "guestbook",
+      "rsvp",
+      "kakaoShare",
+      "kakaoMap",
+      "account"
+    ],
+    "preview": {
+      "local": "build/t01-hb4258/index.html",
+      "demo": ""
+    },
+    "note": "config.js 하나로 정보 수정, GitHub Pages 전제로 제작"
+  },
+  {
+    "id": "t02-nerdkim",
+    "title": "개발자 감성",
+    "repo": "nerdkim/wedding-invitation-for-nerds",
+    "commit": "9e20aa46daaf4ad1fdfb1d0be50300bc0bd99abb",
+    "license": "MIT",
+    "stack": "static",
+    "build": true,
+    "features": [
+      "rsvp",
+      "kakaoShare",
+      "guestbook",
+      "naverMap",
+      "account"
+    ],
+    "preview": {
+      "local": "build/t02-nerdkim/index.html",
+      "demo": ""
+    },
+    "note": "main / developer / terminal 세 가지 화면"
+  },
+  {
+    "id": "t03-yoon-ena",
+    "title": "심플 일러스트",
+    "repo": "yoon-ena/wedding",
+    "commit": "6c0eac0c0013507fe5a6845c7897ee7a60ba2053",
+    "license": "MIT",
+    "stack": "static",
+    "build": false,
+    "features": [
+      "kakaoShare",
+      "guestbook",
+      "rsvp",
+      "account"
+    ],
+    "preview": {
+      "local": "build/t03-yoon-ena/index.html",
+      "demo": "https://yoonena.github.io/wedding/"
+    },
+    "note": "순수 HTML, 정갈한 일러스트 감성"
+  },
+  {
+    "id": "t04-heejin-hwang",
+    "title": "봄날 파스텔",
+    "repo": "heejin-hwang/mobile-wedding-invitation",
+    "commit": "fcffc9f0ddde329bf6490fad97e46fb0cdd50c7f",
+    "license": "MIT",
+    "stack": "react-vite",
+    "build": true,
+    "features": [
+      "kakaoShare",
+      "guestbook",
+      "rsvp",
+      "naverMap",
+      "kakaoMap",
+      "account"
+    ],
+    "preview": {
+      "local": "build/t04-heejin-hwang/index.html",
+      "demo": "https://happily-ever-after.vercel.app/"
+    },
+    "note": "가장 인기(441★), 봄 컬러 디자인, 구글 캘린더 추가 버튼"
+  },
+  {
+    "id": "t05-wkdtjsgur100",
+    "title": "벚꽃 엔딩",
+    "repo": "wkdtjsgur100/mobile-wedding-invitation",
+    "commit": "bbbdaafb5544c88119714bf2504b767709dc8bcb",
+    "license": "MIT",
+    "stack": "react-vite",
+    "build": true,
+    "features": [
+      "kakaoShare",
+      "guestbook",
+      "rsvp",
+      "naverMap",
+      "kakaoMap",
+      "account"
+    ],
+    "preview": {
+      "local": "build/t05-wkdtjsgur100/index.html",
+      "demo": "https://sw-wedding.vercel.app"
+    },
+    "note": "t04 파생작(벚꽃 효과), 네이버 지도, 원저작권 heejin-hwang 표기 유지"
+  },
+  {
+    "id": "t06-juhonamnam",
+    "title": "모던 미니멀",
+    "repo": "juhonamnam/wedding-invitation",
+    "commit": "27a36f79b943762957d737f5e8feffd4964f626c",
+    "license": "MIT",
+    "stack": "react-vite",
+    "build": true,
+    "features": [
+      "guestbook",
+      "rsvp",
+      "kakaoShare",
+      "naverMap",
+      "kakaoMap",
+      "account"
+    ],
+    "preview": {
+      "local": "build/t06-juhonamnam/index.html",
+      "demo": "https://juhonamnam.github.io/wedding-invitation/"
+    },
+    "note": "기능 가장 풍부: 카카오 공유·네이버 지도·내비 연동·D-Day"
+  },
+  {
+    "id": "t07-knm8643",
+    "title": "블루밍 플라워",
+    "repo": "knm8643/wedding-public",
+    "commit": "cebf2ada4237cb7aecfc761d2d5ef14a68a3b346",
+    "license": "MIT",
+    "stack": "vue-vite",
+    "build": true,
+    "features": [
+      "kakaoShare",
+      "guestbook",
+      "rsvp",
+      "kakaoMap",
+      "account"
+    ],
+    "preview": {
+      "local": "build/t07-knm8643/index.html",
+      "demo": "https://chungrimi.com"
+    },
+    "note": "Vue, 핑크 꽃잎 효과(Blooming Plus 디자인)"
+  }
+]

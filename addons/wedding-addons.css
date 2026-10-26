@@ -1,0 +1,113 @@
+/* 청첩장 공통 모듈 스타일 (Shadow DOM 안에서만 적용됨) */
+:host {
+  all: initial;
+  display: block;
+  --wa-accent: #b5776b;
+  --wa-ink: #3a3330;
+  --wa-muted: #8a817c;
+  --wa-line: #e8e1dc;
+  --wa-surface: rgba(255, 255, 255, 0.92);
+  --wa-field: #ffffff;
+  font-family: inherit;
+  color: var(--wa-ink);
+}
+* { box-sizing: border-box; }
+.wrap {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  font-family: inherit;
+  text-align: left;
+}
+.card {
+  background: var(--wa-surface);
+  border: 1px solid var(--wa-line);
+  border-radius: 16px;
+  padding: 24px 20px;
+}
+h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--wa-accent);
+  letter-spacing: 0.02em;
+}
+.sub {
+  margin: 0 0 18px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--wa-muted);
+  white-space: pre-line;
+}
+form { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 13px; font-weight: 600; }
+.hint { font-size: 12px; color: var(--wa-muted); }
+input, textarea, button { font: inherit; color: inherit; }
+input:not([type=radio]), textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--wa-line);
+  border-radius: 10px;
+  background: var(--wa-field);
+  font-size: 15px;
+}
+input:focus-visible, textarea:focus-visible, button:focus-visible, .choice:focus-within {
+  outline: 2px solid var(--wa-accent);
+  outline-offset: 1px;
+}
+textarea { resize: vertical; }
+input:disabled { opacity: 0.5; }
+.choices { display: flex; gap: 8px; flex-wrap: wrap; }
+.choice { flex: 1 1 0; min-width: 0; position: relative; }
+.choice input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.choice span {
+  display: block;
+  padding: 9px 8px;
+  border: 1px solid var(--wa-line);
+  border-radius: 10px;
+  text-align: center;
+  font-size: 14px;
+  background: var(--wa-field);
+}
+.choice input:checked + span { border-color: var(--wa-accent); background: var(--wa-accent); color: #fff; }
+.choice input:disabled + span { opacity: 0.45; }
+button {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--wa-line);
+  background: var(--wa-field);
+  font-size: 15px;
+  cursor: pointer;
+}
+button:disabled { opacity: 0.6; cursor: default; }
+button.primary { background: var(--wa-accent); border-color: var(--wa-accent); color: #fff; font-weight: 600; }
+button.kakao { background: #fee500; border-color: #fee500; color: #191919; font-weight: 600; }
+button.ghost { background: transparent; }
+.status { margin: 0; min-height: 1em; font-size: 13px; text-align: center; color: var(--wa-accent); }
+.status:empty { display: none; }
+.done { text-align: center; margin: 0; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.preview {
+  margin: 14px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff6e5;
+  color: #8a5a00;
+  font-size: 12px;
+}
+.posts { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.posts li { padding: 12px 14px; border-radius: 12px; background: var(--wa-field); border: 1px solid var(--wa-line); }
+.posts li.empty { text-align: center; color: var(--wa-muted); font-size: 14px; }
+.post-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; }
+.post-head span { font-size: 12px; color: var(--wa-muted); }
+.posts p { margin: 4px 0 0; white-space: pre-wrap; word-break: break-word; font-size: 14px; }
+.posts + button { margin-top: 10px; width: 100%; }
+.share { padding: 16px; }
+.share .buttons { display: flex; flex-direction: column; gap: 8px; }

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>청첩장 템플릿 갤러리</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #faf7f4; --surface: #ffffff; --ink: #2b2522; --muted: #8a7f78; --line: #ebe4de;
+      --accent: #b5776b; --accent-ink: #ffffff; --ok: #3f8f6b; --warn: #c27c2c; --chip: #f3ede8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1c1917; --surface: #262220; --ink: #f2ece7; --muted: #a8a09a; --line: #3a3431;
+        --accent: #d49688; --accent-ink: #1c1917; --ok: #6cc59b; --warn: #e3a35a; --chip: #322c29;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Noto Sans KR', system-ui, sans-serif; }
+    header { padding: 40px 16px 24px; text-align: center; }
+    h1 { font-family: 'Gowun Batang', serif; font-size: 28px; margin: 0 0 8px; }
+    .sub { color: var(--muted); margin: 0; font-size: 14px; }
+    .bar { max-width: 1200px; margin: 0 auto; padding: 0 16px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+    .needs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+    .current { font-size: 14px; }
+    .current b { color: var(--accent); }
+    label.filter { font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; cursor: pointer; }
+    main { max-width: 1200px; margin: 0 auto; padding: 0 16px 64px; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+    .phone { position: relative; width: 224px; height: 460px; margin: 0 auto; border-radius: 24px; overflow: hidden; border: 6px solid #2b2522; background: #fff; }
+    .phone iframe { position: absolute; top: 0; left: 0; width: 360px; height: 740px; border: 0; transform: scale(0.589); transform-origin: 0 0; }
+    .phone .empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 16px; font-size: 13px; color: #8a7f78; background: #f3ede8; }
+    .src { position: absolute; right: 6px; bottom: 6px; font-size: 11px; padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,.6); color: #fff; }
+    .title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .title h2 { font-family: 'Gowun Batang', serif; font-size: 19px; margin: 0; }
+    .title span { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .note { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.5; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--chip); }
+    .chip.ok { color: var(--ok); }
+    .chip.miss { color: var(--warn); }
+    .actions { display: flex; gap: 8px; margin-top: auto; }
+    .actions a, .actions button { flex: 1; text-align: center; font: inherit; font-size: 13px; padding: 9px 0; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--ink); text-decoration: none; cursor: pointer; }
+    .actions button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+    .actions button:disabled { opacity: .6; cursor: default; }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: calc(100% - 32px); }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>청첩장 템플릿 갤러리</h1>
+    <p class="sub">마음에 드는 템플릿을 대표 청첩장으로 선택하세요</p>
+  </header>
+  <div class="bar">
+    <div class="current">현재 대표 템플릿: <b id="current">-</b></div>
+    <div class="needs" id="needs"></div>
+    <label class="filter"><input type="checkbox" id="onlyFit"> 내가 켠 기능을 모두 지원하는 것만</label>
+  </div>
+  <main id="list"></main>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var LABELS = { kakaoShare: '카카오 공유', guestbook: '방명록', rsvp: '참석 여부', kakaoMap: '카카오맵', naverMap: '네이버 지도', account: '계좌 안내' };
+    var STACK = { 'static': 'HTML', 'react-vite': 'React', 'vue-vite': 'Vue' };
+    var state = { catalog: [], wedding: null, needs: [], built: {} };
+
+    function el(tag, attrs, children) {
+      var n = document.createElement(tag);
+      for (var k in attrs || {}) {
+        if (k === 'text') n.textContent = attrs[k]; else if (k === 'class') n.className = attrs[k]; else n.setAttribute(k, attrs[k]);
+      }
+      (children || []).forEach(function (c) { n.appendChild(c); });
+      return n;
+    }
+
+    function toast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      clearTimeout(toast.timer); toast.timer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+    }
+
+    function neededFeatures(w) {
+      var f = w.features || {}, out = [];
+      ['rsvp', 'guestbook', 'kakaoShare'].forEach(function (k) { if (f[k] && f[k].enabled) out.push(k); });
+      return out;
+    }
+
+    // 빌드 결과가 있으면 내 데이터로, 아직 빌드 전이면 원작 데모로 미리 본다.
+    function previewUrl(t) {
+      if (t.preview.local && state.built[t.id]) return { url: '../' + t.preview.local, kind: '내 데이터' };
+      if (t.preview.demo) return { url: t.preview.demo, kind: '원작 데모' };
+      return null;
+    }
+
+    function checkBuilt(catalog) {
+      return Promise.all(catalog.map(function (t) {
+        if (!t.preview.local) return null;
+        return fetch('../' + t.preview.local, { cache: 'no-store' })
+          .then(function (r) { state.built[t.id] = r.ok; })
+          .catch(function () { state.built[t.id] = false; });
+      }));
+    }
+
+    function card(t) {
+      var p = previewUrl(t);
+      var phone = el('div', { class: 'phone' });
+      if (p) {
+        phone.appendChild(el('iframe', { src: p.url, loading: 'lazy', title: t.title + ' 미리보기' }));
+        phone.appendChild(el('span', { class: 'src', text: p.kind }));
+      } else {
+        phone.appendChild(el('div', { class: 'empty', text: '빌드 후 미리보기가 제공됩니다' }));
+      }
+
+      var chips = el('div', { class: 'chips' });
+      state.needs.forEach(function (k) {
+        var has = t.features.indexOf(k) >= 0;
+        chips.appendChild(el('span', { class: 'chip ' + (has ? 'ok' : 'miss'), text: (has ? '✓ ' : '+ ') + LABELS[k] + (has ? '' : ' 추가 구현') }));
+      });
+      t.features.forEach(function (k) {
+        if (state.needs.indexOf(k) < 0) chips.appendChild(el('span', { class: 'chip', text: LABELS[k] || k }));
+      });
+
+      var selected = state.wedding.template === t.id;
+      var btn = el('button', { class: 'primary', text: selected ? '대표 템플릿' : '대표로 선택' });
+      if (selected) btn.disabled = true;
+      btn.addEventListener('click', function () { select(t.id); });
+
+      var actions = el('div', { class: 'actions' }, [
+        el('a', { href: p ? p.url : 'https://github.com/' + t.repo, target: '_blank', rel: 'noopener', text: p ? '크게 보기' : '원본 보기' }),
+        btn
+      ]);
+
+      return el('article', { class: 'card' + (selected ? ' selected' : ''), 'data-id': t.id }, [
+        phone,
+        el('div', { class: 'title' }, [el('h2', { text: t.title }), el('span', { text: STACK[t.stack] + ' · ' + t.license })]),
+        el('p', { class: 'note', text: t.note }),
+        chips,
+        el('a', { class: 'note', href: 'https://github.com/' + t.repo, target: '_blank', rel: 'noopener', text: 'github.com/' + t.repo }),
+        actions
+      ]);
+    }
+
+    function render() {
+      var cur = state.catalog.filter(function (t) { return t.id === state.wedding.template; })[0];
+      document.getElementById('current').textContent = cur ? cur.title + ' (' + cur.id + ')' : '선택 안 됨';
+
+      var needs = document.getElementById('needs');
+      needs.innerHTML = '';
+      needs.appendChild(document.createTextNode('켠 기능'));
+      state.needs.forEach(function (k) { needs.appendChild(el('span', { class: 'chip', text: LABELS[k] })); });
+
+      var onlyFit = document.getElementById('onlyFit').checked;
+      var list = document.getElementById('list');
+      list.innerHTML = '';
+      state.catalog.forEach(function (t) {
+        var fits = state.needs.every(function (k) { return t.features.indexOf(k) >= 0; });
+        if (!onlyFit || fits) list.appendChild(card(t));
+      });
+    }
+
+    function select(id) {
+      fetch('/api/select', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (res) {
+          state.wedding.template = res.template;
+          render();
+          toast('대표 템플릿을 변경했습니다. data/wedding.json 에 저장됨');
+        })
+        .catch(function () { toast('선택은 로컬 서버(npm run dev)에서만 저장됩니다'); });
+    }
+
+    Promise.all([
+      fetch('../templates/catalog.json', { cache: 'no-store' }).then(function (r) { return r.json(); }),
+      fetch('../data/wedding.json', { cache: 'no-store' }).then(function (r) { return r.json(); })
+    ]).then(function (res) {
+      state.catalog = res[0]; state.wedding = res[1]; state.needs = neededFeatures(res[1]);
+      return checkBuilt(state.catalog);
+    }).then(function () {
+      document.getElementById('onlyFit').addEventListener('change', render);
+      render();
+    }).catch(function (e) {
+      document.getElementById('list').textContent = '데이터를 불러오지 못했습니다: ' + e;
+    });
+  </script>
+</body>
+</html>
