@@ -1,12 +1,24 @@
 // t01-hb4258: wedding.json → config.js (window.CONFIG)
 // 템플릿은 config.js 하나만 읽으므로 그 파일을 새로 쓰고, 사진은 assets/ 아래로 옮긴다.
-import { readFile, writeFile, readdir, rm } from 'node:fs/promises';
+import { readFile, writeFile, readdir, rm, copyFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   kstParts, parentName, parentPhone, accountLabel, kakaoKey, venueLine, escapeHtml,
 } from '../../scripts/lib/wedding.mjs';
 
 const ICON = { subway: 'M', bus: 'B', car: 'P' };
+
+// 복사본 파일의 정해진 부분을 바꾼다. 원본이 바뀌어 못 찾으면 조용히 넘어가지 않고 빌드를 멈춘다.
+async function patch(file, pairs) {
+  // Windows 에서 CRLF 로 받은 저장소에서도 같은 문자열로 찾도록 줄바꿈을 맞춘다.
+  let text = (await readFile(file, 'utf8')).replace(/\r\n/g, '\n');
+  for (const [from, to] of pairs) {
+    if (!text.includes(from)) throw new Error(`${file} 에서 바꿀 부분을 찾지 못했습니다: ${from.trim().slice(0, 60)}`);
+    text = text.replace(from, to);
+  }
+  await writeFile(file, text);
+}
 
 function person(p, images, warn, fallbackPhoto) {
   if (!images.has(p.photo)) warn(`${p.name} 사진이 없어 데모 사진을 씁니다`);
@@ -100,9 +112,21 @@ export async function apply({ wedding: w, out, images }) {
     '// scripts/build.mjs 가 data/wedding.json 에서 생성했습니다. 직접 고치지 마세요.\n' +
     `window.CONFIG = ${JSON.stringify(config, null, 2)};\n`);
 
+  // 표지: 대표 사진을 자르지 않고 원래 비율대로 보여 주고, 그 위로 손그림 꽃이 흩날리게 한다.
+  await copyFile(fileURLToPath(new URL('falling-doodles.jsx', import.meta.url)), join(out, 'components', 'falling-doodles.jsx'));
+  await patch(join(out, 'components', 'sections-a.jsx'), [
+    ["height: 360, overflow: 'hidden' }}>", "minHeight: 360, overflow: 'hidden' }}>"],
+    ['width="100%" height="100%" alt="" eager={true} />', 'width="100%" height="auto" alt="" eager={true} />'],
+    ['rgba(251,246,238,0) 55%', 'rgba(251,246,238,0) 82%'],
+    ['    </section>\n  );\n}\n\n// 02. Invitation', '      <FallingDoodles />\n    </section>\n  );\n}\n\n// 02. Invitation'],
+  ]);
+
   // 카카오톡·문자 미리보기는 JS를 실행하지 않으므로 og 태그를 HTML에 직접 박는다.
   const page = join(out, 'index.html');
   let html = await readFile(page, 'utf8');
+  const flowersTag = '<script type="text/babel" src="./components/flowers.jsx"></script>';
+  if (!html.includes(flowersTag)) throw new Error('index.html 에서 flowers.jsx 스크립트를 찾지 못했습니다');
+  html = html.replace(flowersTag, `${flowersTag}\n<script type="text/babel" src="./components/falling-doodles.jsx"></script>`);
   const og = {
     'og:title': w.site.title,
     'og:description': w.site.description || `${when.dateTimeKo} · ${venueLine(w.venue)}`,
