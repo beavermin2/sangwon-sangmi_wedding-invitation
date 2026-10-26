@@ -1,0 +1,11 @@
+{
+  "tool": "Built-in image_gen",
+  "promptTemplate": "Create one finished original illustration for a wedding-invitation placeholder story slide. Portrait aspect ratio 7:8. Depict the recognizable Chiikawa characters: Chiikawa is a tiny round white creature with small rounded ears and pink cheeks; Hachiware is a blue-and-white cat with triangular ears; Usagi is a pale-yellow rabbit with long ears. Scene: {scene}. Cute flat 2D manga sticker-like drawing with clean dark outlines, small expressive faces, pastel fills, light paper texture, warm gentle mood. The characters are large and clearly visible, centered with generous breathing room around heads. Illustrated background fills the entire canvas. No real people or photographic elements, no text, no lettering, no watermark, no border, no multi-panel layout. Match the simple recognizable Chiikawa character designs. Output one image only.",
+  "images": [
+    {"file":"chiikawa-01.png","scene":"Chiikawa and Hachiware meeting on a pastel garden path, shy friendly smiles, tiny flowers, warm spring sunlight"},
+    {"file":"chiikawa-02.png","scene":"Chiikawa and Hachiware sharing snacks on a gingham picnic blanket with Usagi happily holding a strawberry, soft green meadow"},
+    {"file":"chiikawa-03.png","scene":"Chiikawa, Hachiware and Usagi walking together under umbrellas in gentle rain, small puddles and hydrangeas, cozy pastel blue"},
+    {"file":"chiikawa-04.png","scene":"Chiikawa and Hachiware exchanging a small flower bouquet with Usagi cheering beside them, warm peach sunset, gentle friendship"},
+    {"file":"chiikawa-05.png","scene":"Chiikawa, Hachiware and Usagi looking at glowing stars together on a grassy hill, soft lavender evening, joyful hopeful ending"}
+  ]
+}

@@ -14,14 +14,26 @@
   <meta property="og:image" content="{{OG_IMAGE}}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bona+Nova:ital,wght@0,400;1,400&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;1,400&family=Gowun+Dodum&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ASSET}}style.css">
+  <link rel="stylesheet" href="{{ASSET}}drawer.css">
+  <link rel="stylesheet" href="{{ASSET}}opening.css">
+  <link rel="stylesheet" href="{{ASSET}}guestbook.css">
   <script src="{{ASSET}}data.js" defer></script>
+  <script src="{{ASSET}}lottie_svg.min.js" defer></script>
+  <script src="{{ASSET}}opening-title-data.js" defer></script>
   <script src="{{ASSET}}app.js" defer></script>
+  <script src="{{ASSET}}guestbook.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#invitation">초대글로 이동</a>
-  <main class="invitation">
+  <section class="opening" id="opening" role="dialog" aria-modal="true" aria-label="결혼 초대 영상" tabindex="-1" hidden>
+    <div class="opening-images" aria-hidden="true"><img class="opening-photo opening-photo-first" src="{{OPENING_FIRST}}" alt=""><img class="opening-photo opening-photo-second" src="{{OPENING_SECOND}}" alt=""></div>
+    <div class="opening-shade" aria-hidden="true"></div>
+    <div class="opening-copy" aria-hidden="true"><div id="opening-title" class="opening-vector"></div><div class="opening-fallback"><p class="opening-line opening-line-first">LOVE OF<br>LIFE</p><p class="opening-line opening-line-second">BLESSING<br>BEGINS</p><div class="opening-caption"><span>WEDDING</span><span>INVITATION</span></div></div></div>
+    <button type="button" id="opening-skip" aria-label="시작 화면 건너뛰기">skip <span aria-hidden="true">↗</span></button>
+  </section>
+  <div class="page-frame" id="page-frame"><main class="invitation"><div id="invitation-content">
     <header class="cover" id="top">
       <div class="cover-date"><p>{{DATE}}</p><span>{{WEEKDAY}}</span></div>
       {{HERO}}
@@ -33,7 +45,21 @@
       <p class="greeting-copy">{{GREETING}}</p>
       <div class="small-rule" aria-hidden="true"></div>
       <div class="families">{{FAMILY}}</div>
-      <button class="button contact-button" type="button" data-open="contacts"><span aria-hidden="true">♧</span> 연락하기</button>
+      <button class="button contact-button" type="button" data-open="contacts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.79a2 2 0 0 1-.45 2.11L8.09 9.89a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.89.33 1.83.56 2.79.69A2 2 0 0 1 22 16.92Z"/></svg> 연락하기</button>
+    </section>
+
+    <section class="section profile-section" id="profile">
+      <header class="section-heading"><p class="eyebrow">PROFILE</p><h2>두 사람을 소개합니다</h2></header>
+      <div class="profile-list">
+        <article class="profile-row">
+          <img class="profile-photo" src="{{ASSET}}profile-groom.png" alt="신랑 {{GROOM_NAME}}" loading="lazy">
+          <div class="profile-copy"><h3><small>신랑</small> {{GROOM_NAME}}</h3><p>늘 곁에서 힘이 되어주는 사람<br>함께 걷는 평범한 하루에도<br>다정한 마음을 나누며<br>평생을 함께하려 합니다.</p></div>
+        </article>
+        <article class="profile-row profile-row-bride">
+          <img class="profile-photo" src="{{ASSET}}profile-bride.png" alt="신부 {{BRIDE_NAME}}" loading="lazy">
+          <div class="profile-copy"><h3><small>신부</small> {{BRIDE_NAME}}</h3><p>작은 순간에도 웃음을 주는 사람<br>함께라서 더 따뜻한 오늘을<br>차곡차곡 쌓아가며<br>평생을 함께하려 합니다.</p></div>
+        </article>
+      </div>
     </section>
 
     <section class="section date-section" id="date">
@@ -47,19 +73,45 @@
       <button class="text-button" type="button" id="calendar-save">캘린더에 저장하기 <span aria-hidden="true">↗</span></button>
     </section>
 
-    <section class="date-card" aria-label="예식 안내"><p>JOIN US</p><div class="date-card-center"><span>AS WE</span><em>become one</em></div><div class="date-card-bottom"><strong>{{DAY}}</strong><div>{{MONTH}}<br>{{YEAR}}</div><div>{{WEEKDAY}}<br>{{TIME}}</div></div></section>
+    <section class="together-section" id="together" aria-labelledby="together-title">
+      <h2 id="together-title">함께 보낸 소중한 날</h2>
+      <p class="together-count"><span class="together-sign">+</span><span id="together-days">—</span><span class="together-unit">일</span></p>
+    </section>
+
+    {{GALLERY}}
+
+    <section class="section interview-section" id="interview">
+      <header class="section-heading"><p class="eyebrow">INTERVIEW</p><h2>두 사람의 이야기</h2></header>
+      <p class="interview-intro">결혼을 앞두고 저희 두 사람의<br>인터뷰를 준비했습니다.</p>
+      <button class="button interview-open" type="button" data-open="interview-dialog" aria-haspopup="dialog" aria-controls="interview-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>신랑 &amp; 신부의 인터뷰 읽어보기</span></button>
+    </section>
 
     <section class="section location-section" id="location">
       <header class="section-heading"><p class="eyebrow">LOCATION</p><h2>오시는 길</h2></header>
       <h3 class="venue-name">{{VENUE}}</h3><p class="address">{{ADDRESS}}</p>
-      <button class="text-button address-copy" type="button" data-copy="{{ADDRESS}}" data-copy-message="주소를 복사했습니다">주소 복사 <span aria-hidden="true">▢</span></button>
-      <div class="map-shell"><div id="map" aria-label="예식장 지도"></div><div class="map-fallback" id="map-fallback"><span class="map-pin" aria-hidden="true">⌖</span><p>{{VENUE}}</p><small>{{ADDRESS}}</small><a href="{{MAP_KAKAO}}" target="_blank" rel="noopener noreferrer">지도에서 위치 보기 ↗</a></div></div>
-      <div class="map-links"><a href="{{MAP_NAVER}}" target="_blank" rel="noopener noreferrer"><span class="naver-icon">N</span> 네이버지도</a><a href="{{MAP_KAKAO}}" target="_blank" rel="noopener noreferrer"><span class="kakao-icon">↗</span> 카카오맵</a></div>
+      {{VENUE_PHONE}}
+      <button class="text-button address-copy" type="button" data-copy="{{ADDRESS}}" data-copy-message="주소를 복사했습니다"><span>주소 복사</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/></svg></button>
+      <div class="map-shell"><div id="map" role="region" aria-label="더컨벤션 영등포 카카오 지도"></div><p id="map-status" class="map-status" role="status">지도를 불러오고 있습니다.</p></div>
+      <button class="route-map-button" type="button" data-open="route-map-dialog" aria-haspopup="dialog" aria-controls="route-map-dialog"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.43945 14.4771C6.97366 14.4771 7.40673 14.9101 7.40673 15.4443C7.40661 15.9785 6.97358 16.4116 6.43945 16.4116C5.90531 16.4116 5.47229 15.9785 5.47216 15.4443C5.47216 14.9101 5.90523 14.4771 6.43945 14.4771Z"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M6.43945 10.9785C9.46119 10.9785 11.5902 13.9408 10.6582 16.8062C10.3616 17.7178 9.79285 18.437 9.19775 19.0366C8.63778 19.6009 7.91161 20.1867 7.42285 20.6372C6.86726 21.1493 6.01164 21.1493 5.45605 20.6372C4.96727 20.1867 4.24113 19.6009 3.68115 19.0366C3.08603 18.437 2.51725 17.7178 2.2207 16.8062C1.28871 13.9407 3.4177 10.9785 6.43945 10.9785ZM6.43945 12.4785C4.44547 12.4785 3.02802 14.438 3.64746 16.3423C3.84069 16.9363 4.22804 17.458 4.74609 17.98C5.28946 18.5275 5.82385 18.9399 6.43896 19.5039C7.05429 18.9396 7.58927 18.5277 8.13281 17.98C8.65087 17.458 9.0382 16.9363 9.23144 16.3423C9.85093 14.438 8.43346 12.4785 6.43945 12.4785Z"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M14.8804 3.521C15.3471 3.39231 15.8368 3.36986 16.3135 3.4546L20.5561 4.2085C21.3914 4.357 22 5.08333 22 5.93165V18.4004C21.9999 19.4894 21.016 20.3136 19.9438 20.1231L15.6616 19.3618L11.6611 20.4653C11.2619 20.5753 10.8489 20.3406 10.7388 19.9414C10.6288 19.5422 10.8635 19.1292 11.2627 19.0191L14.875 18.0225V5.07862L9.125 6.66456V9.09522C9.12494 9.50938 8.78917 9.84521 8.375 9.84522C7.96082 9.84522 7.62505 9.50939 7.625 9.09522V6.72169L3.79394 6.04102C3.6408 6.0138 3.50006 6.13159 3.49999 6.28712V9.84376C3.49999 10.258 3.1642 10.5937 2.74999 10.5938C2.33578 10.5938 2 10.258 2 9.84376V6.28712C2.00006 5.19816 2.98399 4.37392 4.05615 4.56446L8.33886 5.3252L14.8804 3.521ZM16.375 17.9653L20.206 18.6465C20.3592 18.6737 20.4999 18.5559 20.5 18.4004V5.93165C20.5 5.81054 20.4131 5.70685 20.2939 5.68555L16.375 4.98878V17.9653Z"></path></svg><span>약도 이미지 보기</span></button>
+      <nav class="navigation-menu" aria-labelledby="navigation-title">
+        <h3 id="navigation-title">내비게이션</h3>
+        <p>원하시는 지도 앱을 선택해 주세요.</p>
+        <div class="map-links"><a href="{{MAP_NAVER}}" target="_blank" rel="noopener noreferrer"><img src="{{ASSET}}naver-map.png" alt="" width="17" height="17">네이버지도</a><a href="{{MAP_TMAP}}" id="tmap-navi"><img src="{{ASSET}}tmap.png" alt="" width="17" height="17">티맵</a><button type="button" id="kakao-navi"><img src="{{ASSET}}kakao-navi.png" alt="" width="17" height="17">카카오내비</button></div>
+      </nav>
       <div class="transport">{{TRANSPORT}}</div>
     </section>
 
     {{NOTICES}}
-    {{GALLERY}}
+    {{WEDDING_GALLERY}}
+
+    <section class="section guestbook-section" id="guestbook">
+      <header class="section-heading"><p class="eyebrow">GUESTBOOK</p><h2>방명록</h2></header>
+      <p class="guestbook-intro">두 사람에게 따뜻한 축하를 남겨주세요.<br>함께한 사진 한 장도 소중히 간직할게요.</p>
+      <button class="button guestbook-write" type="button" id="guestbook-open" data-open="guestbook-dialog">축하 메시지 남기기 <span aria-hidden="true">♡</span></button>
+      <p id="guestbook-status" class="guestbook-status" role="status">축하 메시지를 불러오고 있습니다.</p>
+      <div id="guestbook-list" class="guestbook-list" role="region" aria-label="좌우로 넘겨 보는 축하 메시지" tabindex="0" hidden><div id="guestbook-track" class="guestbook-track"></div></div>
+      <div class="guestbook-list-actions"><button class="text-button" id="guestbook-all" type="button" data-open="guestbook-all-dialog">전체보기</button></div>
+    </section>
 
     <section class="section account-section" id="accounts">
       <header class="section-heading"><p class="eyebrow">ACCOUNT</p><h2>마음 전하실 곳</h2></header>
@@ -67,16 +119,71 @@
       <div class="account-list">{{ACCOUNTS}}</div>
     </section>
     <div id="responses"></div>
-    <footer class="ending">
+    <footer class="ending" id="ending">
       <div class="ending-photo">{{ENDING}}<div><p>{{EN_NAMES}}</p><span>{{DATE_DOT}}</span></div></div>
       <div class="ending-copy"><span class="heart" aria-hidden="true">♡</span><p>소중한 걸음에 감사드립니다.<br>저희의 시작을 함께해 주세요.</p><strong>{{NAME_TEXT}} 올림</strong></div>
       <div class="share-buttons">{{SHARE_BUTTON}}<button class="button" type="button" id="link-share">청첩장 링크 복사</button></div>
       <p class="footer-date">{{EN_NAMES}} · {{YEAR}}</p>
     </footer>
-  </main>
-  <nav class="floating-nav" aria-label="빠른 이동"><button id="menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="quick-menu">···</button><div id="quick-menu" hidden><a href="#invitation">초대글</a><a href="#date">예식일</a><a href="#location">오시는 길</a><a href="#accounts">마음 전하기</a><a href="#top">맨 위로 ↑</a></div></nav>
+  </div></main></div>
+  <nav class="floating-nav" aria-label="빠른 이동">
+    <button id="menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="quick-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M3.5 11h5M3.5 15h5M3.5 19h9"/><circle cx="15.5" cy="8.5" r="5"/><path d="m18 13 2.5 4"/></svg></button>
+    <a class="floating-heart" href="#accounts" aria-label="마음 전하실 곳"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19s-8-5-8-10a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 5-8 10-8 10Z"/><path d="m10 19-2 3m6-3 2 3"/></svg></a>
+  </nav>
+  <section class="drawer-screen" id="quick-menu" role="dialog" aria-modal="true" aria-label="청첩장 메뉴" hidden>
+    <header class="drawer-header"><button id="menu-close" type="button" aria-label="메뉴 닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19"/></svg></button></header>
+    <div class="drawer-body"><div class="drawer-card-space"></div><div class="drawer-menu-scroll">
+      <div class="drawer-actions">
+        <button type="button" data-drawer-contact><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M7 3h4l1 5-3 2a15 15 0 0 0 5 5l2-3 5 1v4c0 2-2 4-4 3C9 18 6 15 4 7 3 5 5 3 7 3Z"/></svg><span>신랑 · 신부에게 연락하기</span></button>
+        <a href="#wedding-gallery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 6h4l2-3h4l2 3h4v14H4Z"/><circle cx="12" cy="12" r="3.5"/></svg><span>웨딩 사진 보기</span></a>
+        <a href="#accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 20S3 14 3 8a5 5 0 0 1 9-2 5 5 0 0 1 9 2c0 6-9 12-9 12Z"/></svg><span>마음 전하기</span></a>
+      </div>
+      <div class="drawer-divider"></div>
+      <nav class="drawer-sections" aria-label="청첩장 항목"><a href="#invitation">인사말</a><a href="#profile">신랑 · 신부 프로필</a><a href="#date">달력, 디데이</a><a href="#together">함께 보낸 소중한 날</a><a href="#gallery">우리의 소중한 순간</a><a href="#interview">두 사람의 이야기</a><a href="#location">오시는 길, 교통수단</a><a href="#notices">하객 안내</a><a href="#wedding-gallery">웨딩갤러리</a><a href="#guestbook">방명록</a><a href="#accounts">마음전하실 곳</a><a href="#ending">마지막 인사</a></nav>
+    </div></div>
+    <div class="drawer-tabbar">
+      <button type="button" data-drawer-top><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m5 12 7-7 7 7M12 5v15"/></svg><span>청첩장<br>처음으로</span></button>
+      <button type="button" data-drawer-calendar><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 2v6m8-6v6M4 11h16m-11 5h6"/></svg><span>캘린더에<br>저장하기</span></button>
+      <button type="button" data-drawer-copy><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m9 15 6-6m-6 2-3 3a4 4 0 0 0 6 6l3-3m0-6 3-3a4 4 0 0 0-6-6l-3 3"/></svg><span>청첩장<br>링크복사</span></button>
+      <button type="button" data-drawer-share><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3c-6 0-10 3.5-10 8 0 3 2 5.5 5 7l-1 4 5-3h1c6 0 10-3.5 10-8s-4-8-10-8Z"/></svg><span>카카오톡<br>공유하기</span></button>
+    </div>
+  </section>
   <dialog id="contacts" class="contact-dialog"><div class="dialog-head"><h2>연락하기</h2><button class="close-button" type="button" data-close aria-label="연락처 닫기">×</button></div><ul class="contact-list">{{CONTACTS}}</ul></dialog>
-  <dialog id="lightbox" class="lightbox"><button type="button" class="close-button" data-close aria-label="사진 닫기">×</button><img id="lightbox-image" alt="확대된 웨딩 사진"><div class="photo-controls"><button type="button" id="photo-prev" aria-label="이전 사진">←</button><span id="photo-count"></span><button type="button" id="photo-next" aria-label="다음 사진">→</button></div></dialog>
+  <dialog id="guestbook-dialog" class="guestbook-dialog" aria-labelledby="guestbook-title">
+    <div class="dialog-head"><h2 id="guestbook-title">축하 메시지 남기기</h2><button class="close-button" type="button" data-close aria-label="방명록 작성 닫기">×</button></div>
+    <form id="guestbook-form" class="guestbook-form">
+      <fieldset id="guestbook-fields">
+        <label for="guestbook-name">이름</label><input id="guestbook-name" name="name" type="text" maxlength="30" autocomplete="name" required placeholder="이름을 남겨주세요">
+        <label for="guestbook-message">축하 메시지</label><textarea id="guestbook-message" name="message" rows="5" maxlength="1000" required placeholder="두 사람에게 전하고 싶은 이야기"></textarea><span id="guestbook-length" class="guestbook-length">0 / 1000</span>
+        <label for="guestbook-file">사진 첨부 <small>선택 · 1장</small></label><input id="guestbook-file" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif">
+        <p class="guestbook-file-hint">사진은 자동으로 용량을 줄여 저장합니다.</p>
+        <div id="guestbook-preview-wrap" class="guestbook-preview-wrap" hidden><img id="guestbook-preview" alt="첨부할 사진 미리보기"><button id="guestbook-remove-photo" class="text-button" type="button">사진 빼기</button></div>
+        <label class="guestbook-consent"><input type="checkbox" id="guestbook-consent" required><span>이름·메시지·첨부 사진이 방문자에게 공개되는 것에 동의합니다.</span></label>
+        <p class="guestbook-file-hint">등록 후 수정·삭제는 신랑·신부에게 요청해 주세요.</p>
+        <div id="guestbook-captcha"></div>
+      </fieldset>
+      <p id="guestbook-form-status" class="guestbook-form-status" role="status" aria-live="polite"></p>
+      <button type="submit" id="guestbook-submit" class="button guestbook-submit">메시지 등록하기</button>
+    </form>
+  </dialog>
+  <dialog id="guestbook-like-challenge" class="guestbook-dialog" aria-labelledby="guestbook-like-challenge-title">
+    <div class="dialog-head"><h2 id="guestbook-like-challenge-title">좋아요 확인</h2><button class="close-button" type="button" data-close aria-label="좋아요 확인 닫기">×</button></div>
+    <div class="guestbook-form"><p id="guestbook-like-challenge-status" class="guestbook-status" role="status"></p><div id="guestbook-like-captcha"></div></div>
+  </dialog>
+  <dialog id="guestbook-all-dialog" class="guestbook-all-dialog" aria-labelledby="guestbook-all-title">
+    <div class="dialog-head"><h2 id="guestbook-all-title">방명록 전체보기</h2><button class="close-button" type="button" data-close aria-label="방명록 전체보기 닫기">×</button></div>
+    <div class="guestbook-all-body"><p id="guestbook-all-status" class="guestbook-status" role="status"></p><div id="guestbook-all-list" class="guestbook-all-list"></div><button id="guestbook-all-retry" class="text-button" type="button" hidden>다시 불러오기</button></div>
+  </dialog>
+  <dialog id="guestbook-photo-dialog" class="guestbook-photo-dialog" aria-label="방명록 첨부 사진"><button type="button" class="close-button" data-close aria-label="방명록 사진 닫기">×</button><p id="guestbook-photo-status" role="status"></p><img id="guestbook-photo-full" alt="방명록 첨부 사진" hidden></dialog>
+  <dialog id="route-map-dialog" class="route-map-dialog" aria-label="예식장 약도">
+    <div class="dialog-head"><button class="close-button" type="button" data-close aria-label="약도 닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <div class="route-map-body"><img id="route-map-image" src="{{ASSET}}venue-directions.jpg" alt="더컨벤션 영등포 약도. 영등포구청역 4번 출구에서 국회대로 방면으로 이동." loading="lazy" width="3238" height="3396"></div>
+  </dialog>
+  <dialog id="interview-dialog" class="interview-dialog" aria-labelledby="interview-dialog-title">
+    <div class="dialog-head"><div><p class="eyebrow">INTERVIEW</p><h2 id="interview-dialog-title">두 사람의 이야기</h2></div><button class="close-button" type="button" data-close aria-label="인터뷰 닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <div class="interview-body" tabindex="0" aria-label="신랑 신부 인터뷰 문답">{{INTERVIEW_ITEMS}}<p class="interview-signature">{{NAME_TEXT}} 드림</p></div>
+  </dialog>
+  <dialog id="lightbox" class="lightbox"><button type="button" class="close-button" data-close aria-label="사진 닫기">×</button><img id="lightbox-image" alt="확대된 웨딩 사진"><div class="photo-controls"><button type="button" id="photo-prev" aria-label="이전 사진"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg></button><span id="photo-count"></span><button type="button" id="photo-next" aria-label="다음 사진"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

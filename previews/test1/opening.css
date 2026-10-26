@@ -1,0 +1,45 @@
+/* Five-second opening sequence, matching the online reference's pan, zoom and fade. */
+.opening{position:fixed;inset:0;max-width:425px;margin:auto;z-index:80;overflow:hidden;color:white;background:#382c30;isolation:isolate}
+.opening:focus{outline:none}
+.opening-images,.opening-shade{position:absolute;inset:0}
+.opening-photo{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center}
+.opening-photo-first{width:120%;z-index:2}
+.opening-photo-second{z-index:1}
+.opening-shade{z-index:3;background:#382c30;opacity:.4}
+.opening-copy{position:absolute;bottom:4%;left:5%;right:5%;aspect-ratio:1080/500;z-index:4;text-align:center}
+.opening-vector,.opening-fallback{position:absolute;inset:0}
+.opening-vector svg{display:block;width:100%;height:100%}
+.opening-title-ready .opening-fallback{visibility:hidden}
+.opening-line{position:absolute;inset:0 0 auto;font:400 clamp(42px,12vw,55px)/.94 var(--serif);letter-spacing:.025em}
+.opening-line-second{opacity:0}
+.opening-caption{position:absolute;bottom:0;left:8%;right:8%;display:flex;justify-content:space-between;font:9px/1.5 Arial,sans-serif;letter-spacing:2px}
+#opening-skip{position:absolute;right:18px;top:max(18px,env(safe-area-inset-top));z-index:5;padding:8px 12px;border:1px solid #ffffff55;border-radius:20px;background:#0002;color:white;font-size:12px}
+.opening-playing{animation:opening-exit 5s linear both}
+.opening-playing .opening-photo-first{animation:opening-pan 2s linear both,opening-first 5s linear both}
+.opening-playing .opening-photo-second{animation:opening-zoom 5s linear both}
+.opening-playing .opening-shade{animation:opening-shade 5s linear both}
+.opening-playing .opening-line-first{animation:opening-title-first 5s ease both}
+.opening-playing .opening-line-second{animation:opening-title-second 5s ease both}
+.opening-playing .opening-caption{animation:opening-caption 5s ease both}
+body.opening-active{overflow:hidden}
+.opening-active .floating-nav{visibility:hidden}
+@keyframes opening-pan{from{transform:translateX(0)}to{transform:translateX(-10%)}}
+@keyframes opening-first{0%,40.3%{opacity:1}40.4%,100%{opacity:0}}
+@keyframes opening-zoom{0%,40%{transform:scale(1)}100%{transform:scale(1.15)}}
+@keyframes opening-shade{0%,25.3%{opacity:.4}40.3%{opacity:1}44%,80%{opacity:.4}84.7%{opacity:1}100%{opacity:0}}
+@keyframes opening-exit{0%,84.7%{opacity:1}100%{opacity:0}}
+@keyframes opening-title-first{0%{opacity:0;transform:translateY(18px)}12%,28%{opacity:1;transform:translateY(0)}40%,100%{opacity:0;transform:translateY(-10px)}}
+@keyframes opening-title-second{0%,40%{opacity:0;transform:translateY(18px)}51%,76%{opacity:1;transform:translateY(0)}87%,100%{opacity:0;transform:translateY(-10px)}}
+@keyframes opening-caption{0%{opacity:0}12%,76%{opacity:1}90%,100%{opacity:0}}
+.moments-cover{display:flex;align-items:center;flex-direction:column;gap:20px}
+.moments-cover-photo{width:min(280px,100%);height:auto;aspect-ratio:7/8;object-fit:cover;border-radius:8px}
+.moments-cover-lettering{display:grid;grid-template-columns:110px 1fr;width:100%;margin-top:4px;border-top:1px solid #c7c2bf;text-align:left}
+.moments-cover-lettering>span{padding:12px 8px 12px 0;border-right:1px solid #c7c2bf;font:12px/1.7 var(--font);color:var(--muted)}
+.moments-cover-lettering>em{align-self:center;text-align:center;font:italic 42px/1.3 var(--serif)}
+.moments-cover-lettering>p{grid-column:1/-1;border-top:1px solid #c7c2bf;padding-top:9px;text-align:center;font-size:11px;color:var(--muted)}
+.moments-start{align-self:flex-end;display:flex;gap:12px;align-items:center;padding:12px 0;background:none;font-size:14px}
+.moments-start-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#393532;color:white}
+.moments-start-icon svg{width:22px;height:22px;flex-shrink:0;-webkit-text-stroke:0}
+.moments-start:hover .moments-start-icon{transform:translateX(3px)}
+.moments-start-icon{transition:transform .25s ease}
+@media(prefers-reduced-motion:reduce){.opening{display:none!important}.moments-start-icon{transition:none}}
