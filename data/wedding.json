@@ -4,7 +4,7 @@
     "url": "",
     "title": "민상원 ♥ 고상미 결혼합니다",
     "description": "2027년 01월 30일 토요일 오전 11시 20분 · 더 컨벤션 영등포",
-    "ogImage": "images/og.jpg",
+    "ogImage": "images/og-1793016030434-ckyf.jpg",
     "favicon": "images/favicon.png"
   },
   "groom": {
@@ -15,7 +15,7 @@
     },
     "relation": "아들",
     "phone": "010-3921-3120",
-    "photo": "images/groom.jpg",
+    "photo": "images/groom-1793013644181-wok6.jpg",
     "parents": {
       "father": {
         "name": "민병근",
@@ -37,7 +37,7 @@
     },
     "relation": "딸",
     "phone": "010-4240-4341",
-    "photo": "images/bride.jpg",
+    "photo": "images/bride-1793013649539-uhkk.jpg",
     "parents": {
       "father": {
         "name": "고문학",
@@ -98,26 +98,26 @@
   },
   "greeting": {
     "title": "저희 결혼합니다",
-    "message": "서로가 마주 보며 다져온 사랑을\n이제 함께 한 곳을 바라보며\n걸어갈 수 있는 큰 울타리로 키우고자 합니다.\n\n귀한 걸음 하시어 축복해 주시면 감사하겠습니다.",
+    "message": "나란히 적힌, 두 이름이 우리가 되어\n특별한 행복이 되려 합니다.\n평생의 행복, 그 시작에 소중한 분들을 초대합니다.",
     "quote": {
-      "text": "",
-      "author": ""
+      "text": "\"행복이 그거래요, 좋아하는 사람이랑 낭비한 시간들\"",
+      "author": "<인생84, 유튜브中>"
     }
   },
   "notices": [
     {
       "icon": "🍽",
       "title": "식사 안내",
-      "detail": "예식 후 2층 연회장에서 뷔페가 제공됩니다."
+      "detail": "예식 30분 전부터 5층 연회장에서 뷔페가 제공됩니다."
     },
     {
-      "icon": "🅿",
-      "title": "주차 안내",
-      "detail": "건물 지하 주차장 2시간 무료입니다."
+      "icon": "💐",
+      "title": "화환 안내",
+      "detail": "예식장 운영 방침에 따라 축하 화환은 정중히 사양하고 있습니다."
     }
   ],
   "gallery": {
-    "cover": "images/cover-1792995538495-62u9.jpg",
+    "cover": "images/cover-1793016055598-n56r.jpg",
     "photos": [
       "images/gallery-1792995549207-9jgr.jpg"
     ]
@@ -145,16 +145,16 @@
   },
   "features": {
     "rsvp": {
-      "enabled": true,
+      "enabled": false,
       "deadline": "2027-05-01",
-      "askCompanions": true,
-      "askMeal": true,
+      "askCompanions": false,
+      "askMeal": false,
       "endpoint": ""
     },
     "guestbook": {
       "enabled": true,
       "provider": "google-sheets",
-      "endpoint": ""
+      "endpoint": "https://script.google.com/macros/s/AKfycbyHz-fCYZ90UVwrkgHrB_6IdrI5TtBf1gP6g6bfzpWZmpczyKBbv6j6LZX6PrcWlxj0/exec"
     },
     "kakaoShare": {
       "enabled": true,
@@ -167,7 +167,16 @@
     },
     "music": {
       "enabled": false,
-      "src": ""
+      "src": "",
+      "autoplay": true,
+      "volume": 0.6
+    },
+    "video": {
+      "enabled": false,
+      "title": "",
+      "youtube": "",
+      "src": "",
+      "poster": ""
     }
   },
   "templateOptions": {
