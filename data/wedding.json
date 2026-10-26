@@ -117,8 +117,10 @@
     }
   ],
   "gallery": {
-    "cover": "images/cover.jpg",
-    "photos": []
+    "cover": "images/cover-1792995538495-62u9.jpg",
+    "photos": [
+      "images/gallery-1792995549207-9jgr.jpg"
+    ]
   },
   "accounts": {
     "note": "참석이 어려우신 분들을 위해\n계좌번호를 안내드립니다",
