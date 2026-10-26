@@ -2,84 +2,97 @@
   "template": "t01-hb4258",
   "site": {
     "url": "",
-    "title": "이도현 ♥ 한지우 결혼합니다",
+    "title": "민상원 ♥ 고상미 결혼합니다",
     "description": "2027년 5월 15일 토요일 오후 12시 30분 · 더채플앳청담",
     "ogImage": "images/og.jpg",
     "favicon": "images/favicon.png"
   },
   "groom": {
-    "name": "이도현",
+    "name": "민상원",
     "nameEn": {
-      "first": "Dohyun",
-      "last": "Lee"
+      "first": "Sangwon",
+      "last": "Min"
     },
-    "relation": "장남",
-    "phone": "010-0000-0001",
+    "relation": "아들",
+    "phone": "010-3921-3120",
     "photo": "images/groom.jpg",
     "parents": {
       "father": {
-        "name": "이정우",
+        "name": "민병근",
         "phone": "010-0000-0002",
         "deceased": false
       },
       "mother": {
-        "name": "박수진",
+        "name": "구연단",
         "phone": "010-0000-0003",
         "deceased": false
       }
     }
   },
   "bride": {
-    "name": "한지우",
+    "name": "고상미",
     "nameEn": {
-      "first": "Jiwoo",
-      "last": "Han"
+      "first": "Sangmi",
+      "last": "Ko"
     },
-    "relation": "차녀",
-    "phone": "010-0000-0004",
+    "relation": "딸",
+    "phone": "010-4240-4341",
     "photo": "images/bride.jpg",
     "parents": {
       "father": {
-        "name": "한성호",
-        "phone": "010-0000-0005",
-        "deceased": false
+        "name": "고문학",
+        "phone": "010-00000000",
+        "deceased": true
       },
       "mother": {
-        "name": "김은영",
+        "name": "석혜정",
         "phone": "010-0000-0006",
         "deceased": false
       }
     }
   },
   "ceremony": {
-    "datetime": "2027-05-15T12:30:00+09:00"
+    "datetime": "2027-01-30T11:20:00+09:00",
+    "holidays": [
+      1
+    ]
   },
   "venue": {
-    "name": "더채플앳청담",
-    "hall": "커티지홀",
-    "floor": "3층",
-    "address": "서울특별시 강남구 선릉로 757",
-    "addressDetail": "7호선 청담역 13번 출구 도보 10분",
-    "phone": "02-0000-0000",
-    "lat": 37.5236,
-    "lng": 127.045,
-    "naverPlaceId": "",
-    "kakaoPlaceId": "",
+    "name": "더 컨벤션 영등포",
+    "hall": "그랜드볼룸",
+    "floor": "1층",
+    "address": "서울시 영등포구 국회대로38길 2",
+    "addressDetail": "",
+    "phone": "",
+    "lat": 37.5266936866142,
+    "lng": 126.898753273126,
+    "naverPlaceId": "1241035074",
+    "kakaoPlaceId": "871883439",
     "transport": [
       {
         "type": "subway",
         "label": "지하철",
-        "detail": "7호선 청담역 13번 출구 도보 10분"
+        "detail": "2호선, 5호선 영등포구청역 4번 출구(도보 3분)"
       },
       {
         "type": "bus",
         "label": "버스",
-        "detail": "간선 301, 342 · 청담사거리 하차"
+        "detail": "70-3, 5620, 6631, 6637, 7612, 영등포02, 영등포12"
       },
       {
         "type": "car",
-        "label": "자가용",
-        "detail": "건물 지하 주차장 2시간 무료"
+        "label": "주차안내",
+        "detail": "웨딩홀 B1, B2층 주차장"
+      },
+      {
+        "type": "car",
+        "label": "주차안내",
+        "detail": "웨딩홀 맞은평 공영주차장(2시간 무료)"
+      },
+      {
+        "type": "car",
+        "label": "주차안내",
+        "detail": "외부주차장 삼성생명 이용가능(서울 영등포구 국회대로559)"
       }
     ]
   },
@@ -111,32 +124,18 @@
     "note": "참석이 어려우신 분들을 위해\n계좌번호를 안내드립니다",
     "groom": [
       {
-        "owner": "이도현",
-        "relation": "신랑",
-        "bank": "은행명",
-        "number": "000-000-000000",
-        "kakaopay": ""
-      },
-      {
-        "owner": "이정우",
-        "relation": "아버지",
-        "bank": "은행명",
-        "number": "000-000-000000",
+        "owner": "민상원",
+        "relation": "아들",
+        "bank": "신한은행",
+        "number": "110-082-305096",
         "kakaopay": ""
       }
     ],
     "bride": [
       {
-        "owner": "한지우",
+        "owner": "고상미",
         "relation": "신부",
-        "bank": "은행명",
-        "number": "000-000-000000",
-        "kakaopay": ""
-      },
-      {
-        "owner": "한성호",
-        "relation": "아버지",
-        "bank": "은행명",
+        "bank": "국민은행",
         "number": "000-000-000000",
         "kakaopay": ""
       }
@@ -157,7 +156,7 @@
     },
     "kakaoShare": {
       "enabled": true,
-      "jsKey": "",
+      "jsKey": "3c647d51512244a844dce00774cb5cef",
       "buttonText": "모바일 청첩장 보기"
     },
     "map": {
