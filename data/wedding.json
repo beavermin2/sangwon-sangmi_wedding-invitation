@@ -108,16 +108,21 @@
     {
       "icon": "🍽",
       "title": "식사 안내",
-      "detail": "예식 30분 전부터 5층 연회장에서 뷔페가 제공됩니다."
+      "detail": "예식 30분 전부터 5층 연회장에서 식사가 제공됩니다."
     },
     {
       "icon": "💐",
       "title": "화환 안내",
       "detail": "예식장 운영 방침에 따라 축하 화환은 정중히 사양하고 있습니다."
+    },
+    {
+      "icon": "📌",
+      "title": "ATM",
+      "detail": "1층 로비 계단 옆"
     }
   ],
   "gallery": {
-    "cover": "images/cover-1793020215842-0z1r.jpg",
+    "cover": "images/cover-1793020906707-cf6r.jpg",
     "photos": [
       "images/gallery-1792995549207-9jgr.jpg"
     ]
