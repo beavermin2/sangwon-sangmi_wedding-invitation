@@ -32,13 +32,17 @@ export function kstParts(iso) {
 //   'flower'(기본): 흰 국화 그림. 텍스트에는 표식(보이지 않는 U+2063 + 🌼)을 넣고,
 //                   공통 모듈(addons/wedding-addons.js)이 화면에서 addons/mourn-flower.svg 그림으로 바꾼다.
 //                   스크립트가 돌지 않으면 🌼 로 보인다.
+//   'chrysanthemum': 'flower' 와 같되 국화 선 그림(addons/mourn-chrysanthemum.png)으로 바꾼다.
 //   그 밖의 값('🌼', '✿', '故' 등): 그 글자를 그대로 쓴다.
 // build.mjs 가 어댑터를 돌리기 전에 useWedding() 으로 한 번 설정한다.
 export const FLOWER_MARK = '⁣🌼';
+const MARK_IMAGES = { flower: 'mourn-flower.svg', chrysanthemum: 'mourn-chrysanthemum.png' };
 let deceased = FLOWER_MARK;
+let markImage = MARK_IMAGES.flower;
 export function useWedding(w) {
   const opt = (w.options && w.options.deceasedMark) || 'flower';
-  deceased = opt === 'flower' ? FLOWER_MARK : opt;
+  markImage = MARK_IMAGES[opt] || '';
+  deceased = markImage ? FLOWER_MARK : opt;
   if (w.venue) w.venue.transport = mergeTransport(w.venue.transport);
 }
 
@@ -61,6 +65,8 @@ export function mergeTransport(list) {
 }
 export const deceasedMark = () => deceased;
 export const usesFlowerImage = () => deceased === FLOWER_MARK;
+// 표식을 바꿀 그림 파일 이름(addons/ 안). 글자 표시를 고르면 ''.
+export const flowerImage = () => (usesFlowerImage() ? markImage : '');
 export const parentName = (p) => (p && p.name ? (p.deceased ? `${deceased} ${p.name}` : p.name) : '');
 // 표시를 뗀 이름(계좌 예금주와 맞춰 볼 때)
 export const bareName = (name) => String(name || '').replace(new RegExp(`^${deceased.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`), '');

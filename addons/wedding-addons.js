@@ -16,7 +16,7 @@
   var KAKAO_SRI = 'sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka';
   var PAGE = 5;
 
-  /* ── 고인 표시: 텍스트 표식(U+2063 + 🌼)을 흰 국화 그림으로 ───────────────
+  /* ── 고인 표시: 텍스트 표식(U+2063 + 🌼)을 국화 그림(흰 국화·선 그림)으로 ───────────────
      템플릿마다 이름을 그리는 방식(HTML·React·Vue)이 달라, 화면에 나온 글자를 찾아 바꾼다.
      원래 글자 노드는 지우지 않고 내용만 줄이고 그 앞에 그림을 넣어 React/Vue 가 쥔 노드를 깨지 않는다. */
   function swapMourn(root) {
@@ -38,7 +38,7 @@
         // 그래서 국화가 있는 줄과 없는 줄의 글자 위치가 같다.
         at.data = at.data.slice(mark.length).replace(/^ /, '');
         var img = document.createElement('img');
-        img.src = BASE + 'mourn-flower.svg';
+        img.src = BASE + (C.mournImage || 'mourn-flower.svg');
         img.alt = '국화';
         img.className = 'wedding-mourn';
         img.setAttribute('style', 'display:inline-block!important;height:1.35em!important;width:1.35em!important;max-width:none!important;' +
