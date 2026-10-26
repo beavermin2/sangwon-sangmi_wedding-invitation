@@ -154,6 +154,13 @@ export async function apply({ wedding: w, out, images }) {
      "fontSize: 13, lineHeight: 2, color: THEME.text, letterSpacing: 1,\n          display: 'grid', gridTemplateColumns: 'auto auto auto', alignItems: 'baseline', textAlign: 'left',"],
     parentLine('gf', 'gm', 'groom'),
     parentLine('bf', 'bm', 'bride'),
+    // 인용구 위의 장식용 큰 따옴표(“)는 빼고 인용문만
+    [`          <div style={{
+            fontFamily: '"Cormorant Garamond", serif',
+            fontSize: 28, lineHeight: 1.2, color: THEME.accent,
+            fontStyle: 'italic', opacity: 0.6, marginBottom: 14,
+          }}>“</div>
+`, ''],
     // 인용구 출처 앞의 줄표(—) 없이 출처만
     ['}}>— {quote.author}</div>', '}}>{quote.author}</div>'],
     ['    </section>\n  );\n}\n\n// 02. Invitation', '      <FallingDoodles />\n    </section>\n  );\n}\n\n// 02. Invitation'],
