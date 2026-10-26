@@ -9,6 +9,7 @@ import { cp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeImages } from './lib/wedding.mjs';
+import { buildPreviews } from './build-previews.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DIST = join(ROOT, 'dist');
@@ -78,3 +79,4 @@ for (const page of (await readdir(DIST)).filter((n) => n.endsWith('.html'))) {
 }
 
 console.log(`✓ dist/ ← ${template.title} (${id})`);
+await buildPreviews({ root: ROOT, dist: DIST, wedding });
