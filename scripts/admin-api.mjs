@@ -2,7 +2,7 @@
 //   GET    /api/admin/state            wedding.json, 템플릿 목록, data/images 파일 목록, git 브랜치
 //   PUT    /api/admin/wedding          wedding.json 저장(검증 후 원자적으로 교체)
 //   POST   /api/admin/upload?name=…    파일 1개 저장(본문 = 파일 바이트). 확장자로 종류를 정한다
-//                                      사진(jpg/png/webp) → data/images/, 음악(mp3/m4a)·동영상(mp4) → data/media/
+//                                      사진(jpg/png/webp/gif) → data/images/, 음악(mp3/m4a)·동영상(mp4) → data/media/
 //   DELETE /api/admin/image?name=…     위 파일 삭제
 //   POST   /api/admin/build            대표 템플릿 빌드 + dist/ 생성(미리보기용)
 //   POST   /api/admin/deploy           data/ 변경을 커밋하고 main 이면 push → GitHub Actions 가 배포
@@ -21,6 +21,8 @@ const KINDS = {
   '.jpeg': { dir: 'images', max: 15 * MB, label: '사진', check: (b) => b[0] === 0xff && b[1] === 0xd8 },
   '.png': { dir: 'images', max: 15 * MB, label: '사진', check: (b) => b.slice(1, 4).toString('ascii') === 'PNG' },
   '.webp': { dir: 'images', max: 15 * MB, label: '사진', check: (b) => b.slice(0, 4).toString('ascii') === 'RIFF' && b.slice(8, 12).toString('ascii') === 'WEBP' },
+  // GIF 는 움직임을 지키려고 줄이지 않고 원본 그대로 받는다.
+  '.gif': { dir: 'images', max: 15 * MB, label: '사진', check: (b) => /^GIF8[79]a$/.test(b.slice(0, 6).toString('ascii')) },
   '.mp3': { dir: 'media', max: 12 * MB, label: '음악', check: (b) => b.slice(0, 3).toString('ascii') === 'ID3' || (b[0] === 0xff && (b[1] & 0xe0) === 0xe0) },
   '.m4a': { dir: 'media', max: 12 * MB, label: '음악', check: ftyp },
   // GitHub 은 50MB 를 넘는 파일에 경고, 100MB 를 넘으면 거부한다.
@@ -133,7 +135,7 @@ export function createAdmin({ root, port, send }) {
 
   async function upload(req, res, url) {
     const f = safeFile(url.searchParams.get('name'));
-    if (!f) return send(res, 400, { error: '파일 이름은 영문·숫자로, 사진(jpg/png/webp)·음악(mp3/m4a)·동영상(mp4)만 올릴 수 있습니다' });
+    if (!f) return send(res, 400, { error: '파일 이름은 영문·숫자로, 사진(jpg/png/webp/gif)·음악(mp3/m4a)·동영상(mp4)만 올릴 수 있습니다' });
     let buf;
     try { buf = await body(req, f.kind.max); } catch (e) {
       if (e.status === 413) return send(res, 413, { error: `${f.kind.label} 파일은 ${f.kind.max / MB}MB 이하만 올릴 수 있습니다` });

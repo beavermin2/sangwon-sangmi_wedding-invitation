@@ -27,7 +27,7 @@ export async function buildPaperRose({ root, dist, wedding: w, template = false 
   async function photo(rel) {
     if (!rel) return '';
     const full = resolve(dataRoot, rel);
-    if (!full.startsWith(dataRoot + sep) || !existsSync(full) || !/\.(jpe?g|png|webp)$/i.test(full)) return '';
+    if (!full.startsWith(dataRoot + sep) || !existsSync(full) || !/\.(jpe?g|png|webp|gif)$/i.test(full)) return '';
     if (!copied.has(full)) {
       const name = `photo-${++imageIndex}${extname(full).toLowerCase()}`;
       await copyFile(full, join(assetDir, name));

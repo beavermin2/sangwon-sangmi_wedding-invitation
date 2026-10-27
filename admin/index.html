@@ -423,11 +423,17 @@
         return new Promise(function (r) { c.toBlob(r, 'image/jpeg', 0.85); });
       });
     }
+    // GIF 는 줄이면 첫 장면만 남으므로 원본 그대로 올린다(움직임 유지, 자르기 없음).
+    var GIF_MAX = 15 * 1024 * 1024, GIF_WARN = 3 * 1024 * 1024;
     function uploadFile(file, prefix, opts) {
       opts = opts || {};
-      var name = prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6) + '.jpg';
-      return resize(file, opts.max || 1600, opts.crop).then(function (blob) {
-        return api('POST', '/api/admin/upload?name=' + encodeURIComponent(name), blob, 'image/jpeg');
+      var gif = file.type === 'image/gif';
+      if (gif && file.size > GIF_MAX) return Promise.reject(new Error('GIF는 15MB 이하만 올릴 수 있습니다'));
+      if (gif && file.size > GIF_WARN) toast('GIF가 ' + (file.size / 1048576).toFixed(1) + 'MB 입니다. 청첩장이 늦게 열릴 수 있어요');
+      var name = prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6) + (gif ? '.gif' : '.jpg');
+      var body = gif ? Promise.resolve(file) : resize(file, opts.max || 1600, opts.crop);
+      return body.then(function (blob) {
+        return api('POST', '/api/admin/upload?name=' + encodeURIComponent(name), blob, gif ? 'image/gif' : 'image/jpeg');
       }).then(function (res) {
         IMAGES.push({ name: name, path: res.path, size: res.size });
         return res.path;
@@ -512,7 +518,7 @@
           .catch(function (e) { toast(e.message, true); });
       } }) : null;
 
-      return [card('주요 사진', '사진은 긴 변 1600px 로 줄여서 data/images 에 저장됩니다.', [el('div', { class: 'photos' }, slotEls)]),
+      return [card('주요 사진', '사진은 긴 변 1600px 로 줄여서 data/images 에 저장됩니다. GIF 는 움직이도록 원본 그대로 올라갑니다(3MB 이하 권장).', [el('div', { class: 'photos' }, slotEls)]),
         card('갤러리', '순서대로 표시됩니다. 화살표로 순서를 바꿀 수 있습니다.', [drop, gallery,
           photos.length ? null : el('p', { class: 'note warn', text: '갤러리 사진이 없으면 템플릿의 데모 사진이 나옵니다.' }), cleanup])];
     }

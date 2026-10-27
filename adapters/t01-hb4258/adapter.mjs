@@ -105,7 +105,7 @@ export async function apply({ wedding: w, out, images }) {
       bride: w.accounts.bride.map((a) => ({ name: accountLabel(a), bank: a.bank, number: a.number })),
     },
     // 자동 탐색은 번호×확장자마다 404 요청을 남기므로 실제 파일 목록을 넘긴다.
-    gallery: { files: (await readdir(join(assets, 'gallery'))).filter((f) => /\.(jpe?g|png|webp)$/i.test(f)).sort(), maxScan: 30 },
+    gallery: { files: (await readdir(join(assets, 'gallery'))).filter((f) => /\.(jpe?g|png|webp|gif)$/i.test(f)).sort(), maxScan: 30 },
   };
   if (!config.meta.kakaoAppKey) warn('카카오 JS 키가 없어 카카오 공유·지도가 꺼집니다');
 
