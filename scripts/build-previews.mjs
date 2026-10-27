@@ -3,7 +3,7 @@ import { copyFile, mkdir, readFile, writeFile, unlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, extname, resolve, sep } from 'node:path';
 import { injectAddons } from './lib/addons.mjs';
-import { fallingDoodles } from './lib/falling-doodles.mjs';
+import { backgroundEffect } from './lib/falling-doodles.mjs';
 import { escapeHtml as h, kstParts, mapLinks, makeImages, useWedding, parentName, MONTH_EN } from './lib/wedding.mjs';
 
 export async function buildPreviews({ root, dist, wedding: w }) {
@@ -134,7 +134,7 @@ export async function buildPaperRose({ root, dist, wedding: w, template = false 
     RSVP_SECTION_MENU:w.features.rsvp?.enabled?'<a href="#rsvp">참석의사 전달하기</a>':'',
     RSVP:w.features.rsvp?.enabled?await readFile(join(source,'rsvp.html'),'utf8'):'',
     RSVP_MENU:w.features.rsvp?.enabled?'<a href="#rsvp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4m8-4v4M8 14l3 3 5-6"/></svg><span>참석의사 전달하기</span></a>':'',
-    FALLING_FLOWERS:fallingDoodles(),
+    FALLING_FLOWERS:backgroundEffect(w.options?.backgroundEffect),
     WEDDING_GALLERY:`<section id="wedding-gallery" class="section wedding-gallery-section">${heading('WEDDING GALLERY','웨딩갤러리')}<div class="wedding-gallery-grid">${[0,1].map(column=>`<div class="wedding-gallery-column">${weddingGallery.map((item,i)=>({item,i})).filter(({i})=>i%2===column).map(({item,i})=>`<button type="button" class="wedding-gallery-photo" style="--gallery-ratio:${galleryPhotoRatio(item,i)}" data-photo="${h(base+item.image)}" data-photo-order="${i}" aria-label="${h(item.title)} 크게 보기"><img src="${h(base+item.image)}" alt="${h(item.title)} — 치이카와 샘플 일러스트" loading="lazy" decoding="async" width="${item.width}" height="${item.height}"></button>`).join('')}</div>`).join('')}</div></section>`,
     INTERVIEW_ITEMS:(JSON.parse(await readFile(join(source,'interview.json'),'utf8'))).map((item,i)=>`<article class="interview-item"><h3><span>Q${i+1}.</span>${h(item.question)}</h3><div class="interview-answer"><h4>신랑 ${h(w.groom.name)}</h4><p>${multiline(item.groom)}</p></div><div class="interview-answer"><h4>신부 ${h(w.bride.name)}</h4><p>${multiline(item.bride)}</p></div></article>`).join(''),
     TITLE:h(w.site.title), DESCRIPTION:h(w.site.description), PUBLIC_URL:h(publicUrl), OG_IMAGE:h(ogImage), ASSET:base,
@@ -176,7 +176,7 @@ export async function buildPaperRose({ root, dist, wedding: w, template = false 
   values.RSVP=values.RSVP.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw new Error(`Unknown RSVP placeholder: ${key}`);return String(values[key]);});
   values.PHOTO_SHARE=values.PHOTO_SHARE.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw new Error(`Unknown photo share placeholder: ${key}`);return String(values[key]);});
   html=html.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw new Error(`Unknown preview placeholder: ${key}`);return String(values[key]);});
-  for(const file of ['style.css','drawer.css','opening.css','app.js','guestbook.css','guestbook.js','backend-resilience.js','rsvp.css','rsvp.js','rsvp-entry.js','photo-share.css','photo-share.js','photo-share-core.js'])await copyFile(join(source,file),join(assetDir,file));
+  for(const file of ['style.css','effects.css','drawer.css','opening.css','app.js','guestbook.css','guestbook.js','backend-resilience.js','rsvp.css','rsvp.js','rsvp-entry.js','photo-share.css','photo-share.js','photo-share-core.js'])await copyFile(join(source,file),join(assetDir,file));
   for(const file of ['lottie_svg.min.js','lottie-LICENSE.md','supabase.js','supabase-LICENSE','LaBelleAurore-Regular.ttf','LaBelleAurore-OFL.txt'])await copyFile(join(source,'vendor',file),join(assetDir,file));
   const openingTitle=JSON.parse(await readFile(join(source,'opening-title.json'),'utf8'));
   await writeFile(join(assetDir,'opening-title-data.js'),`window.OPENING_TITLE_DATA = ${JSON.stringify(openingTitle).replace(/</g,'\\u003c')};\n`);

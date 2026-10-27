@@ -83,6 +83,9 @@
     details.log pre { max-height: 260px; overflow: auto; background: var(--chip); padding: 10px; border-radius: 8px; font-size: 12px; white-space: pre-wrap; }
     .note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
     .note.warn { color: var(--warn); }
+    .fx-preview { position: relative; height: 240px; max-width: 360px; margin-top: 12px; border-radius: 12px; overflow: hidden; background: #f8f3ec; border: 1px solid var(--line); }
+    .fx-preview .page-doodles { position: absolute; max-width: none; z-index: 0; }
+    .fx-preview > p { margin: 0; padding: 100px 0; text-align: center; color: #9a8f88; }
   </style>
 </head>
 <body>
@@ -402,9 +405,32 @@
           })),
           el('p', { class: 'note', text: '원작 커플의 실제 사진이 데모로 들어 있는 템플릿(심플 일러스트·벚꽃 엔딩·블루밍 플라워)은 갤러리 사진을 올려야 배포됩니다.' }),
           el('p', {}, [el('a', { href: '/gallery/', target: '_blank', rel: 'noopener', text: '템플릿 갤러리 열기 ↗' })]),
-        ])];
+        ]), effectCard()];
       } },
     ];
+
+    /* ── 배경 효과 ─────────────────────────────────────────── */
+    // 청첩장이 쓰는 생성기·스타일을 그대로 불러 작은 화면에 미리 보여 준다.
+    var EFFECT_CSS = '/previews/test1/effects.css';
+    function effectCard() {
+      if (!document.querySelector('link[href="' + EFFECT_CSS + '"]')) {
+        document.head.appendChild(el('link', { rel: 'stylesheet', href: EFFECT_CSS }));
+      }
+      var stage = el('div', { class: 'fx-preview' });
+      var select = el('select', {});
+      var lib;
+      function show(v) { if (lib) stage.innerHTML = lib.backgroundEffect(v || 'doodles') || '<p>효과 없음</p>'; }
+      select.addEventListener('change', function () { set('options.backgroundEffect', select.value); show(select.value); });
+      import('/scripts/lib/falling-doodles.mjs').then(function (m) {
+        lib = m;
+        m.EFFECTS.forEach(function (o) { select.appendChild(el('option', { value: o[0], text: o[1] })); });
+        select.value = get('options.backgroundEffect') || 'doodles';
+        show(select.value);
+      }).catch(function () { stage.textContent = '미리보기를 불러오지 못했습니다'; });
+      return card('배경 효과', '청첩장 화면 위로 계속 흩날리는 장식입니다. 페이퍼 & 로즈(t08) 템플릿에 적용됩니다.', [
+        el('label', { class: 'f' }, ['효과', select]), stage,
+      ]);
+    }
 
     /* ── 사진 ──────────────────────────────────────────────── */
     // 큰 사진은 브라우저에서 줄여서 올린다(긴 변 1600px, JPEG 85%).

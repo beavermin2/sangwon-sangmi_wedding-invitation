@@ -1,0 +1,48 @@
+/* 배경 효과 레이어 (scripts/lib/falling-doodles.mjs 가 HTML 을 만든다). 스크롤과 독립, 터치를 가로채지 않는다. */
+.page-doodles{position:fixed;inset:0;max-width:425px;margin-inline:auto;overflow:hidden;pointer-events:none;z-index:15;opacity:.65}
+.page-doodles[data-effect=fireworks],.page-doodles[data-effect=starfall]{opacity:.85}
+.page-doodles[data-effect=snow]{opacity:1}
+
+/* 위에서 아래로 지나가는 줄(lane)과 좌우로 흔들리는 장식(item) */
+.doodle-lane{position:absolute;inset:0;animation:doodle-fall linear infinite}
+.doodle-item{position:absolute;top:0;animation:doodle-sway ease-in-out infinite alternate}
+.doodle-item svg{display:block;filter:drop-shadow(0 1px 1.5px #0000001f)}
+@keyframes doodle-fall{0%{transform:translateY(-12%);opacity:0}8%,90%{opacity:1}100%{transform:translateY(105%);opacity:0}}
+@keyframes doodle-sway{from{transform:translateX(calc(var(--doodle-sway) * -1)) rotate(calc(var(--doodle-spin) * -1))}to{transform:translateX(var(--doodle-sway)) rotate(var(--doodle-spin))}}
+
+/* 하트: 아래에서 위로 떠오른다 */
+[data-effect=hearts] .doodle-lane{animation-name:doodle-rise}
+@keyframes doodle-rise{0%{transform:translateY(105%);opacity:0}10%,85%{opacity:1}100%{transform:translateY(-12%);opacity:0}}
+
+/* 눈: 가장자리가 은은하게 번지는 눈송이 */
+.fx-snow{display:block;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff 0 45%,#f1f5fa 75%);box-shadow:0 0 4px 1px #a8bdd3a6}
+
+/* 꽃가루: 종이 조각이 뒤집히며 반짝인다 */
+.fx-confetti{display:block;animation:fx-flip linear infinite}
+@keyframes fx-flip{0%{transform:rotateX(0) rotateY(0)}50%{transform:rotateX(180deg) rotateY(40deg)}100%{transform:rotateX(360deg) rotateY(0)}}
+
+/* 별빛: 떨어지며 깜빡이는 별과 가끔 지나가는 별똥별 */
+.fx-twinkle{display:block;animation:fx-twinkle ease-in-out infinite alternate}
+.fx-twinkle svg{filter:drop-shadow(0 0 4px #e9b53fb3)}
+@keyframes fx-twinkle{from{transform:scale(.7);opacity:.55}to{transform:scale(1.15);opacity:1}}
+.fx-shoot{position:absolute;width:110px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#E8B64C);transform-origin:left center;opacity:0;animation:fx-shoot linear infinite}
+.fx-shoot::after{content:"";position:absolute;right:-2px;top:-2px;width:6px;height:6px;border-radius:50%;background:#FFF3CC;box-shadow:0 0 6px 2px #F2C94C}
+@keyframes fx-shoot{0%{transform:translate(0,0) rotate(135deg);opacity:0}2%{opacity:1}14%{transform:translate(-170px,170px) rotate(135deg);opacity:0}100%{transform:translate(-170px,170px) rotate(135deg);opacity:0}}
+
+/* 폭죽: 아래에서 불꽃이 올라와 사방으로 터진다 */
+.fx-burst{position:absolute;width:0;height:0;animation:fx-drop var(--fx-d) ease-in var(--fx-dl) infinite both}
+.fx-spark{position:absolute;left:-4px;top:-1.5px;width:9px;height:3px;border-radius:3px;opacity:0;animation:fx-spark var(--fx-d) cubic-bezier(.15,.7,.3,1) var(--fx-dl) infinite both}
+.fx-flash{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:50%;opacity:0;filter:blur(2px);animation:fx-flash var(--fx-d) ease-out var(--fx-dl) infinite both}
+.fx-trail{position:absolute;left:-1px;top:0;width:2px;height:46px;border-radius:2px;opacity:0;animation:fx-trail var(--fx-d) ease-out var(--fx-dl) infinite both}
+@keyframes fx-trail{0%{transform:translateY(160px) scaleY(.6);opacity:0}4%{opacity:.9}14%{transform:translateY(0) scaleY(1);opacity:.9}17%,100%{transform:translateY(0);opacity:0}}
+@keyframes fx-flash{0%,14%{transform:scale(.2);opacity:0}17%{transform:scale(1.4);opacity:.9}26%,100%{transform:scale(2);opacity:0}}
+@keyframes fx-spark{0%,14%{transform:rotate(var(--fx-a)) translateX(0) scaleX(.4);opacity:0}16%{opacity:1}38%{transform:rotate(var(--fx-a)) translateX(var(--fx-r)) scaleX(1);opacity:1}64%{transform:rotate(var(--fx-a)) translateX(calc(var(--fx-r) * 1.15)) scaleX(.5);opacity:0}100%{transform:rotate(var(--fx-a)) translateX(calc(var(--fx-r) * 1.15));opacity:0}}
+@keyframes fx-drop{0%,30%{transform:translateY(0)}66%,100%{transform:translateY(18px)}}
+
+.page-doodles[data-paused] *{animation-play-state:paused!important}
+/* 움직임 줄이기 설정: 떨어지는 장식은 제자리에 멈춰 두고, 폭죽·별똥별은 숨긴다 */
+@media(prefers-reduced-motion:reduce){
+  .page-doodles *{animation:none!important}
+  .doodle-lane{transform:translateY(var(--doodle-rest))}
+  .fx-burst,.fx-shoot{display:none}
+}

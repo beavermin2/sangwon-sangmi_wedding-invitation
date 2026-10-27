@@ -302,13 +302,3 @@ body.modal-open{overflow:hidden}
 .together-timeline p{font-size:12px;line-height:1.9;margin-top:3px;color:#8a7e78;word-break:keep-all}
 .together-timeline strong{font-weight:400;color:#9b6377;font-variant-numeric:tabular-nums}
 @media(max-width:350px){.together-section{padding-inline:28px}.together-timeline li{padding-left:23px}}
-
-/* 스크롤과 독립된 장식 레이어. 청첩장 전체에서 보이며 터치를 가로채지 않는다. */
-.page-doodles{position:fixed;inset:0;max-width:425px;margin-inline:auto;overflow:hidden;pointer-events:none;z-index:15;opacity:.65}
-.doodle-lane{position:absolute;inset:0;animation:doodle-fall linear infinite}
-.doodle-item{position:absolute;top:0;animation:doodle-sway ease-in-out infinite alternate}
-.doodle-item svg{display:block;filter:drop-shadow(0 1px 1.5px #0000001f)}
-@keyframes doodle-fall{0%{transform:translateY(-12%);opacity:0}8%,90%{opacity:1}100%{transform:translateY(105%);opacity:0}}
-@keyframes doodle-sway{from{transform:translateX(calc(var(--doodle-sway) * -1)) rotate(calc(var(--doodle-spin) * -1))}to{transform:translateX(var(--doodle-sway)) rotate(var(--doodle-spin))}}
-.page-doodles[data-paused] .doodle-lane,.page-doodles[data-paused] .doodle-item{animation-play-state:paused}
-@media(prefers-reduced-motion:reduce){.doodle-lane,.doodle-item{animation:none!important}.doodle-lane{transform:translateY(var(--doodle-rest))}}
