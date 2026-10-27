@@ -2,6 +2,7 @@
 import { copyFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { backgroundEffect } from './falling-doodles.mjs';
 import { FLOWER_MARK, flowerImage, kstParts, usesFlowerImage, venueLine, youtubeId } from './wedding.mjs';
 
 const SRC = fileURLToPath(new URL('../../addons/', import.meta.url));
@@ -12,6 +13,9 @@ const END = '<!-- /wedding-addons -->';
 //   mount  { selector, where }  붙일 위치. 없으면 <body> 끝.
 //   share  false                템플릿에 카카오 공유 버튼이 이미 있으면 모듈 쪽 공유는 숨긴다.
 //   accent '#rrggbb'            템플릿 색에 맞춘 강조색
+//   nativeEffect 'doodles'      템플릿이 원래 갖고 있는 배경 장식. 이 효과를 고르거나 비워 두면 템플릿 것을 그대로 쓴다.
+//   effect false                배경 효과를 템플릿 렌더러가 직접 그릴 때(t08)
+//   effectZ 1001                본문이 높은 z-index 의 고정 레이어 안에 있을 때 배경 효과를 그 위로 올린다.
 export async function injectAddons({ wedding: w, id, out, images, options = {} }) {
   const warnings = [];
   const f = w.features || {};
@@ -82,7 +86,14 @@ export async function injectAddons({ wedding: w, id, out, images, options = {} }
     '/* scripts/build.mjs 가 data/wedding.json 에서 생성했습니다. 직접 고치지 마세요. */\n' +
     `window.__WEDDING_ADDONS__ = ${JSON.stringify(config, null, 2).replace(/</g, '\\u003c')};\n`);
 
-  const tag = `${MARK}\n<script src="./addons/config.js"></script>\n<script src="./addons/wedding-addons.js" defer></script>\n${END}\n`;
+  // 배경 효과: 고르지 않았거나 템플릿 고유 장식과 같으면 넣지 않는다.
+  const chosen = (w.options && w.options.backgroundEffect) || '';
+  const effect = options.effect !== false && chosen && chosen !== options.nativeEffect ? backgroundEffect(chosen, { zIndex: options.effectZ }) : '';
+  if (effect) await copyFile(join(SRC, 'background-effects.css'), join(dir, 'background-effects.css'));
+  else await rm(join(dir, 'background-effects.css'), { force: true });
+  const layer = effect ? `<link rel="stylesheet" href="./addons/background-effects.css">\n${effect}\n` : '';
+
+  const tag = `${MARK}\n${layer}<script src="./addons/config.js"></script>\n<script src="./addons/wedding-addons.js" defer></script>\n${END}\n`;
   const pages = (await readdir(out)).filter((n) => n.endsWith('.html'));
   for (const page of pages) {
     const file = join(out, page);

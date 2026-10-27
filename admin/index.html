@@ -411,7 +411,7 @@
 
     /* ── 배경 효과 ─────────────────────────────────────────── */
     // 청첩장이 쓰는 생성기·스타일을 그대로 불러 작은 화면에 미리 보여 준다.
-    var EFFECT_CSS = '/previews/test1/effects.css';
+    var EFFECT_CSS = '/addons/background-effects.css';
     function effectCard() {
       if (!document.querySelector('link[href="' + EFFECT_CSS + '"]')) {
         document.head.appendChild(el('link', { rel: 'stylesheet', href: EFFECT_CSS }));
@@ -419,15 +419,19 @@
       var stage = el('div', { class: 'fx-preview' });
       var select = el('select', {});
       var lib;
-      function show(v) { if (lib) stage.innerHTML = lib.backgroundEffect(v || 'doodles') || '<p>효과 없음</p>'; }
+      function show(v) {
+        if (!lib) return;
+        if (!v) stage.innerHTML = '<p>템플릿마다 원래 장식을 씁니다<br>(클래식 화이트·페이퍼 & 로즈는 손그림 꽃)</p>';
+        else stage.innerHTML = lib.backgroundEffect(v) || '<p>효과 없음</p>';
+      }
       select.addEventListener('change', function () { set('options.backgroundEffect', select.value); show(select.value); });
       import('/scripts/lib/falling-doodles.mjs').then(function (m) {
         lib = m;
-        m.EFFECTS.forEach(function (o) { select.appendChild(el('option', { value: o[0], text: o[1] })); });
-        select.value = get('options.backgroundEffect') || 'doodles';
+        [['', '템플릿 기본 장식']].concat(m.EFFECTS).forEach(function (o) { select.appendChild(el('option', { value: o[0], text: o[1] })); });
+        select.value = get('options.backgroundEffect') || '';
         show(select.value);
       }).catch(function () { stage.textContent = '미리보기를 불러오지 못했습니다'; });
-      return card('배경 효과', '청첩장 화면 위로 계속 흩날리는 장식입니다. 페이퍼 & 로즈(t08) 템플릿에 적용됩니다.', [
+      return card('배경 효과', '청첩장 화면 위로 계속 흩날리는 장식입니다. 어떤 템플릿을 고르든 똑같이 적용됩니다.', [
         el('label', { class: 'f' }, ['효과', select]), stage,
       ]);
     }

@@ -176,7 +176,8 @@ export async function buildPaperRose({ root, dist, wedding: w, template = false 
   values.RSVP=values.RSVP.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw new Error(`Unknown RSVP placeholder: ${key}`);return String(values[key]);});
   values.PHOTO_SHARE=values.PHOTO_SHARE.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw new Error(`Unknown photo share placeholder: ${key}`);return String(values[key]);});
   html=html.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw new Error(`Unknown preview placeholder: ${key}`);return String(values[key]);});
-  for(const file of ['style.css','effects.css','drawer.css','opening.css','app.js','guestbook.css','guestbook.js','backend-resilience.js','rsvp.css','rsvp.js','rsvp-entry.js','photo-share.css','photo-share.js','photo-share-core.js'])await copyFile(join(source,file),join(assetDir,file));
+  await copyFile(join(root,'addons','background-effects.css'),join(assetDir,'background-effects.css'));
+  for(const file of ['style.css','drawer.css','opening.css','app.js','guestbook.css','guestbook.js','backend-resilience.js','rsvp.css','rsvp.js','rsvp-entry.js','photo-share.css','photo-share.js','photo-share-core.js'])await copyFile(join(source,file),join(assetDir,file));
   for(const file of ['lottie_svg.min.js','lottie-LICENSE.md','supabase.js','supabase-LICENSE','LaBelleAurore-Regular.ttf','LaBelleAurore-OFL.txt'])await copyFile(join(source,'vendor',file),join(assetDir,file));
   const openingTitle=JSON.parse(await readFile(join(source,'opening-title.json'),'utf8'));
   await writeFile(join(assetDir,'opening-title-data.js'),`window.OPENING_TITLE_DATA = ${JSON.stringify(openingTitle).replace(/</g,'\\u003c')};\n`);
@@ -194,7 +195,7 @@ export async function buildPaperRose({ root, dist, wedding: w, template = false 
   previewWedding.features.rsvp={enabled:false};
   for(const key of ['rsvp','guestbook'])if(!previewWedding.features[key]?.endpoint)previewWedding.features[key]={enabled:false};
   await writeFile(join(assetDir,'index.html'),html);
-  await injectAddons({wedding:previewWedding,id:'preview-test1',out:assetDir,images:makeImages(join(root,'data')),options:{mount:{selector:'#responses'},share:false,accent:'#b8788d'}});
+  await injectAddons({wedding:previewWedding,id:'preview-test1',out:assetDir,images:makeImages(join(root,'data')),options:{mount:{selector:'#responses'},share:false,accent:'#b8788d',effect:false}});
   html=(await readFile(join(assetDir,'index.html'),'utf8')).replaceAll('src="./addons/',`src="${base}addons/`);
   await writeFile(entry,html);
   await unlink(join(assetDir,'index.html'));

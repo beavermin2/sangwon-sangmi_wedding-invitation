@@ -460,4 +460,13 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
   else mount();
+
+  // 배경 효과(.page-doodles)는 탭이 숨겨졌을 때 멈춰 배터리를 아낀다.
+  document.addEventListener('visibilitychange', function () {
+    var layers = document.querySelectorAll('.page-doodles');
+    for (var i = 0; i < layers.length; i++) {
+      if (document.hidden) layers[i].setAttribute('data-paused', '');
+      else layers[i].removeAttribute('data-paused');
+    }
+  });
 })();

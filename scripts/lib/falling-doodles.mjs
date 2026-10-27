@@ -1,8 +1,9 @@
-// 청첩장 화면 전체에 깔리는 배경 효과(정적 HTML + CSS 애니메이션, 스타일은 previews/test1/effects.css).
-// options.backgroundEffect 로 고른다. 기본값 doodles 는 대표 청첩장의 falling-doodles.jsx 와 같은 손그림 꽃이다.
+// 청첩장 화면 전체에 깔리는 배경 효과(정적 HTML + CSS 애니메이션, 스타일은 addons/background-effects.css).
+// options.backgroundEffect 로 고른다. 비워 두면 템플릿 기본 장식을 쓴다(t01·t08 은 손그림 꽃, 나머지는 없음).
+// 페이퍼 & 로즈(t08)는 렌더러가, 나머지 템플릿은 공통 모듈(lib/addons.mjs)이 이 HTML 을 넣는다.
 // 관리자 화면도 이 파일을 브라우저에서 그대로 불러 미리보기를 그린다(Node 전용 API 를 쓰지 않는다).
 export const EFFECTS = [
-  ['doodles', '손그림 꽃·하트 (기본)'],
+  ['doodles', '손그림 꽃·하트'],
   ['cherry', '벚꽃 꽃잎이 흩날림'],
   ['fireworks', '폭죽이 터짐'],
   ['starfall', '별빛이 쏟아짐'],
@@ -142,11 +143,13 @@ const BUILDERS = {
   },
 };
 
-export function backgroundEffect(kind = 'doodles') {
+// zIndex: 템플릿 본문이 높은 층(고정 팝업 등)에 그려질 때 그 위로 올린다.
+export function backgroundEffect(kind = 'doodles', { zIndex } = {}) {
   if (kind === 'none') return '';
   const build = BUILDERS[kind] || BUILDERS.doodles;
   const name = BUILDERS[kind] ? kind : 'doodles';
-  return `<div class="page-doodles" data-effect="${name}" aria-hidden="true">${build(random())}</div>`;
+  const style = zIndex ? ` style="z-index:${Number(zIndex)}"` : '';
+  return `<div class="page-doodles" data-effect="${name}"${style} aria-hidden="true">${build(random())}</div>`;
 }
 
 // 이전 이름(기본 손그림 꽃)

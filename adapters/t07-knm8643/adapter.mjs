@@ -11,7 +11,8 @@ import {
 } from '../../scripts/lib/wedding.mjs';
 
 // 공통 모듈: 내부 스크롤 영역(.blooming-wrap) 끝에 붙인다. body 끝에 붙이면 스크롤 영역 밖이라 보이지 않는다.
-export const addons = { mount: { selector: '.blooming-wrap', where: 'beforeend' }, accent: '#d4788f' };
+// 본문 전체가 z-index 1000 의 고정 팝업(.mobile-popup) 안에 그려지므로 배경 효과는 그 위 층에 둔다.
+export const addons = { mount: { selector: '.blooming-wrap', where: 'beforeend' }, accent: '#d4788f', effectZ: 1001 };
 
 export const copySource = false;
 

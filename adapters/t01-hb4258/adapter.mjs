@@ -41,7 +41,7 @@ function person(p, images, warn, fallbackPhoto) {
 
 // 공통 모듈: 템플릿의 카카오 공유 섹션 바로 위에 붙이고, 공유 버튼은 템플릿 것을 쓴다.
 // 맨 아래 THANK YOU 꼬리말을 빼므로 공유 섹션이 마지막 섹션이다.
-export const addons = { mount: { selector: '#root section:last-of-type', where: 'beforebegin' }, share: false, accent: '#9c7a5b' };
+export const addons = { mount: { selector: '#root section:last-of-type', where: 'beforebegin' }, share: false, accent: '#9c7a5b', nativeEffect: 'doodles' };
 
 export async function apply({ wedding: w, out, images }) {
   const warnings = [];
@@ -114,7 +114,9 @@ export async function apply({ wedding: w, out, images }) {
     `window.CONFIG = ${JSON.stringify(config, null, 2)};\n`);
 
   // 표지: 대표 사진을 자르지 않고 원래 비율대로 보여 주고, 그 위로 손그림 꽃이 흩날리게 한다.
-  await copyFile(fileURLToPath(new URL('falling-doodles.jsx', import.meta.url)), join(out, 'components', 'falling-doodles.jsx'));
+  // 손그림 꽃은 이 템플릿의 기본 장식. 다른 배경 효과를 고르면 공통 모듈이 그 효과를 넣으므로 빼 둔다.
+  const ownDoodles = [undefined, '', 'doodles'].includes(w.options && w.options.backgroundEffect);
+  if (ownDoodles) await copyFile(fileURLToPath(new URL('falling-doodles.jsx', import.meta.url)), join(out, 'components', 'falling-doodles.jsx'));
   await patch(join(out, 'components', 'sections-a.jsx'), [
     ["height: 360, overflow: 'hidden' }}>", "minHeight: 360, overflow: 'hidden' }}>"],
     ['width="100%" height="100%" alt="" eager={true} />', 'width="100%" height="auto" alt="" eager={true} />'],
@@ -180,10 +182,10 @@ export async function apply({ wedding: w, out, images }) {
   let html = await readFile(page, 'utf8');
   const flowersTag = '<script type="text/babel" src="./components/flowers.jsx"></script>';
   if (!html.includes(flowersTag)) throw new Error('index.html 에서 flowers.jsx 스크립트를 찾지 못했습니다');
-  html = html.replace(flowersTag, `${flowersTag}\n<script type="text/babel" src="./components/falling-doodles.jsx"></script>`);
+  if (ownDoodles) html = html.replace(flowersTag, `${flowersTag}\n<script type="text/babel" src="./components/falling-doodles.jsx"></script>`);
   // 손그림 꽃은 표지만이 아니라 화면 전체에 흩날리게 청첩장 맨 앞에 한 번 넣는다.
   if (!/<div className="app-shell">\r?\n/.test(html)) throw new Error('index.html 에서 app-shell 을 찾지 못했습니다');
-  html = html.replace(/<div className="app-shell">(\r?\n)/, '<div className="app-shell">$1      <FallingDoodles />$1');
+  if (ownDoodles) html = html.replace(/<div className="app-shell">(\r?\n)/, '<div className="app-shell">$1      <FallingDoodles />$1');
   // 카카오톡 공유 아래의 꽃 장식·THANK YOU 꼬리말은 넣지 않는다.
   if (!/\s*<FooterSection \/>/.test(html)) throw new Error('index.html 에서 <FooterSection /> 을 찾지 못했습니다');
   html = html.replace(/\r?\n\s*<FooterSection \/>/, '');
