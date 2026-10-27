@@ -205,6 +205,7 @@
     }
   },
   "options": {
-    "deceasedMark": "chrysanthemum"
+    "deceasedMark": "chrysanthemum",
+    "backgroundEffect": "hearts"
   }
 }
