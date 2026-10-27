@@ -150,10 +150,10 @@
   },
   "features": {
     "rsvp": {
-      "enabled": true,
+      "enabled": false,
       "deadline": "2027-01-30",
-      "askCompanions": true,
-      "askMeal": true,
+      "askCompanions": false,
+      "askMeal": false,
       "endpoint": "https://script.google.com/macros/s/AKfycbyHz-fCYZ90UVwrkgHrB_6IdrI5TtBf1gP6g6bfzpWZmpczyKBbv6j6LZX6PrcWlxj0/exec"
     },
     "guestbook": {
