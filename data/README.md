@@ -12,7 +12,7 @@
 | `site.url` | 배포 주소(끝에 `/`). 카카오 공유 썸네일과 `og:image` 절대 경로에 쓰입니다. |
 | `site.title` / `site.description` | 카카오톡·문자 공유 미리보기 제목과 설명입니다. |
 | `site.ogImage` | 공유 썸네일입니다. 1200×630 JPG, 300KB 이하를 권장합니다. |
-| `groom` / `bride` | 이름, 영문 이름, 관계(장남·차녀 등), 연락처, 프로필 사진, 부모 정보. 고인이신 부모님은 `deceased: true` 로 적으면 이름 앞에 국화(🌼)가 표시됩니다. 모양은 `options.deceasedMark`(`flower` 흰 국화 그림 / `chrysanthemum` 국화 선 그림 / 🌼 / ✿ / 故)로 바꿉니다. |
+| `groom` / `bride` | 이름, 영문 이름, 관계(장남·차녀 등), 연락처, 프로필 사진, 부모 정보. 고인이신 부모님은 `deceased: true` 로 적으면 이름 앞에 국화(🌼)가 표시됩니다. 모양은 `options.deceasedMark`(`flower` 흰 국화 그림 / `chrysanthemum` 국화 선 그림 / `whiteChrysanthemum` 잎 달린 흰 국화 그림 / 🌼 / ✿ / 故)로 바꿉니다. |
 | `ceremony.datetime` | 예식 일시(ISO 8601, `+09:00` 포함). 달력과 D-Day는 이 값으로 계산합니다. |
 | `venue` | 예식장 이름·홀·주소·좌표(`lat`/`lng`)·교통편. |
 | `greeting` | 인사말 제목, 본문(`\n` 줄바꿈), 인용구(비우면 숨김). |

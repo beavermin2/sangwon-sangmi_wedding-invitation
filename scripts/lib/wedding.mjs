@@ -33,10 +33,11 @@ export function kstParts(iso) {
 //                   공통 모듈(addons/wedding-addons.js)이 화면에서 addons/mourn-flower.svg 그림으로 바꾼다.
 //                   스크립트가 돌지 않으면 🌼 로 보인다.
 //   'chrysanthemum': 'flower' 와 같되 국화 선 그림(addons/mourn-chrysanthemum.png)으로 바꾼다.
+//   'whiteChrysanthemum': 잎 달린 흰 국화 그림(addons/mourn-white-chrysanthemum.png).
 //   그 밖의 값('🌼', '✿', '故' 등): 그 글자를 그대로 쓴다.
 // build.mjs 가 어댑터를 돌리기 전에 useWedding() 으로 한 번 설정한다.
 export const FLOWER_MARK = '⁣🌼';
-const MARK_IMAGES = { flower: 'mourn-flower.svg', chrysanthemum: 'mourn-chrysanthemum.png' };
+const MARK_IMAGES = { flower: 'mourn-flower.svg', chrysanthemum: 'mourn-chrysanthemum.png', whiteChrysanthemum: 'mourn-white-chrysanthemum.png' };
 let deceased = FLOWER_MARK;
 let markImage = MARK_IMAGES.flower;
 export function useWedding(w) {
