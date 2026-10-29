@@ -148,6 +148,13 @@ export async function apply({ wedding: w, out, images }) {
   if (ownDoodles) await copyFile(fileURLToPath(new URL('falling-doodles.jsx', import.meta.url)), join(out, 'components', 'falling-doodles.jsx'));
   await patch(join(out, 'components', 'sections-a.jsx'), [
     ["height: 360, overflow: 'hidden' }}>", "minHeight: 360, overflow: 'hidden' }}>"],
+    ["fontSize: 14, letterSpacing: 8, color: THEME.accent, fontStyle: 'italic',", "fontSize: 14, letterSpacing: 8, paddingLeft: 8, color: THEME.accent, fontStyle: 'italic',"],
+    // 인사말: 줄마다 끝 단어가 혼자 다음 줄로 밀리지 않게 화면 폭에 맞춰 글자를 줄인다(넓은 화면은 원래 15px)
+    ['fontSize: 15, lineHeight: 2.2, letterSpacing: 0.5,', "fontSize: 'clamp(11.5px, 3.5vw, 15px)', lineHeight: 2.2, letterSpacing: 0.5,"],
+    // 신랑·신부 소개: 작은 화면(320px)에서 두 사람 칸이 사진 폭보다 줄지 못해 화면 밖으로 밀리던 것을 줄어들게 한다
+    ["<FadeIn delay={delay} style={{ textAlign: 'center', flex: 1 }}>\n      <Photo src={photo ? _assetPath(photo) : null}",
+     "<FadeIn delay={delay} style={{ textAlign: 'center', flex: 1, minWidth: 0 }}>\n      <Photo src={photo ? _assetPath(photo) : null}"],
+    ["style={{ margin: '0 auto 20px', borderRadius: 2 }} />", "style={{ margin: '0 auto 20px', borderRadius: 2, maxWidth: '100%' }} />"],
     ['width="100%" height="100%" alt="" eager={true} />', 'width="100%" height="auto" alt="" eager={true} />'],
     ['rgba(251,246,238,0) 55%', 'rgba(251,246,238,0) 82%'],
     // 표지 시간·장소 줄을 굵게
@@ -169,6 +176,9 @@ export async function apply({ wedding: w, out, images }) {
   await patch(join(out, 'components', 'theme.jsx'), [
     ...ROLES.map(([key, , def]) => [`  ${key}: '${def}',`, `  ${key}: '${colors[key]}',`]),
     ['  flowerDensity: 1,\n};', `  flowerDensity: 1,\n};\nObject.assign(THEME, ${JSON.stringify(partColors)});`],
+    // 자간은 마지막 글자 뒤에도 붙어 가운데 정렬 제목이 그 절반만큼 왼쪽으로 쏠린다. 왼쪽에 같은 만큼 띄워 맞춘다.
+    ["fontSize: 13, letterSpacing: 4, textTransform: 'uppercase',", "fontSize: 13, letterSpacing: 4, textTransform: 'uppercase', paddingLeft: align === 'center' ? 4 : 0,"],
+    ['fontSize: 17, letterSpacing: 6, color: THEME.text,', "fontSize: 17, letterSpacing: 6, color: THEME.text, paddingLeft: align === 'center' ? 6 : 0,"],
   ]);
   // 교통편: 합쳐진 안내(줄바꿈)를 줄마다 보여 준다
   // 하객 안내: iconImage 가 있으면 글자 대신 그림 아이콘
@@ -239,6 +249,17 @@ export async function apply({ wedding: w, out, images }) {
   // 양가 부모(FAMILY) 섹션은 넣지 않는다. 부모님 성함은 인사말 아래 혼주 줄에 이미 나온다.
   if (!/\s*<ParentsSection \/>/.test(html)) throw new Error('index.html 에서 <ParentsSection /> 을 찾지 못했습니다');
   html = html.replace(/\r?\n\s*<ParentsSection \/>/, '');
+  // 아이폰(Safari)과 갤럭시(Chrome)가 같게 보이도록 글자 배치를 맞춘다.
+  //  - 한글을 단어 단위로 줄바꿈(글자 중간에서 끊기면 줄 끝이 들쭉날쭉해 정렬이 어긋나 보인다)
+  //  - 기울임꼴이 없는 한글을 가짜로 기울이지 않는다(Safari 는 기울인 만큼 오른쪽으로 밀려 보인다)
+  //  - 가로로 돌렸을 때 Safari 가 글자를 임의로 키우지 않게 한다
+  //  - 가운데 정렬 글(인용구·인사말 등)은 두 줄로 넘어갈 때 줄 길이를 고르게 나눈다(한 단어만 남는 줄 방지)
+  const typo = `  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  .app-shell { word-break: keep-all; overflow-wrap: break-word; font-synthesis: weight; }
+  .app-shell section[style*="text-align: center"] div { text-wrap: balance; }
+</style>`;
+  if (!html.includes('</style>')) throw new Error('index.html 에서 </style> 을 찾지 못했습니다');
+  html = html.replace('</style>', typo);
   const og = {
     'og:title': w.site.title,
     'og:description': w.site.description || `${when.dateTimeKo} · ${venueLine(w.venue)}`,
