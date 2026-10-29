@@ -146,6 +146,8 @@ export async function apply({ wedding: w, out, images }) {
   ]);
   // 초대글 아래 혼주 두 줄: 줄마다 가운데 정렬하면 '아들'/'딸' 길이와 국화 유무로 어긋나므로
   // 부모 이름 · '의 아들/딸' · 신랑신부 이름을 같은 칸에 맞춘다(국화는 칸 왼쪽 바깥에 걸린다).
+  // 아이폰 Safari 는 auto 칸을 좁게 잡아 한 글자씩 줄바꿈하므로, 칸을 글자 폭(max-content)으로 잡고 줄바꿈을 막는다.
+  // 좁은 화면에서는 글자 크기를 화면 폭에 맞춰 줄인다(작은 글자·간격은 em 이라 함께 줄어든다).
   const parentLine = (gp, gm, who) => [
     `          <div>
             {${gp}} <span style={{ color: THEME.textMuted, fontSize: 11 }}>· </span>{${gm}}
@@ -153,14 +155,14 @@ export async function apply({ wedding: w, out, images }) {
             <span style={{ color: THEME.accent, fontWeight: 500, marginLeft: 4 }}>{d.${who}.name}</span>
           </div>`,
     `          <div style={{ display: 'contents' }}>
-            <span>{${gp}} <span style={{ color: THEME.textMuted, fontSize: 11 }}>· </span>{${gm}}</span>
-            <span style={{ color: THEME.textMuted, fontSize: 11, marginLeft: 8 }}>의 {d.${who}.roleKo}</span>
-            <span style={{ color: THEME.accent, fontWeight: 500, marginLeft: 4 }}>{d.${who}.name}</span>
+            <span>{${gp}} <span style={{ color: THEME.textMuted, fontSize: '0.85em' }}>· </span>{${gm}}</span>
+            <span style={{ color: THEME.textMuted, fontSize: '0.85em', marginLeft: '0.6em' }}>의 {d.${who}.roleKo}</span>
+            <span style={{ color: THEME.accent, fontWeight: 500, marginLeft: '0.4em' }}>{d.${who}.name}</span>
           </div>`,
   ];
   await patch(join(out, 'components', 'sections-a.jsx'), [
     ['fontSize: 13, lineHeight: 2, color: THEME.text, letterSpacing: 1,',
-     "fontSize: 13, lineHeight: 2, color: THEME.text, letterSpacing: 1,\n          display: 'grid', gridTemplateColumns: 'auto auto auto', alignItems: 'baseline', textAlign: 'left',"],
+     "fontSize: 'clamp(11px, 3.4vw, 13px)', lineHeight: 2, color: THEME.text, letterSpacing: 1,\n          display: 'grid', gridTemplateColumns: 'max-content max-content max-content', justifyContent: 'center',\n          alignItems: 'baseline', textAlign: 'left', whiteSpace: 'nowrap', wordBreak: 'keep-all',"],
     parentLine('gf', 'gm', 'groom'),
     parentLine('bf', 'bm', 'bride'),
     // 인용구 위의 장식용 큰 따옴표(“)는 빼고 인용문만
