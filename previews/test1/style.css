@@ -134,6 +134,7 @@ button:disabled{cursor:default;opacity:.4}
 .notice-list article{display:grid;grid-template-columns:26px minmax(0,1fr);gap:6px 12px;align-items:start}
 .notice-list article+article{border-top:1px solid #e6deda;padding-top:26px}
 .notice-mark{grid-column:1;grid-row:1;font-size:19px;line-height:27px;text-align:center}
+.notice-mark img{display:inline-block;width:22px;height:22px;object-fit:contain;vertical-align:middle}
 .notice-list h3{grid-column:2;grid-row:1;font-size:15px;line-height:27px;margin:0;color:#65534e}
 .notice-list p{grid-column:2;font-size:13px;line-height:1.95;color:#817773;word-break:keep-all}
 .section.wedding-gallery-section{padding:60px 7px 70px}

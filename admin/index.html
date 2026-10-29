@@ -183,7 +183,10 @@
         input.addEventListener('change', function () { set(f.path, input.checked); });
         return el('label', { class: 'f check' + (f.wide ? ' wide' : '') }, [input, f.label, f.hint ? el('small', { text: ' ' + f.hint }) : null]);
       } else if (f.type === 'select') {
-        input = el('select', {}, f.options.map(function (o) { return el('option', { value: o[0], text: o[1] }); }));
+        var opts = f.options.slice();
+        // 목록에 없는 기존 값은 지우지 않고 그대로 보여 준다.
+        if (v && !opts.some(function (o) { return o[0] === v; })) opts.push([v, v]);
+        input = el('select', {}, opts.map(function (o) { return el('option', { value: o[0], text: o[1] }); }));
         input.value = v || f.options[0][0];
       } else {
         input = el('input', { type: f.type || 'text', placeholder: f.placeholder, inputmode: f.inputmode, autocomplete: 'off', list: f.list, min: f.min, max: f.max, step: f.step });
@@ -350,10 +353,10 @@
           { path: 'greeting.quote.text', label: '인용구 (선택)', type: 'textarea', wide: true, rows: 2 },
           { path: 'greeting.quote.author', label: '인용구 출처' },
         ])]), card('하객 안내', '식사·주차 등. 제목에 "식사"·"주차"가 들어가면 템플릿의 해당 칸에도 쓰입니다.', [list('notices', [
-          { key: 'icon', label: '아이콘', width: '70px' },
+          { key: 'icon', label: '아이콘', type: 'select', width: '110px', options: [['🍽', '🍽 식사'], ['💐', '💐 화환'], ['atm', 'ATM 그림']] },
           { key: 'title', label: '제목', width: '140px' },
           { key: 'detail', label: '내용', width: '2fr' },
-        ], { icon: '📌', title: '', detail: '' }, '안내 추가', re)])];
+        ], { icon: '🍽', title: '', detail: '' }, '안내 추가', re)])];
       } },
       { id: 'photos', title: '사진', render: photosTab },
       { id: 'media', title: '음악·영상', render: mediaTab },

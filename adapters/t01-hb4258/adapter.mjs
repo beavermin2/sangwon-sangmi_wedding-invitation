@@ -98,7 +98,8 @@ export async function apply({ wedding: w, out, images }) {
     },
     invitation: w.greeting.message,
     transport: (w.venue.transport || []).map((t) => ({ label: t.label, icon: ICON[t.type] || '•', detail: t.detail })),
-    notices: w.notices || [],
+    // 'atm' 은 그림 아이콘(페이퍼 & 로즈 전용)이라 이 템플릿에서는 이모지로 대신한다.
+    notices: (w.notices || []).map((n) => (n.icon === 'atm' ? { ...n, icon: '🏧' } : n)),
     accounts: {
       note: w.accounts.note,
       groom: w.accounts.groom.map((a) => ({ name: accountLabel(a), bank: a.bank, number: a.number })),
