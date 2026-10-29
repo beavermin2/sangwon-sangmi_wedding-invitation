@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   kstParts, parentName, parentPhone, accountLabel, kakaoKey, venueLine, escapeHtml,
 } from '../../scripts/lib/wedding.mjs';
+import { ROLES, PARTS, USES, resolveColors } from './text-colors.mjs';
 
 const ICON = { subway: 'M', bus: 'B', car: 'P' };
 
@@ -18,6 +19,33 @@ async function patch(file, pairs) {
     text = text.replace(from, to);
   }
   await writeFile(file, text);
+}
+
+// 글씨 색 부분 나누기: 함수마다 THEME.<묶음> 을 나온 순서대로 세어 USES 표대로 THEME.<부분> 으로 바꾼다.
+async function splitTextColors(dir) {
+  for (const file of [...new Set(USES.map((u) => u[0]))]) {
+    const path = join(dir, file);
+    const lines = (await readFile(path, 'utf8')).replace(/\r\n/g, '\n').split('\n');
+    const seen = new Map();
+    let fn = '';
+    for (let i = 0; i < lines.length; i++) {
+      const m = /^function (\w+)/.exec(lines[i]);
+      if (m) fn = m[1];
+      lines[i] = lines[i].replace(/THEME\.(textSoft|textMuted|text|accent)\b/g, (all, role) => {
+        const use = USES.find((u) => u[0] === file && u[1] === fn && u[2] === role);
+        if (!use) return all;
+        const key = `${fn}.${role}`;
+        const n = seen.get(key) || 0;
+        seen.set(key, n + 1);
+        return use[3][n] ? `THEME.${use[3][n]}` : all;
+      });
+    }
+    for (const [f, fnName, role, parts] of USES.filter((u) => u[0] === file)) {
+      const n = seen.get(`${fnName}.${role}`) || 0;
+      if (n !== parts.length) throw new Error(`${file} ${fnName} 의 THEME.${role} 가 ${parts.length}곳이어야 하는데 ${n}곳입니다 (text-colors.mjs 의 USES 를 고쳐 주세요)`);
+    }
+    await writeFile(path, lines.join('\n'));
+  }
 }
 
 function person(p, images, warn, fallbackPhoto) {
@@ -133,13 +161,15 @@ export async function apply({ wedding: w, out, images }) {
       </div>
 `, ''],
   ]);
-  // 글씨 색: 관리자에서 고른 색(options.textColors)으로 테마의 글씨 색을 바꾼다. 비운 항목은 기본색.
-  const DEFAULT_TEXT = { text: '#2B2620', textSoft: '#5F564B', textMuted: '#A09789', accent: '#2E4A7B' };
-  const textColors = (w.options && w.options.textColors) || {};
-  await patch(join(out, 'components', 'theme.jsx'), Object.entries(DEFAULT_TEXT).map(([key, def]) => {
-    const c = /^#[0-9a-f]{6}$/i.test(textColors[key] || '') ? textColors[key] : def;
-    return [`  ${key}: '${def}',`, `  ${key}: '${c}',`];
-  }));
+  // 글씨 색: 관리자에서 고른 색(options.textColors). 묶음 색은 테마 값을 바꾸고,
+  // 부분 색은 테마에 키를 더한 뒤 맨 아래에서 각 부분의 THEME.<묶음> 을 THEME.<부분> 으로 바꾼다(text-colors.mjs).
+  const colors = resolveColors(w.options && w.options.textColors);
+  const partColors = {};
+  for (const [, parts] of PARTS) for (const [k] of parts) partColors[k] = colors[k];
+  await patch(join(out, 'components', 'theme.jsx'), [
+    ...ROLES.map(([key, , def]) => [`  ${key}: '${def}',`, `  ${key}: '${colors[key]}',`]),
+    ['  flowerDensity: 1,\n};', `  flowerDensity: 1,\n};\nObject.assign(THEME, ${JSON.stringify(partColors)});`],
+  ]);
   // 교통편: 합쳐진 안내(줄바꿈)를 줄마다 보여 준다
   // 하객 안내: iconImage 가 있으면 글자 대신 그림 아이콘
   await copyFile(fileURLToPath(new URL('../../previews/test1/images/notice-atm.webp', import.meta.url)), join(assets, 'notice-atm.webp'));
@@ -192,6 +222,7 @@ export async function apply({ wedding: w, out, images }) {
     ["<span style={{ position: 'relative', zIndex: 1, fontWeight: isTarget ? 500 : 300 }}>",
      "<span style={{ position: 'relative', zIndex: 1, fontWeight: isTarget ? 500 : 300, top: isTarget ? -2 : 0 }}>"],
   ]);
+  await splitTextColors(join(out, 'components'));
 
   // 카카오톡·문자 미리보기는 JS를 실행하지 않으므로 og 태그를 HTML에 직접 박는다.
   const page = join(out, 'index.html');
