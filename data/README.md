@@ -27,6 +27,7 @@
 | `features.map` | 카카오맵·네이버 지도 키. 카카오맵은 공유 키와 같은 키를 써도 됩니다. |
 | `features.music` | 배경음악 on/off, 파일(`media/…mp3·m4a`, 12MB 이하), `autoplay`(첫 터치 때 재생), `volume`(0.1~1). 청첩장 오른쪽 위에 ♪ 버튼이 생깁니다. |
 | `options.backgroundEffect` | (선택) 화면 위로 계속 흩날리는 배경 효과. 비우면 템플릿 기본 장식(t01·t08 은 손그림 꽃). `doodles`(손그림 꽃) · `cherry`(벚꽃) · `fireworks`(폭죽) · `starfall`(별빛) · `snow`(눈) · `hearts`(떠오르는 하트) · `confetti`(꽃가루) · `none`. 모든 템플릿에 공통으로 적용됩니다. |
+| `options.textColors` | (선택) 글씨 색. `text`(본문) · `textSoft`(설명) · `textMuted`(보조 라벨) · `accent`(포인트: 영문 제목·신랑신부 이름)을 `#rrggbb` 로 적습니다. 비운 항목은 템플릿 기본색. 지금은 t01 템플릿에 적용됩니다. |
 | `features.video` | 동영상 on/off, 제목, `youtube`(유튜브 주소, 추천) 또는 `src`(`media/…mp4`, 45MB 이하)와 표지 사진 `poster`. 둘 다 있으면 유튜브를 씁니다. |
 
 ## 템플릿별 반영 방식

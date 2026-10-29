@@ -133,6 +133,13 @@ export async function apply({ wedding: w, out, images }) {
       </div>
 `, ''],
   ]);
+  // 글씨 색: 관리자에서 고른 색(options.textColors)으로 테마의 글씨 색을 바꾼다. 비운 항목은 기본색.
+  const DEFAULT_TEXT = { text: '#2B2620', textSoft: '#5F564B', textMuted: '#A09789', accent: '#2E4A7B' };
+  const textColors = (w.options && w.options.textColors) || {};
+  await patch(join(out, 'components', 'theme.jsx'), Object.entries(DEFAULT_TEXT).map(([key, def]) => {
+    const c = /^#[0-9a-f]{6}$/i.test(textColors[key] || '') ? textColors[key] : def;
+    return [`  ${key}: '${def}',`, `  ${key}: '${c}',`];
+  }));
   // 교통편: 합쳐진 안내(줄바꿈)를 줄마다 보여 준다
   // 하객 안내: iconImage 가 있으면 글자 대신 그림 아이콘
   await copyFile(fileURLToPath(new URL('../../previews/test1/images/notice-atm.webp', import.meta.url)), join(assets, 'notice-atm.webp'));
