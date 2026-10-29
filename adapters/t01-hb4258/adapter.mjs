@@ -21,6 +21,22 @@ async function patch(file, pairs) {
   await writeFile(file, text);
 }
 
+// 인용구를 줄바꿈 없이 한 줄에 맞추는 글자 크기(CSS). 글자 폭을 em 으로 어림해
+// '화면 폭(최대 480px) - 좌우 여백 56px - 자간' 을 그 폭으로 나누고, 원래 크기(14px)를 넘지 않게 한다.
+// 줄바꿈(\n)을 직접 넣은 인용구는 가장 긴 줄을 기준으로 한다.
+function fitQuoteSize(text, max = 14, spacing = 1) {
+  const em = (ch) => (/[ㄱ-힣一-鿿]/.test(ch) ? 1 : /[A-Z]/.test(ch) ? 0.68 : /[a-z0-9]/.test(ch) ? 0.55 : ch === ' ' ? 0.3 : 0.4);
+  const lines = String(text || '').split('\n');
+  let widest = 0, chars = 0;
+  for (const line of lines) {
+    const w = [...line].reduce((s, ch) => s + em(ch), 0);
+    if (w > widest) { widest = w; chars = [...line].length; }
+  }
+  if (!widest) return `${max}px`;
+  // 글꼴마다 폭이 조금씩 달라 5% 여유를 둔다
+  return `min(${max}px, calc((min(100vw, 480px) - ${56 + chars * spacing}px) / ${(widest * 1.05).toFixed(2)}))`;
+}
+
 // 글씨 색 부분 나누기: 함수마다 THEME.<묶음> 을 나온 순서대로 세어 USES 표대로 THEME.<부분> 으로 바꾼다.
 async function splitTextColors(dir) {
   for (const file of [...new Set(USES.map((u) => u[0]))]) {
@@ -149,6 +165,11 @@ export async function apply({ wedding: w, out, images }) {
   await patch(join(out, 'components', 'sections-a.jsx'), [
     ["height: 360, overflow: 'hidden' }}>", "minHeight: 360, overflow: 'hidden' }}>"],
     ["fontSize: 14, letterSpacing: 8, color: THEME.accent, fontStyle: 'italic',", "fontSize: 14, letterSpacing: 8, paddingLeft: 8, color: THEME.accent, fontStyle: 'italic',"],
+    // 인용구: 줄바꿈하지 않고 화면 폭에 맞춰 글자를 줄인다
+    [`            fontSize: 14, lineHeight: 2, letterSpacing: 1,
+            color: THEME.text, whiteSpace: 'pre-line', fontWeight: 300,`,
+     `            fontSize: '${fitQuoteSize(w.greeting.quote && w.greeting.quote.text)}', lineHeight: 2, letterSpacing: 1,
+            color: THEME.text, whiteSpace: 'pre', fontWeight: 300,`],
     // 인사말: 줄마다 끝 단어가 혼자 다음 줄로 밀리지 않게 화면 폭에 맞춰 글자를 줄인다(넓은 화면은 원래 15px)
     ['fontSize: 15, lineHeight: 2.2, letterSpacing: 0.5,', "fontSize: 'clamp(11.5px, 3.5vw, 15px)', lineHeight: 2.2, letterSpacing: 0.5,"],
     // 신랑·신부 소개: 작은 화면(320px)에서 두 사람 칸이 사진 폭보다 줄지 못해 화면 밖으로 밀리던 것을 줄어들게 한다
