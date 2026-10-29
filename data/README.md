@@ -12,11 +12,11 @@
 | `site.url` | 배포 주소(끝에 `/`). 카카오 공유 썸네일과 `og:image` 절대 경로에 쓰입니다. |
 | `site.title` / `site.description` | 카카오톡·문자 공유 미리보기 제목과 설명입니다. |
 | `site.ogImage` | 공유 썸네일입니다. 1200×630 JPG, 300KB 이하를 권장합니다. |
-| `groom` / `bride` | 이름, 영문 이름, 관계(장남·차녀 등), 연락처, 프로필 사진, 부모 정보. 고인이신 부모님은 `deceased: true` 로 적으면 이름 앞에 국화(🌼)가 표시됩니다. 모양은 `options.deceasedMark`(`flower` 흰 국화 그림 / `chrysanthemum` 국화 선 그림 / 🌼 / ✿ / 故)로 바꿉니다. |
+| `groom` / `bride` | 이름, 영문 이름, 관계(장남·차녀 등), 연락처, 프로필 사진, 부모 정보. 고인이신 부모님은 `deceased: true` 로 적으면 이름 앞에 국화(🌼)가 표시됩니다. 모양은 `options.deceasedMark`(`flower` 흰 국화 그림 / `chrysanthemum` 국화 선 그림 / `whiteChrysanthemum` 잎 달린 흰 국화 그림 / 🌼 / ✿ / 故)로 바꿉니다. |
 | `ceremony.datetime` | 예식 일시(ISO 8601, `+09:00` 포함). 달력과 D-Day는 이 값으로 계산합니다. |
 | `venue` | 예식장 이름·홀·주소·좌표(`lat`/`lng`)·교통편. |
 | `greeting` | 인사말 제목, 본문(`\n` 줄바꿈), 인용구(비우면 숨김). |
-| `notices` | 식사·주차 등 하객 안내. 빈 배열이면 섹션을 숨깁니다. |
+| `notices` | 식사·주차 등 하객 안내. 빈 배열이면 섹션을 숨깁니다. `icon` 은 `🍽` · `💐` · `atm`(ATM 그림) 중에서 고릅니다. |
 | `gallery.cover` / `gallery.photos` | 대표 사진과 갤러리 사진 목록입니다. 사진은 긴 변 1000px 내외로 줄여서 넣으세요. |
 | `accounts` | 신랑측·신부측 계좌. `kakaopay` 에 송금 링크를 넣으면 버튼이 표시됩니다. |
 | `features.rsvp.enabled` | **참석 여부 받기 on/off.** `askCompanions`(동행 인원), `askMeal`(식사 여부), `deadline`(마감일, 지나면 '마감' 표시), `endpoint`(저장소 주소)를 설정합니다. |

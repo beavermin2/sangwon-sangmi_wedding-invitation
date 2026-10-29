@@ -124,7 +124,7 @@ export async function buildPaperRose({ root, dist, wedding: w, template = false 
     <div class="moments-nav"><button id="moments-prev" type="button" aria-label="기록 표지로 돌아가기"><svg viewBox="0 0 16 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="m11 4-6 8 6 8"/></svg></button><button id="moments-next" type="button" aria-label="다음 기록"><svg viewBox="0 0 16 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="m5 4 6 8-6 8"/></svg></button></div>
     </div>
   </section>`;
-  const notices=(w.notices||[]).length?`<section id="notices" class="section notice-section"><header class="section-heading info-heading"><h2>안내사항</h2><p class="eyebrow">NOTICE</p></header><div class="notice-list">${w.notices.map(n=>`<article><span class="notice-mark" aria-hidden="true">${h(n.icon||'♡')}</span><h3>${h(n.title)}</h3><p>${multiline(n.detail)}</p></article>`).join('')}</div></section>`:'';
+  const notices=(w.notices||[]).length?`<section id="notices" class="section notice-section"><header class="section-heading info-heading"><h2>안내사항</h2><p class="eyebrow">NOTICE</p></header><div class="notice-list">${w.notices.map(n=>`<article><span class="notice-mark" aria-hidden="true">${n.icon==='atm'?`<img src="${h(base)}notice-atm.webp" alt="" width="22" height="22">`:h(n.icon||'♡')}</span><h3>${h(n.title)}</h3><p>${multiline(n.detail)}</p></article>`).join('')}</div></section>`:'';
   const busGroups=JSON.parse(await readFile(join(source,'transport.json'),'utf8')).find(item=>item.title==='버스')?.rows||[];
   const values={
     PHOTO_SHARE:await readFile(join(source,'photo-share.html'),'utf8'),
@@ -181,7 +181,7 @@ export async function buildPaperRose({ root, dist, wedding: w, template = false 
   for(const file of ['lottie_svg.min.js','lottie-LICENSE.md','supabase.js','supabase-LICENSE','LaBelleAurore-Regular.ttf','LaBelleAurore-OFL.txt'])await copyFile(join(source,'vendor',file),join(assetDir,file));
   const openingTitle=JSON.parse(await readFile(join(source,'opening-title.json'),'utf8'));
   await writeFile(join(assetDir,'opening-title-data.js'),`window.OPENING_TITLE_DATA = ${JSON.stringify(openingTitle).replace(/</g,'\\u003c')};\n`);
-  for(const file of ['profile-groom.png','profile-bride.png','venue-directions.jpg','naver-map.png','tmap.png','kakao-navi.png','chiikawa-wedding-rsvp.png'])await copyFile(join(source,'images',file),join(assetDir,file));
+  for(const file of ['profile-groom.png','profile-bride.png','venue-directions.jpg','naver-map.png','tmap.png','kakao-navi.png','chiikawa-wedding-rsvp.png','notice-atm.webp'])await copyFile(join(source,'images',file),join(assetDir,file));
   const config={date:w.ceremony.datetime,dateIso:d.dateIso,names:`${w.groom.name} · ${w.bride.name}`,title:w.site.title,description:w.site.description,venue,address:w.venue.address,lat:w.venue.lat,lng:w.venue.lng,mapKey:w.features.map?.kakaoJsKey||w.features.kakaoShare?.jsKey||'',shareKey:w.features.kakaoShare?.enabled?w.features.kakaoShare.jsKey||'':'',shareImage,publicUrl,gallery};
   config.togetherSince = togetherSince;
   config.rsvp = w.features.rsvp || {enabled:false};

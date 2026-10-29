@@ -21,7 +21,7 @@ export async function injectAddons({ wedding: w, id, out, images, options = {} }
   const f = w.features || {};
   const dir = join(out, 'addons');
   await mkdir(dir, { recursive: true });
-  for (const name of ['wedding-addons.js', 'wedding-addons.css', 'mourn-flower.svg', 'mourn-chrysanthemum.png']) await copyFile(join(SRC, name), join(dir, name));
+  for (const name of ['wedding-addons.js', 'wedding-addons.css', 'mourn-flower.svg', 'mourn-chrysanthemum.png', 'mourn-white-chrysanthemum.png']) await copyFile(join(SRC, name), join(dir, name));
   // 이전 빌드에서 남은 음악·영상 파일 정리
   for (const name of await readdir(dir)) if (/^(bgm|video|video-poster)\./.test(name)) await rm(join(dir, name));
 
