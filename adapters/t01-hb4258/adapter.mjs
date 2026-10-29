@@ -236,6 +236,9 @@ export async function apply({ wedding: w, out, images }) {
   // 카카오톡 공유 아래의 꽃 장식·THANK YOU 꼬리말은 넣지 않는다.
   if (!/\s*<FooterSection \/>/.test(html)) throw new Error('index.html 에서 <FooterSection /> 을 찾지 못했습니다');
   html = html.replace(/\r?\n\s*<FooterSection \/>/, '');
+  // 양가 부모(FAMILY) 섹션은 넣지 않는다. 부모님 성함은 인사말 아래 혼주 줄에 이미 나온다.
+  if (!/\s*<ParentsSection \/>/.test(html)) throw new Error('index.html 에서 <ParentsSection /> 을 찾지 못했습니다');
+  html = html.replace(/\r?\n\s*<ParentsSection \/>/, '');
   const og = {
     'og:title': w.site.title,
     'og:description': w.site.description || `${when.dateTimeKo} · ${venueLine(w.venue)}`,

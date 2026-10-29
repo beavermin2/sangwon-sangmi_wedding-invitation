@@ -35,11 +35,6 @@ export const PARTS = [
     ['profileName', '이름', 'text'],
     ['profileSub', '영문 이름·소개', 'textSoft'],
   ]],
-  ['연락하기', [
-    ['contactTitle', '신랑측/신부측', 'accent'],
-    ['contactName', '이름', 'text'],
-    ['contactSub', '관계·설명', 'textSoft'],
-  ]],
   ['예식 일시', [
     ['dateMain', '날짜·시간', 'text'],
     ['dateSub', '오전/오후', 'textMuted'],
@@ -94,10 +89,6 @@ export const USES = [
   ['sections-a.jsx', 'ProfileSection', 'text', ['profileName']],
   ['sections-a.jsx', 'ProfileSection', 'textMuted', ['profileSub']],
   ['sections-a.jsx', 'ProfileSection', 'textSoft', ['profileSub', 'profileSub']],
-  ['sections-a.jsx', 'ParentsSection', 'textSoft', ['contactSub']],
-  ['sections-a.jsx', 'ParentsSection', 'accent', ['contactTitle']],
-  ['sections-a.jsx', 'ParentsSection', 'text', ['contactName', 'contactName']],
-  ['sections-a.jsx', 'ParentsSection', 'textMuted', ['contactSub']],
   ['sections-a.jsx', 'DateTimeSection', 'accent', ['dateMain']],
   ['sections-a.jsx', 'DateTimeSection', 'text', ['dateMain', 'dateMain', 'venueName']],
   ['sections-a.jsx', 'DateTimeSection', 'textMuted', ['dateSub', 'venueSub']],
