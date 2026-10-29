@@ -204,6 +204,10 @@
   },
   "options": {
     "deceasedMark": "whiteChrysanthemum",
-    "backgroundEffect": "confetti"
+    "backgroundEffect": "confetti",
+    "textColors": {
+      "quote": "#2E4A7B",
+      "quoteAuthor": "#2E4A7B"
+    }
   }
 }
