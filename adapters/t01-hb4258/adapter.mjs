@@ -201,10 +201,11 @@ export async function apply({ wedding: w, out, images }) {
             <span style={{ color: THEME.textMuted, fontSize: 11, marginLeft: 8 }}>의 {d.${who}.roleKo}</span>
             <span style={{ color: THEME.accent, fontWeight: 500, marginLeft: 4 }}>{d.${who}.name}</span>
           </div>`,
+    // 칸마다 nowrap 을 직접 걸어, 바깥 스타일이 줄바꿈을 다시 켜도 한 줄을 지킨다.
     `          <div style={{ display: 'contents' }}>
-            <span>{${gp}} <span style={{ color: THEME.textMuted, fontSize: '0.85em' }}>· </span>{${gm}}</span>
-            <span style={{ color: THEME.textMuted, fontSize: '0.85em', marginLeft: '0.6em' }}>의 {d.${who}.roleKo}</span>
-            <span style={{ color: THEME.accent, fontWeight: 500, marginLeft: '0.4em' }}>{d.${who}.name}</span>
+            <span style={{ whiteSpace: 'nowrap' }}>{${gp}} <span style={{ color: THEME.textMuted, fontSize: '0.85em' }}>· </span>{${gm}}</span>
+            <span style={{ color: THEME.textMuted, fontSize: '0.85em', marginLeft: '0.6em', whiteSpace: 'nowrap' }}>의 {d.${who}.roleKo}</span>
+            <span style={{ color: THEME.accent, fontWeight: 500, marginLeft: '0.4em', whiteSpace: 'nowrap' }}>{d.${who}.name}</span>
           </div>`,
   ];
   await patch(join(out, 'components', 'sections-a.jsx'), [
@@ -253,10 +254,11 @@ export async function apply({ wedding: w, out, images }) {
   //  - 한글을 단어 단위로 줄바꿈(글자 중간에서 끊기면 줄 끝이 들쭉날쭉해 정렬이 어긋나 보인다)
   //  - 기울임꼴이 없는 한글을 가짜로 기울이지 않는다(Safari 는 기울인 만큼 오른쪽으로 밀려 보인다)
   //  - 가로로 돌렸을 때 Safari 가 글자를 임의로 키우지 않게 한다
-  //  - 가운데 정렬 글(인용구·인사말 등)은 두 줄로 넘어갈 때 줄 길이를 고르게 나눈다(한 단어만 남는 줄 방지)
+  //  - 가운데 정렬 글(인용구·인사말 등)은 두 줄로 넘어갈 때 줄 길이를 고르게 나눈다(한 단어만 남는 줄 방지).
+  //    text-wrap(줄임 속성)은 Safari 에서 줄바꿈 금지(nowrap)까지 풀어 혼주 줄이 깨지므로 text-wrap-style 만 쓴다.
   const typo = `  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .app-shell { word-break: keep-all; overflow-wrap: break-word; font-synthesis: weight; }
-  .app-shell section[style*="text-align: center"] div { text-wrap: balance; }
+  .app-shell section[style*="text-align: center"] div { text-wrap-style: balance; }
 </style>`;
   if (!html.includes('</style>')) throw new Error('index.html 에서 </style> 을 찾지 못했습니다');
   html = html.replace('</style>', typo);
