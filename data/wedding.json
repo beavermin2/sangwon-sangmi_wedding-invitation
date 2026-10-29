@@ -204,7 +204,7 @@
   },
   "options": {
     "deceasedMark": "whiteChrysanthemum",
-    "backgroundEffect": "confetti",
+    "backgroundEffect": "hearts",
     "textColors": {
       "quote": "#2E4A7B",
       "quoteAuthor": "#2E4A7B"
