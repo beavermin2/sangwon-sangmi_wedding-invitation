@@ -206,6 +206,6 @@
   },
   "options": {
     "deceasedMark": "whiteChrysanthemum",
-    "backgroundEffect": "hearts"
+    "backgroundEffect": "confetti"
   }
 }
