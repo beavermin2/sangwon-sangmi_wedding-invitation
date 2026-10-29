@@ -98,8 +98,8 @@ export async function apply({ wedding: w, out, images }) {
     },
     invitation: w.greeting.message,
     transport: (w.venue.transport || []).map((t) => ({ label: t.label, icon: ICON[t.type] || '•', detail: t.detail })),
-    // 'atm' 은 그림 아이콘(페이퍼 & 로즈 전용)이라 이 템플릿에서는 이모지로 대신한다.
-    notices: (w.notices || []).map((n) => (n.icon === 'atm' ? { ...n, icon: '🏧' } : n)),
+    // 'atm' 은 그림 아이콘. 아래 sections-b.jsx 패치가 iconImage 를 그림으로 그린다.
+    notices: (w.notices || []).map((n) => (n.icon === 'atm' ? { ...n, icon: '🏧', iconImage: 'assets/notice-atm.webp' } : n)),
     accounts: {
       note: w.accounts.note,
       groom: w.accounts.groom.map((a) => ({ name: accountLabel(a), bank: a.bank, number: a.number })),
@@ -134,9 +134,15 @@ export async function apply({ wedding: w, out, images }) {
 `, ''],
   ]);
   // 교통편: 합쳐진 안내(줄바꿈)를 줄마다 보여 준다
+  // 하객 안내: iconImage 가 있으면 글자 대신 그림 아이콘
+  await copyFile(fileURLToPath(new URL('../../previews/test1/images/notice-atm.webp', import.meta.url)), join(assets, 'notice-atm.webp'));
   await patch(join(out, 'components', 'sections-b.jsx'), [
     ["fontSize: 12, color: THEME.textSoft, lineHeight: 1.6, fontWeight: 300 }}>{item.detail}</div>",
      "fontSize: 12, color: THEME.textSoft, lineHeight: 1.6, fontWeight: 300, whiteSpace: 'pre-line' }}>{item.detail}</div>"],
+    [`              fontSize: 18, lineHeight: 1,
+            }}>{item.icon}</div>`,
+     `              fontSize: 18, lineHeight: 1,
+            }}>{item.iconImage ? <img src={item.iconImage} alt="" width={24} height={24} style={{ objectFit: 'contain' }} /> : item.icon}</div>`],
   ]);
   // 초대글 아래 혼주 두 줄: 줄마다 가운데 정렬하면 '아들'/'딸' 길이와 국화 유무로 어긋나므로
   // 부모 이름 · '의 아들/딸' · 신랑신부 이름을 같은 칸에 맞춘다(국화는 칸 왼쪽 바깥에 걸린다).
