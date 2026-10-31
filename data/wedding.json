@@ -15,7 +15,7 @@
     },
     "relation": "아들",
     "phone": "010-3921-3120",
-    "photo": "",
+    "photo": "images/groom-1793447749569-gm6s.jpg",
     "parents": {
       "father": {
         "name": "민병근",
@@ -37,7 +37,7 @@
     },
     "relation": "딸",
     "phone": "010-4240-4341",
-    "photo": "",
+    "photo": "images/bride-1793447758440-5zor.jpg",
     "parents": {
       "father": {
         "name": "고문학",
@@ -123,7 +123,42 @@
   ],
   "gallery": {
     "cover": "images/cover-1793020906707-cf6r.jpg",
-    "photos": []
+    "photos": [
+      "images/gallery-1793447850103-i6jo.jpg",
+      "images/gallery-1793447832091-riy8.jpg",
+      "images/gallery-1793447832509-7xdu.jpg",
+      "images/gallery-1793447832911-esgg.jpg",
+      "images/gallery-1793447833329-x3ww.jpg",
+      "images/gallery-1793447831676-70vx.jpg",
+      "images/gallery-1793447848149-gj59.jpg",
+      "images/gallery-1793447849150-qqz2.jpg",
+      "images/gallery-1793447848579-59it.jpg",
+      "images/gallery-1793447833714-gvyg.jpg",
+      "images/gallery-1793447834141-4o71.jpg",
+      "images/gallery-1793447848804-bt8c.jpg",
+      "images/gallery-1793447849377-216d.jpg",
+      "images/gallery-1793447849755-x8qb.jpg",
+      "images/gallery-1793447834498-rb00.jpg",
+      "images/gallery-1793447834911-x7xz.jpg",
+      "images/gallery-1793447846763-acbo.jpg",
+      "images/gallery-1793447847670-9sw7.jpg",
+      "images/gallery-1793447847186-mib7.jpg",
+      "images/gallery-1793447835329-vsbq.jpg",
+      "images/gallery-1793447837149-fhkn.jpg",
+      "images/gallery-1793447837553-s2cc.jpg",
+      "images/gallery-1793447837908-dgdf.jpg",
+      "images/gallery-1793447839057-nr5n.jpg",
+      "images/gallery-1793447838676-6upn.jpg",
+      "images/gallery-1793447835758-xxlc.jpg",
+      "images/gallery-1793447842369-xt9z.jpg",
+      "images/gallery-1793447841994-o8lv.jpg",
+      "images/gallery-1793447843943-y30r.jpg",
+      "images/gallery-1793448654105-108w.jpg",
+      "images/gallery-1793447844675-8gsj.jpg",
+      "images/gallery-1793447842781-y63f.jpg",
+      "images/gallery-1793447982074-hwj9.jpg",
+      "images/gallery-1793447980473-6k7p.jpg"
+    ]
   },
   "accounts": {
     "note": "",
