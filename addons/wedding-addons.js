@@ -59,7 +59,7 @@
     }).observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
-  /* ── 배경음악: 오른쪽 위 고정 버튼 ─────────────────────────────
+  /* ── 배경음악: 왼쪽 위 고정 버튼 ─────────────────────────────
      모바일 브라우저는 소리 자동 재생을 막으므로, 자동 재생이 켜져 있으면 첫 터치 때 시작한다.
      하객이 직접 끄면 그 뒤로는 저절로 다시 켜지 않는다. 동영상을 재생하면 잠시 멈춘다. */
   var bgm = null;
@@ -79,7 +79,7 @@
     var style = document.createElement('style');
     style.textContent =
       ':host{all:initial}' +
-      'button{position:fixed;top:14px;right:14px;z-index:2147483000;width:42px;height:42px;border-radius:50%;' +
+      'button{position:fixed;top:14px;left:14px;z-index:2147483000;width:42px;height:42px;border-radius:50%;' +
       'border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.88);box-shadow:0 2px 10px rgba(0,0,0,.12);' +
       'display:grid;place-items:center;cursor:pointer;padding:0;color:' + (C.accent || '#b5776b') + ';-webkit-tap-highlight-color:transparent}' +
       'button:focus-visible{outline:2px solid currentColor;outline-offset:2px}' +

@@ -107,8 +107,32 @@ function GallerySection() {
   );
 }
 
+// 손가락으로 끌어 넘기는 슬라이드. 옆 사진은 끄는 동안에만 보인다.
+const SLIDE_GAP = 24;
 function Lightbox({ photos, index, onClose, onChange }) {
-  const go = (delta) => onChange((index + delta + photos.length) % photos.length);
+  const n = photos.length;
+  const at = (delta) => (index + delta + n) % n;
+  const boxRef = React.useRef(null);
+  const drag = React.useRef(null);
+  const [dx, setDx] = React.useState(0);
+  const [sliding, setSliding] = React.useState(0); // 넘어가는 중인 방향(-1/1), 0 이면 멈춤
+  const [dragging, setDragging] = React.useState(false);
+
+  const go = (delta) => {
+    if (sliding || n < 2) return;
+    const w = boxRef.current ? boxRef.current.offsetWidth : 320;
+    jumped.current = false;
+    setSliding(delta);
+    setDx(-delta * (w + SLIDE_GAP));
+  };
+  const jumped = React.useRef(false); // 사진을 바꾼 직후엔 제자리로 되돌아가는 움직임 없이 붙인다
+  const settle = (e) => {
+    if (e.target !== e.currentTarget) return;
+    if (sliding) { onChange(at(sliding)); jumped.current = true; }
+    setSliding(0);
+    setDx(0);
+  };
+
   React.useEffect(() => {
     const k = (e) => {
       if (e.key === 'Escape') onClose();
@@ -119,14 +143,54 @@ function Lightbox({ photos, index, onClose, onChange }) {
     return () => document.removeEventListener('keydown', k);
   });
 
+  const onPointerDown = (e) => {
+    if (sliding || n < 2) return;
+    drag.current = { x: e.clientX, t: Date.now() };
+    jumped.current = false;
+    setDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e) => {
+    if (drag.current) setDx(e.clientX - drag.current.x);
+  };
+  const onPointerUp = () => {
+    if (!drag.current) return;
+    const w = boxRef.current ? boxRef.current.offsetWidth : 320;
+    const fast = Math.abs(dx) > 20 && Date.now() - drag.current.t < 250;
+    drag.current = null;
+    setDragging(false);
+    if (Math.abs(dx) > w * 0.2 || fast) go(dx < 0 ? 1 : -1);
+    else setDx(0);
+  };
+
+  const moving = dx !== 0 || sliding !== 0;
+  const slide = (offset) => (
+    <div key={offset} style={{
+      position: 'absolute', top: 0, width: '100%', height: '100%',
+      left: `calc(${offset} * (100% + ${SLIDE_GAP}px))`,
+      visibility: offset === 0 || moving ? 'visible' : 'hidden',
+    }}>
+      <Photo src={photos[at(offset)]} width="100%" height="100%" alt={`Photo ${at(offset) + 1}`} eager={true} />
+    </div>
+  );
+
   return (
     <div onClick={onClose} style={{
       position: 'fixed', inset: 0, background: 'rgba(15,18,25,0.92)',
       zIndex: 100, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', padding: 20,
     }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '85%', maxWidth: 320, aspectRatio: '3/4', position: 'relative' }}>
-        <Photo src={photos[index]} width="100%" height="100%" alt={`Photo ${index + 1}`} eager={true} />
+      <div ref={boxRef} onClick={(e) => e.stopPropagation()}
+        onPointerDown={onPointerDown} onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
+        style={{ width: '85%', maxWidth: 320, aspectRatio: '3/4', position: 'relative', touchAction: 'pan-y', userSelect: 'none' }}>
+        <div onTransitionEnd={settle} style={{
+          position: 'absolute', inset: 0,
+          transform: `translateX(${dx}px)`,
+          transition: dragging || jumped.current ? 'none' : 'transform 0.3s ease-out',
+        }}>
+          {slide(-1)}{slide(0)}{slide(1)}
+        </div>
       </div>
       <div style={{
         marginTop: 20, fontFamily: '"Cormorant Garamond", serif',
