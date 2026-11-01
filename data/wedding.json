@@ -168,6 +168,20 @@
         "bank": "신한은행",
         "number": "110-082-305096",
         "kakaopay": ""
+      },
+      {
+        "owner": "민병근",
+        "relation": "아버지",
+        "bank": "하나은행",
+        "number": "221-910191-16007",
+        "kakaopay": ""
+      },
+      {
+        "owner": "구연단",
+        "relation": "어머니",
+        "bank": "신한은행",
+        "number": "110-237-549969",
+        "kakaopay": ""
       }
     ],
     "bride": [
@@ -176,6 +190,13 @@
         "relation": "신부",
         "bank": "우리은행",
         "number": "1002-433-410753",
+        "kakaopay": ""
+      },
+      {
+        "owner": "석혜정",
+        "relation": "어머니",
+        "bank": "국민은행",
+        "number": "098-24-0381879",
         "kakaopay": ""
       }
     ]
